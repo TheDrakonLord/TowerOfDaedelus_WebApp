@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TowerOfDaedelus_WebApp.Data;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,22 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
+
+builder.Services.AddAuthentication()
+    .AddDiscord(options =>
+    {
+        try
+        {
+            options.ClientId = Environment.GetEnvironmentVariable("DISCORD_CLIENT_ID");
+            options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
+        }
+        catch (ArgumentNullException)
+        {
+
+            throw;
+        }
+
+    });
 
 var app = builder.Build();
 
