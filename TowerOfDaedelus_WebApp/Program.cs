@@ -22,13 +22,17 @@ builder.Services.AddAuthentication()
         {
             options.ClientId = Environment.GetEnvironmentVariable("DISCORD_CLIENT_ID");
             options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
-            options.CallbackPath = "/signin-discord";
         }
         catch (ArgumentNullException)
         {
 
             throw;
         }
+
+        options.CallbackPath = "/signin-discord";
+        options.Scope.Add("guilds.members.read");
+        options.Scope.Add("identify");
+        options.Scope.Add("email");
 
     });
 
