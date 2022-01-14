@@ -1,4 +1,4 @@
-﻿{
+{
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
@@ -10,18 +10,22 @@
   "profiles": {
     "TowerOfDaedelus_WebApp": {
       "commandName": "Project",
-      "dotnetRunMessages": true,
       "launchBrowser": true,
-      "applicationUrl": "https://localhost:7284;http://localhost:5284",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DISCORD_CLIENT_ID": "931628451612475472",
+        "DISCORD_CLIENT_SECRET": "pHbZM2CucUGk2CwXJT72dGjyqdBsr21e"
+      },
+      "applicationUrl": "https://localhost:7284;http://localhost:5284",
+      "dotnetRunMessages": true
     },
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DISCORD_CLIENT_ID": "931628451612475472",
+        "DISCORD_CLIENT_SECRET": "pHbZM2CucUGk2CwXJT72dGjyqdBsr21e"
       }
     }
   }
