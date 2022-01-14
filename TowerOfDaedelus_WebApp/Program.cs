@@ -22,6 +22,7 @@ builder.Services.AddAuthentication()
         {
             options.ClientId = Environment.GetEnvironmentVariable("DISCORD_CLIENT_ID");
             options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
+            options.CallbackPath = "/signin-discord";
         }
         catch (ArgumentNullException)
         {
