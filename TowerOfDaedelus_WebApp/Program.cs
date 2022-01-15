@@ -1,18 +1,11 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TowerOfDaedelus_WebApp.Data;
-using System;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authentication;
-using System.Globalization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.OAuth;
-using System.Net.Http.Headers;
-using System.Text.Json;
 using System.Net;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -96,6 +89,24 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("Admins", policy =>
     policy.RequireClaim(customClaim,RoleIdAdmin));
+
+    options.AddPolicy("GameMasters", policy =>
+    policy.RequireClaim(customClaim, RoleIdAssistantGameMaster,RoleIdGameMaster, RoleIdAdmin));
+
+    options.AddPolicy("AllCharacters", policy =>
+    policy.RequireClaim(customClaim, RoleIdScholar, RoleIdScribe, RoleIdAdvisor, RoleIdVisitor, RoleIdClockworkSoldier, RoleIdAssistantGameMaster, RoleIdGameMaster, RoleIdAdmin));
+
+    options.AddPolicy("AllPlayers", policy =>
+    policy.RequireClaim(customClaim, RoleIdScholar, RoleIdScribe, RoleIdAdvisor, RoleIdVisitor, RoleIdAssistantGameMaster, RoleIdGameMaster, RoleIdAdmin));
+
+    options.AddPolicy("PermanentPlayers", policy =>
+    policy.RequireClaim(customClaim, RoleIdScholar, RoleIdScribe, RoleIdAssistantGameMaster, RoleIdGameMaster, RoleIdAdmin));
+
+    options.AddPolicy("VisitingPlayers", policy =>
+    policy.RequireClaim(customClaim, RoleIdAdvisor, RoleIdVisitor, RoleIdAssistantGameMaster, RoleIdGameMaster, RoleIdAdmin));
+
+    options.AddPolicy("NonPlayerCharacters", policy =>
+    policy.RequireClaim(customClaim, RoleIdClockworkSoldier, RoleIdAssistantGameMaster, RoleIdGameMaster, RoleIdAdmin));
 
     options.FallbackPolicy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
