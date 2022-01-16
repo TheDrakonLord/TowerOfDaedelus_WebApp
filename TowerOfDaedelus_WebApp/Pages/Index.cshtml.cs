@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace TowerOfDaedelus_WebApp.Pages
 {
@@ -16,7 +17,8 @@ namespace TowerOfDaedelus_WebApp.Pages
 
         public void OnGet()
         {
-
+           
+            Console.WriteLine(User.Identity?.Name);
         }
     }
 }
