@@ -6,10 +6,10 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using System.Net;
 using Newtonsoft.Json.Linq;
+using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
-const string targetGuildID = "866469546109173792";
 const string RoleIdAdmin = "866470088508178452";
 const string RoleIdGameMaster = "868206725268926504";
 const string RoleIdAssistantGameMaster = "868206804931346463";
@@ -30,7 +30,10 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
 builder.Services.AddRazorPages();
+
+
 
 builder.Services.AddAuthentication()
     .AddDiscord(options =>
@@ -51,62 +54,37 @@ builder.Services.AddAuthentication()
         options.Scope.Add("identify");
         options.Scope.Add("email");
 
-        options.Events = new OAuthEvents
-        {
-            OnCreatingTicket = async context =>
-            {
-                HttpWebRequest webRequest1 = (HttpWebRequest)WebRequest.Create($"https://discordapp.com/api/users/@me/guilds/{targetGuildID}/member");
-                webRequest1.Method = "Get";
-                webRequest1.ContentLength = 0;
-                webRequest1.Headers.Add("Authorization", "Bearer " + context.AccessToken);
-                webRequest1.ContentType = "application/x-www-form-urlencoded";
+        options.ClaimActions.MapJsonKey(ClaimTypes.Email, "email", "string");
+        options.ClaimActions.MapJsonKey(ClaimTypes.Name, "username", "string");
 
-                string[] resultArray;
-                using (HttpWebResponse response1 = webRequest1.GetResponse() as HttpWebResponse)
-                {
-                    using (StreamReader reader = new StreamReader(response1.GetResponseStream()))
-                    {
-                        string jString = reader.ReadToEnd();
-                        JObject jsonObject = JObject.Parse(jString);
-                        JToken jRoles = jsonObject.SelectToken("roles");
-                        resultArray = jRoles.ToObject<string[]>();
-                    }
-                }
-
-                foreach (string x in resultArray)
-                {
-                    Claim y = new Claim(customClaim, x);
-                    context.Identity.AddClaim(y);
-                    
-                }
-            }
-        };
-
-        options.SaveTokens = true;
+        options.SaveTokens = true;        
     });
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("Admins", policy =>
+    options.AddPolicy("admins", policy =>
     policy.RequireClaim(customClaim,RoleIdAdmin));
 
-    options.AddPolicy("GameMasters", policy =>
+    options.AddPolicy("gameMasters", policy =>
     policy.RequireClaim(customClaim, RoleIdAssistantGameMaster,RoleIdGameMaster, RoleIdAdmin));
 
-    options.AddPolicy("AllCharacters", policy =>
+    options.AddPolicy("allCharacters", policy =>
     policy.RequireClaim(customClaim, RoleIdScholar, RoleIdScribe, RoleIdAdvisor, RoleIdVisitor, RoleIdClockworkSoldier, RoleIdAssistantGameMaster, RoleIdGameMaster, RoleIdAdmin));
 
-    options.AddPolicy("AllPlayers", policy =>
+    options.AddPolicy("allPlayers", policy =>
     policy.RequireClaim(customClaim, RoleIdScholar, RoleIdScribe, RoleIdAdvisor, RoleIdVisitor, RoleIdAssistantGameMaster, RoleIdGameMaster, RoleIdAdmin));
 
-    options.AddPolicy("PermanentPlayers", policy =>
+    options.AddPolicy("permanentPlayers", policy =>
     policy.RequireClaim(customClaim, RoleIdScholar, RoleIdScribe, RoleIdAssistantGameMaster, RoleIdGameMaster, RoleIdAdmin));
 
-    options.AddPolicy("VisitingPlayers", policy =>
+    options.AddPolicy("visitingPlayers", policy =>
     policy.RequireClaim(customClaim, RoleIdAdvisor, RoleIdVisitor, RoleIdAssistantGameMaster, RoleIdGameMaster, RoleIdAdmin));
 
-    options.AddPolicy("NonPlayerCharacters", policy =>
+    options.AddPolicy("nonPlayerCharacters", policy =>
     policy.RequireClaim(customClaim, RoleIdClockworkSoldier, RoleIdAssistantGameMaster, RoleIdGameMaster, RoleIdAdmin));
+
+    options.AddPolicy("viewers", policy =>
+    policy.RequireClaim(customClaim, RoleIdSpectralWatcher, RoleIdAdmin));
 
     options.FallbackPolicy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
@@ -138,3 +116,5 @@ app.UseAuthorization();
 app.MapRazorPages();
 
 app.Run();
+
+
