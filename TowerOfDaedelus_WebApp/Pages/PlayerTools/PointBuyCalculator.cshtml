@@ -79,6 +79,10 @@
         .pointBuyCalc {
             background-color: white;
         }
+
+        .costArray{
+            background-color: white;
+        }
     </style>
 </head>
 <body>
@@ -230,6 +234,134 @@
         </table>
         <h2> points remaining to spend: @HttpContext.Session.GetInt32("_IntPoints").ToString()</h2>
         <progress value="@HttpContext.Session.GetInt32("_IntPoints")" max="15"/>
+    </div>
+    <br />
+    <br />
+    <div class="costArray">
+        <h1>How point buy 15 works</h1>
+        <p>In 15 point buy you assign points to each score by paying a cost for each increase. You have 15 total points to spend. Increasing a score costs some of that points while decreasing a score grants points. You cannot assign a score higher than 7 or lower than -2. The costs for increasing or decreasing a score are shown in the table below. For further information see <a href="https://www.worldanvil.com/w/the-towers-of-daedalus-thedrakonlord/a/the-athena-system-article?preview=true" target="_blank">The Athena System</a></p>
+        <h2>Point Cost Table</h2>
+        <table class="main-table">
+            <thead>
+                <tr>
+                    <th>-2</th>
+                    <th>-1</th>
+                    <th>0</th>
+                    <th>1</th>
+                    <th>2</th>
+                    <th>3</th>
+                    <th>4</th>
+                    <th>5</th>
+                    <th>6</th>
+                    <th>7</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>-2</td>
+                    <td>-1</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>2</td>
+                    <td>3</td>
+                    <td>4</td>
+                    <td>5</td>
+                    <td>7</td>
+                    <td>9</td>
+                </tr>
+            </tbody>
+        </table>
+        <br />
+        <br />
+        <h1>What the scores mean</h1>
+        <p>The Following Table shows the definitions for each score</p>
+        <h2>Ability Score Descriptions Table</h2>
+        <table class="main-table">
+            <thead>
+                <th>Score</th>
+                <th>Description</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Mind</td>
+                    <td>Mind is a representation of how smart or wise a character is. It is used for skill challenges such as recalling historical information, spotting hidden objects, noticing patterns, etc.</td>
+                </tr>
+                <tr>
+                    <td>Strength</td>
+                    <td>Strength measures a characters' raw physical power. It is used for skill challenges such as moving heavy objects, dealing physical damage to an object, etc. </td>
+                </tr>
+                <tr>
+                    <td>Agility</td>
+                    <td>Agility measures a characters' speed and dexterity. It is used for skill challenges such as maintaining balance, performing precision tasks, lock-picking, etc. </td>
+                </tr>
+                <tr>
+                    <td>Constitution</td>
+                    <td>Constitution is your characters physical fortitude. It represents your characters ability to resist effects such as poison, extreme pain, and to push the boundaries of physical limits. It is used for skill challenges involving similar effects. </td>
+                </tr>
+                <tr>
+                    <td>Soul</td>
+                    <td>Soul measures your characters' resolve and determination in the face of extreme pressure. It is also sometimes used for metaphysical effects such as prayer. A soul check might be to determine if your character can stave off the effects of insanity or to overcome an attempt at possession. </td>
+                </tr>
+            </tbody>
+        </table>
+        <br />
+        <br />
+        <p>The following table gives examples for the power level represented by each score value</p>
+        <h2>Score Value Descriptions Table</h2>
+        <table class="main-table">
+            <thead>
+                <tr>
+                    <th>Score</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>-2</td>
+                    <td>A comically low score reserved entirely for joke characters or beings that couldn't entirely be called "people" such as insects, slimes, zombies, etc. Alternatively, on reserved for completely immobile beings</td>
+                </tr>
+                                <tr>
+                    <td>-1</td>
+                    <td> 	A score below the human average</td>
+                </tr>
+
+                                <tr>
+                    <td>0</td>
+                    <td>The common human average</td>
+                </tr>
+
+                                <tr>
+                    <td>1</td>
+                    <td>A score above the human average. Comparable to a professional, but not the best of the best.</td>
+                </tr>
+
+                                <tr>
+                    <td>2</td>
+                    <td>The maximum human potential. Comparable to an Olympian.</td>
+                </tr>
+
+                                <tr>
+                    <td>3</td>
+                    <td>A mediocre superhuman ability. One that can be most easily measured more by what normal humans couldn't possible do than what the superhuman could really achieve.</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>A great superhuman ability. The classical comic book hero baseline.</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>An incredible superhuman ability. The maximum a player character would be granted under normal circumstance.</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>An unparalleled superhuman ability. This is the score a bad guy has when you're wondering why he's tanking all your strongest hitters.</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>A near-unlimited superhuman ability, entirely impossible to measure by realistic means. What superman achieves on a near daily basis</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </body>
 </html>
