@@ -20,6 +20,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authentication;
 using System.Net;
 using Newtonsoft.Json.Linq;
+using TowerOfDaedelus_WebApp.Properties;
 
 namespace TowerOfDaedelus_WebApp.Areas.Identity.Pages.Account
 {
@@ -33,8 +34,6 @@ namespace TowerOfDaedelus_WebApp.Areas.Identity.Pages.Account
         private readonly IEmailSender _emailSender;
         private readonly ILogger<ExternalLoginModel> _logger;
 
-        const string targetGuildID = "866469546109173792";
-        const string customClaim = "DiscordRole";
 
         public ExternalLoginModel(
             SignInManager<IdentityUser> signInManager,
@@ -195,7 +194,7 @@ namespace TowerOfDaedelus_WebApp.Areas.Identity.Pages.Account
                         props.IsPersistent = true;
 
                         // Send a request to discord to obtain the user's Role IDs in the target server
-                        HttpWebRequest webRequest1 = (HttpWebRequest)WebRequest.Create($"https://discordapp.com/api/users/@me/guilds/{targetGuildID}/member");
+                        HttpWebRequest webRequest1 = (HttpWebRequest)WebRequest.Create($"https://discordapp.com/api/users/@me/guilds/{Resources.targetGuildID}/member");
                         webRequest1.Method = "Get";
                         webRequest1.ContentLength = 0;
                         webRequest1.Headers.Add("Authorization", "Bearer " + props.GetTokenValue("access_token"));
@@ -213,12 +212,13 @@ namespace TowerOfDaedelus_WebApp.Areas.Identity.Pages.Account
                                 resultArray = jRoles.ToObject<string[]>();
                             }
                         }
+
+                        // Create a claim for each role reported by discord
                         foreach (string x in resultArray)
                         {
-                            Claim y = new Claim(customClaim, x);
+                            Claim y = new Claim(Resources.customClaim, x);
                             await _userManager.AddClaimAsync(user, y);
                         }
-                        Console.WriteLine("test");
 
                         _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
 

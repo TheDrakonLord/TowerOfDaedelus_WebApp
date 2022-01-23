@@ -59,5 +59,104 @@ namespace TowerOfDaedelus_WebApp.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DiscordRole.
+        /// </summary>
+        internal static string customClaim {
+            get {
+                return ResourceManager.GetString("customClaim", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 866470088508178452.
+        /// </summary>
+        internal static string RoleIdAdmin {
+            get {
+                return ResourceManager.GetString("RoleIdAdmin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 866470007274078227.
+        /// </summary>
+        internal static string RoleIdAdvisor {
+            get {
+                return ResourceManager.GetString("RoleIdAdvisor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 868206804931346463.
+        /// </summary>
+        internal static string RoleIdAssistantGameMaster {
+            get {
+                return ResourceManager.GetString("RoleIdAssistantGameMaster", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 868207055620681768.
+        /// </summary>
+        internal static string RoleIdClockworkSoldier {
+            get {
+                return ResourceManager.GetString("RoleIdClockworkSoldier", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 868206725268926504.
+        /// </summary>
+        internal static string RoleIdGameMaster {
+            get {
+                return ResourceManager.GetString("RoleIdGameMaster", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 866469929926393866.
+        /// </summary>
+        internal static string RoleIdScholar {
+            get {
+                return ResourceManager.GetString("RoleIdScholar", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 866469956677664768.
+        /// </summary>
+        internal static string RoleIdScribe {
+            get {
+                return ResourceManager.GetString("RoleIdScribe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 868207008669630485.
+        /// </summary>
+        internal static string RoleIdSpectralWatcher {
+            get {
+                return ResourceManager.GetString("RoleIdSpectralWatcher", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 866470040563482656.
+        /// </summary>
+        internal static string RoleIdVisitor {
+            get {
+                return ResourceManager.GetString("RoleIdVisitor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 866469546109173792.
+        /// </summary>
+        internal static string targetGuildID {
+            get {
+                return ResourceManager.GetString("targetGuildID", resourceCulture);
+            }
+        }
     }
 }

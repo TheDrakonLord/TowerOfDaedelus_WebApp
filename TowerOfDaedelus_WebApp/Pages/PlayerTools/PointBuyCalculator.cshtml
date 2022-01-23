@@ -1,0 +1,235 @@
+﻿@page
+@using Microsoft.AspNetCore.Http
+@model TowerOfDaedelus_WebApp.Pages.PlayerTools.PointBuyCalculatorModel
+@{
+}
+<html>
+<head>
+    <style>
+        body {
+            text-align: center;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0px;
+            background: url(https://i.imgur.com/7pI8GpX.png) no-repeat center center fixed;
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+        }
+
+        .main-table {
+            width: 100%;
+            height: 100%;
+            color: white;
+            background-color: black;
+            opacity: 100%;
+        }
+
+        .sub-table {
+            width: 100%;
+            height: 100%;
+            color: white;
+            background-color: black;
+            opacity: 100%;
+        }
+
+        .sub-table2 {
+            width: 100%;
+            height: 100%;
+            color: white;
+            background-color: black;
+            opacity: 100%;
+        }
+
+        h1 {
+            color: grey;
+            background-color: black;
+        }
+
+        h2 {
+            color: white;
+            background-color: black;
+        }
+
+        input[type=text] {
+            margin-left: 0px;
+            margin-right: 0px;
+            margin-top: 0px;
+            margin-bottom: 0px;
+            float: left;
+            width: 100%;
+            height: 100%;
+        }
+
+        input[type=button] {
+            margin-left: 0px;
+            margin-right: 0px;
+            margin-top: 0px;
+            margin-bottom: 0px;
+            float: left;
+            width: 100%;
+            height: 100%;
+        }
+
+        progress {
+            width: 100%;
+        }
+
+        .pointBuyCalc {
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="pointBuyCalc">
+        <h1>15 Point Buy Calculator</h1>
+        <table class="main-table">
+            <thead>
+                <tr>
+                    <th>
+                        Mind
+                    </th>
+                    <th>
+                        Strength
+                    </th>
+                    <th>
+                        Agility
+                    </th>
+                    <th>
+                        Constitution
+                    </th>
+                    <th>
+                        Soul
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <form method="post">
+                <tr>
+                    <td>
+                        <table class="sub-table">
+                            <tr>
+                                <td>
+                                    <input type="text" readonly id="pbcMndDisplay" name="pbcMndDisplay" value="@HttpContext.Session.GetInt32("_IntMind").ToString()" />
+                                </td>
+                                <td>
+                                    <table class="sub-table2">
+                                        <tr>
+                                            <td>
+                                                
+                                                <input type="submit" id="pbcMndUp" name="pbcMndUp" value="^" asp-page-handler="MndUp" />
+                                                
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <input type="submit" id="pbcMndDown" name="pbcMndDown" value="˅" asp-page-handler="MndDown"/>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <table class="sub-table">
+                            <tr>
+                                <td>
+                                    <input type="text" readonly id="pbcStrDisplay" name="pbcStrDisplay" value="@HttpContext.Session.GetInt32("_IntStrength").ToString()" />
+                                </td>
+                                <td>
+                                    <table class="sub-table2">
+                                        <tr>
+                                            <td>
+                                                <input type="submit" id="pbcStrUp" name="pbcStrUp" value="^" asp-page-handler="StrUp"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <input type="submit" id="pbcStrDown" name="pbcStrDown" value="˅" asp-page-handler="StrDown"/>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <table class="sub-table">
+                            <tr>
+                                <td>
+                                    <input type="text" readonly id="pbcAglDisplay" name="pbcAglDisplay" value="@HttpContext.Session.GetInt32("_IntAgility").ToString()" />
+                                </td>
+                                <td>
+                                    <table class="sub-table2">
+                                        <tr>
+                                            <td>
+                                                <input type="submit" id="pbcAglUp" name="pbcAglUp" value="^" asp-page-handler="AglUp"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <input type="submit" id="pbcAglDown" name="pbcAglDown" value="˅" asp-page-handler="AglDown"/>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <table class="sub-table">
+                            <tr>
+                                <td>
+                                    <input type="text" readonly id="pbcConDisplay" name="pbcConDisplay" value="@HttpContext.Session.GetInt32("_IntConstitution").ToString()" />
+                                </td>
+                                <td>
+                                    <table class="sub-table2">
+                                        <tr>
+                                            <td>
+                                                <input type="submit" id="pbcConUp" name="pbcConUp" value="^" asp-page-handler="ConUp"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <input type="submit" id="pbcConDown" name="pbcConDown" value="˅" asp-page-handler="ConDown" />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <table class="sub-table">
+                            <tr>
+                                <td>
+                                    <input type="text" readonly id="pbcSolDisplay" name="pbcSolDisplay" value="@HttpContext.Session.GetInt32("_IntSoul").ToString()" />
+                                </td>
+                                <td>
+                                    <table class="sub-table2">
+                                        <tr>
+                                            <td>
+                                                <input type="submit" id="pbcSolUp" name="pbcSolUp" value="^" asp-page-handler="SolUp"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <input type="submit" id="pbcSolDown" name="pbcSolDown" value="˅" asp-page-handler="SolDown"/>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                </form>
+            </tbody>
+        </table>
+        <h2> points remaining to spend: @HttpContext.Session.GetInt32("_IntPoints").ToString()</h2>
+        <progress value="@HttpContext.Session.GetInt32("_IntPoints")" max="15"/>
+    </div>
+</body>
+</html>
