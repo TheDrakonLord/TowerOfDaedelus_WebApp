@@ -17,8 +17,6 @@ namespace TowerOfDaedelus_WebApp.Pages
 
         public void OnGet()
         {
-           
-            Console.WriteLine(User.Identity?.Name);
         }
     }
 }

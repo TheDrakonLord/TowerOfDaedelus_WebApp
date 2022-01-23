@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TowerOfDaedelus_WebApp.Data;
+using TowerOfDaedelus_WebApp.Properties;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.OAuth;
@@ -10,16 +11,7 @@ using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
-const string RoleIdAdmin = "866470088508178452";
-const string RoleIdGameMaster = "868206725268926504";
-const string RoleIdAssistantGameMaster = "868206804931346463";
-const string RoleIdScholar = "866469929926393866";
-const string RoleIdScribe = "866469956677664768";
-const string RoleIdAdvisor = "866470007274078227";
-const string RoleIdVisitor = "866470040563482656";
-const string RoleIdClockworkSoldier = "868207055620681768";
-const string RoleIdSpectralWatcher = "868207008669630485";
-const string customClaim = "DiscordRole";
+
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -33,7 +25,15 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 
 builder.Services.AddRazorPages();
 
+builder.Services.AddDistributedMemoryCache();
 
+builder.Services.AddSession(options =>
+{
+    options.Cookie.Name = ".TowersOfDaedelus.Session";
+    options.IdleTimeout = TimeSpan.FromMinutes(10);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 builder.Services.AddAuthentication()
     .AddDiscord(options =>
@@ -57,34 +57,34 @@ builder.Services.AddAuthentication()
         options.ClaimActions.MapJsonKey(ClaimTypes.Email, "email", "string");
         options.ClaimActions.MapJsonKey(ClaimTypes.Name, "username", "string");
 
-        options.SaveTokens = true;        
+        options.SaveTokens = true;
     });
 
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("admins", policy =>
-    policy.RequireClaim(customClaim,RoleIdAdmin));
+    policy.RequireClaim(Resources.customClaim, Resources.RoleIdAdmin));
 
     options.AddPolicy("gameMasters", policy =>
-    policy.RequireClaim(customClaim, RoleIdAssistantGameMaster,RoleIdGameMaster, RoleIdAdmin));
+    policy.RequireClaim(Resources.customClaim, Resources.RoleIdAssistantGameMaster, Resources.RoleIdGameMaster, Resources.RoleIdAdmin));
 
     options.AddPolicy("allCharacters", policy =>
-    policy.RequireClaim(customClaim, RoleIdScholar, RoleIdScribe, RoleIdAdvisor, RoleIdVisitor, RoleIdClockworkSoldier, RoleIdAssistantGameMaster, RoleIdGameMaster, RoleIdAdmin));
+    policy.RequireClaim(Resources.customClaim, Resources.RoleIdScholar, Resources.RoleIdScribe, Resources.RoleIdAdvisor, Resources.RoleIdVisitor, Resources.RoleIdClockworkSoldier, Resources.RoleIdAssistantGameMaster, Resources.RoleIdGameMaster, Resources.RoleIdAdmin));
 
     options.AddPolicy("allPlayers", policy =>
-    policy.RequireClaim(customClaim, RoleIdScholar, RoleIdScribe, RoleIdAdvisor, RoleIdVisitor, RoleIdAssistantGameMaster, RoleIdGameMaster, RoleIdAdmin));
+    policy.RequireClaim(Resources.customClaim, Resources.RoleIdScholar, Resources.RoleIdScribe, Resources.RoleIdAdvisor, Resources.RoleIdVisitor, Resources.RoleIdAssistantGameMaster, Resources.RoleIdGameMaster, Resources.RoleIdAdmin));
 
     options.AddPolicy("permanentPlayers", policy =>
-    policy.RequireClaim(customClaim, RoleIdScholar, RoleIdScribe, RoleIdAssistantGameMaster, RoleIdGameMaster, RoleIdAdmin));
+    policy.RequireClaim(Resources.customClaim, Resources.RoleIdScholar, Resources.RoleIdScribe, Resources.RoleIdAssistantGameMaster, Resources.RoleIdGameMaster, Resources.RoleIdAdmin));
 
     options.AddPolicy("visitingPlayers", policy =>
-    policy.RequireClaim(customClaim, RoleIdAdvisor, RoleIdVisitor, RoleIdAssistantGameMaster, RoleIdGameMaster, RoleIdAdmin));
+    policy.RequireClaim(Resources.customClaim, Resources.RoleIdAdvisor, Resources.RoleIdVisitor, Resources.RoleIdAssistantGameMaster, Resources.RoleIdGameMaster, Resources.RoleIdAdmin));
 
     options.AddPolicy("nonPlayerCharacters", policy =>
-    policy.RequireClaim(customClaim, RoleIdClockworkSoldier, RoleIdAssistantGameMaster, RoleIdGameMaster, RoleIdAdmin));
+    policy.RequireClaim(Resources.customClaim, Resources.RoleIdClockworkSoldier, Resources.RoleIdAssistantGameMaster, Resources.RoleIdGameMaster, Resources.RoleIdAdmin));
 
     options.AddPolicy("viewers", policy =>
-    policy.RequireClaim(customClaim, RoleIdSpectralWatcher, RoleIdAdmin));
+    policy.RequireClaim(Resources.customClaim, Resources.RoleIdSpectralWatcher, Resources.RoleIdAdmin));
 
     options.FallbackPolicy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
@@ -112,6 +112,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseSession();
 
 app.MapRazorPages();
 
