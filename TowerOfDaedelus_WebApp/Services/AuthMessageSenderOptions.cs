@@ -1,0 +1,7 @@
+﻿namespace TowerOfDaedelus_WebApp.Services
+{
+    public class AuthMessageSenderOptions
+    {
+        public string SendGridKey { get; set; }
+    }
+}
