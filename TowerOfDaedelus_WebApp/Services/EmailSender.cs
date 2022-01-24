@@ -25,7 +25,7 @@ namespace TowerOfDaedelus_WebApp.Services
             var client = new SendGridClient(apiKey);
             var msg = new SendGridMessage()
             {
-                From = new EmailAddress("noreply@towerofdaedelus.com", "Password Recovery"),
+                From = new EmailAddress("noreply@towerofdaedelus.com", "The Towers of Daedelus"),
                 Subject = subject,
                 PlainTextContent = message,
                 HtmlContent = message

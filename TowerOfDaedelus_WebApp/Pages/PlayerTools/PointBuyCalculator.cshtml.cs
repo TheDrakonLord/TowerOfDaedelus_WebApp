@@ -4,7 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace TowerOfDaedelus_WebApp.Pages.PlayerTools
 {
-    [Authorize(Policy = "allPlayers")]
+    //[Authorize(Policy = "allPlayers")]
+    [AllowAnonymous]
     public class PointBuyCalculatorModel : PageModel
     {     
         public const string SessionKeyIntMind = "_IntMind";
