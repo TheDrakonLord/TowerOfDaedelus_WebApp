@@ -151,11 +151,29 @@ namespace TowerOfDaedelus_WebApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 953545586852888626.
+        /// </summary>
+        internal static string targetGMChannel {
+            get {
+                return ResourceManager.GetString("targetGMChannel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 866469546109173792.
         /// </summary>
         internal static string targetGuildID {
             get {
                 return ResourceManager.GetString("targetGuildID", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 953545490472009768.
+        /// </summary>
+        internal static string targetPublicChannel {
+            get {
+                return ResourceManager.GetString("targetPublicChannel", resourceCulture);
             }
         }
     }

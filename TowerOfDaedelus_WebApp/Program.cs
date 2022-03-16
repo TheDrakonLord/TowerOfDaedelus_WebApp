@@ -10,6 +10,7 @@ using Newtonsoft.Json.Linq;
 using Microsoft.AspNetCore.Authentication;
 using TowerOfDaedelus_WebApp.Services;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using TowerOfDaedalus_WebApp_DiscordBot;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,9 +32,20 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 });
 
 builder.Services.AddTransient<IEmailSender, EmailSender>();
+
 builder.Services.Configure<AuthMessageSenderOptions>(options =>
 {
     options.SendGridKey = Environment.GetEnvironmentVariable("SENDGRID_API_KEY");
+});
+
+builder.Services.AddHostedService<DiscordBot_BackgroundWorker>();
+
+builder.Services.Configure<DiscordBotOptions>(options =>
+{
+    options.botToken = Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN");
+    options.targetPublicChannel = Resources.targetPublicChannel;
+    options.targetGMChannel = Resources.targetGMChannel;
+    options.targetServer = Resources.targetGuildID;
 });
 
 builder.Services.ConfigureApplicationCookie(options =>
@@ -109,6 +121,8 @@ builder.Services.AddAuthorization(options =>
         .RequireAuthenticatedUser()
         .Build();
 });
+
+
 
 var app = builder.Build();
 
