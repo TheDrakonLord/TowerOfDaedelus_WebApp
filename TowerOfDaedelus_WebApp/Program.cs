@@ -11,18 +11,26 @@ using Microsoft.AspNetCore.Authentication;
 using TowerOfDaedelus_WebApp.Services;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using TowerOfDaedalus_WebApp_DiscordBot;
+using TowerOfDaedelus_WebApp.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+string connectionString;
+#if DEBUG
+connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+#else
+    connectionString = "Data Source=" + Environment.GetEnvironmentVariable("RDS_HOSTNAME") + ";Initial Catalog=" +
+        Environment.GetEnvironmentVariable("RDS_DB_NAME") + ";User ID=" + Environment.GetEnvironmentVariable("RDS_USERNAME")
+        + ";Password=" + Environment.GetEnvironmentVariable("RDS_PASSWORD") + ";";
+#endif
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
