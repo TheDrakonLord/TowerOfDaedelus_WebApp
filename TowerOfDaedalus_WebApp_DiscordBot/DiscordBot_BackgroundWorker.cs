@@ -19,6 +19,16 @@ namespace TowerOfDaedalus_WebApp_DiscordBot
 {
     public class DiscordBot_BackgroundWorker : BackgroundService
     {
+        /// <summary>
+        /// Status message the bot displays on the server
+        /// </summary>
+        private static string statusMessage = "Hello There";
+
+        /// <summary>
+        /// A list of all guilds the bot has joined
+        /// </summary>
+        private static List<ulong> allGuilds = new List<ulong>();
+
         private readonly ILogger<DiscordBot_BackgroundWorker> _logger;
 
         //declare necessary variables
@@ -52,7 +62,7 @@ namespace TowerOfDaedalus_WebApp_DiscordBot
             //initialize the client, command handler, and command service
             _client = new DiscordSocketClient();
             _cService = new CommandService();
-            _cHandler = new commandHandler(_client, _cService);
+            _cHandler = new commandHandler(_client, _cService, _logger);
 
 
 
@@ -63,7 +73,7 @@ namespace TowerOfDaedalus_WebApp_DiscordBot
             // have the client login and start
             await _client.LoginAsync(TokenType.Bot, Options.botToken).ConfigureAwait(false);
             await _client.StartAsync().ConfigureAwait(false);
-            await _client.SetGameAsync(globals.statusMessage, null, ActivityType.Playing).ConfigureAwait(false);
+            await _client.SetGameAsync(statusMessage, null, ActivityType.Playing).ConfigureAwait(false);
             _client.JoinedGuild += joinedGuild;
             _client.LeftGuild += leftGuild;
             _client.Ready += botReady;
@@ -83,7 +93,7 @@ namespace TowerOfDaedalus_WebApp_DiscordBot
         private Task Log(LogMessage msg)
         {
             // queue the message to be sent to the log
-            Console.WriteLine(msg.ToString());
+            _logger.LogInformation(msg.ToString());
             return Task.CompletedTask;
         }
 
@@ -96,17 +106,17 @@ namespace TowerOfDaedalus_WebApp_DiscordBot
         private async Task joinedGuild(SocketGuild newGuild)
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
-            if (!globals.allGuilds.Contains(newGuild.Id))
+            if (!allGuilds.Contains(newGuild.Id))
             {
-                globals.allGuilds.Add(newGuild.Id);
-                globals.logMessage("Connected to Guild", $"{newGuild.Name} ({newGuild.Id})");
+                allGuilds.Add(newGuild.Id);
+                _logger.LogInformation($"{DateTime.Now.ToShortDateString(),-11}{System.DateTime.Now.ToLongTimeString(),-8} Connected to Guild: {newGuild.Name} ({newGuild.Id})");
 
                 //globals.commandStorage.Element("guilds").Add(new XElement("guild", newGuild.Id.ToString()));
                 //globals.commandStorage.Save(globals.storageFilePath);
             }
             else
             {
-                globals.logMessage($"Join error. Already connected to {newGuild.Name} ({newGuild.Id})");
+                _logger.LogWarning($"Join error. Already connected to {newGuild.Name} ({newGuild.Id})");
             }
         }
 
@@ -119,14 +129,14 @@ namespace TowerOfDaedalus_WebApp_DiscordBot
         private async Task leftGuild(SocketGuild leavingGuild)
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
-            if (globals.allGuilds.Contains(leavingGuild.Id))
+            if (allGuilds.Contains(leavingGuild.Id))
             {
-                globals.allGuilds.Remove(leavingGuild.Id);
-                globals.logMessage($"The bot has left the guild {leavingGuild.Name} ({leavingGuild.Id})");
+                allGuilds.Remove(leavingGuild.Id);
+                _logger.LogInformation($"The bot has left the guild {leavingGuild.Name} ({leavingGuild.Id})");
             }
             else
             {
-                globals.logMessage($"Bot departure error. {leavingGuild.Name} ({leavingGuild.Id}) not found in collection");
+                _logger.LogWarning($"Bot departure error. {leavingGuild.Name} ({leavingGuild.Id}) not found in collection");
             }
         }
 
@@ -148,18 +158,18 @@ namespace TowerOfDaedalus_WebApp_DiscordBot
         private async Task botReady()
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
-            globals.logMessage(Strings.logBotReady);
+            _logger.LogInformation(Strings.logBotReady);
             IReadOnlyCollection<SocketGuild> conGuilds = _client.Guilds;
             foreach (SocketGuild x in conGuilds)
             {
-                if (!globals.allGuilds.Contains(x.Id))
+                if (!allGuilds.Contains(x.Id))
                 {
-                    globals.allGuilds.Add(x.Id);
-                    globals.logMessage("Connected to Guild", $"{x.Name} ({x.Id})");
+                    allGuilds.Add(x.Id);
+                    _logger.LogInformation($"{DateTime.Now.ToShortDateString(),-11}{System.DateTime.Now.ToLongTimeString(),-8} Connected to Guild: {x.Name} ({x.Id})");
                 }
                 else
                 {
-                    globals.logMessage($"Ready Join error. Already connected to {x.Name} ({x.Id})");
+                    _logger.LogInformation($"Ready Join error. Already connected to {x.Name} ({x.Id})");
                 }
             }
         }

@@ -15,16 +15,18 @@ namespace TowerOfDaedalus_WebApp_DiscordBot
     {
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
+        private readonly ILogger<DiscordBot_BackgroundWorker> _logger;
 
         /// <summary>
         /// Retrieve client and CommandService instance via actor
         /// </summary>
         /// <param name="client">the discord client</param>
         /// <param name="commands">the command service</param>
-        public commandHandler(DiscordSocketClient client, CommandService commands)
+        public commandHandler(DiscordSocketClient client, CommandService commands, ILogger<DiscordBot_BackgroundWorker> logger)
         {
             _commands = commands;
             _client = client;
+            _logger = logger;
         }
 
         /// <summary>
@@ -78,7 +80,8 @@ namespace TowerOfDaedalus_WebApp_DiscordBot
                 services: null).ConfigureAwait(false);
 
             //log the command recieve in the log
-            globals.logMessage("Command", $"{messageParam as SocketUserMessage}");
+            _logger.LogInformation($"{DateTime.Now.ToShortDateString(),-11}{System.DateTime.Now.ToLongTimeString(),-8} Command: {messageParam as SocketUserMessage}");
+            
         }
     }
 }

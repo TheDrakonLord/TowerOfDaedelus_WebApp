@@ -24,7 +24,6 @@ namespace TowerOfDaedalus_WebApp_DiscordBot
         [Summary("this is a test command")]
         public async Task testComand()
         {
-            Console.WriteLine("test command");
             await Context.Channel.SendMessageAsync("the bot eats a cookie");
         }
     }

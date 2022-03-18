@@ -1,7 +1,8 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using System.Security.Claims
-@inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
+@using TowerOfDaedelus_WebApp.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
