@@ -120,6 +120,33 @@
   <data name="customClaim" xml:space="preserve">
     <value>DiscordRole</value>
   </data>
+  <data name="imgLobbyStatusClosed" xml:space="preserve">
+    <value />
+  </data>
+  <data name="imgUriBackground" xml:space="preserve">
+    <value>https://i.imgur.com/7pI8GpX.png</value>
+  </data>
+  <data name="imgUriLobbyStatusClosed" xml:space="preserve">
+    <value>https://i.imgur.com/5JPb3YI.png</value>
+  </data>
+  <data name="imgUriLobbyStatusOpen" xml:space="preserve">
+    <value>https://i.imgur.com/AUQA0o0.png</value>
+  </data>
+  <data name="imgUriLobbyStatusPrivate" xml:space="preserve">
+    <value>https://i.imgur.com/xE6sgqo.png</value>
+  </data>
+  <data name="imgUriLogoOldOnBlack" xml:space="preserve">
+    <value>https://i.imgur.com/BL8eVMI.png</value>
+  </data>
+  <data name="imgUriLogoOldOnWhite" xml:space="preserve">
+    <value>https://i.imgur.com/VfB8v26.png</value>
+  </data>
+  <data name="imgUriLogoOnBlack" xml:space="preserve">
+    <value>https://i.imgur.com/9G8RXNy.png</value>
+  </data>
+  <data name="imgUriLogoOnWhite" xml:space="preserve">
+    <value>https://i.imgur.com/jcztLp3.png</value>
+  </data>
   <data name="RoleIdAdmin" xml:space="preserve">
     <value>866470088508178452</value>
   </data>
