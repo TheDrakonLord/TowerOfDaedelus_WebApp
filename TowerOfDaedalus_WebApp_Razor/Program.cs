@@ -1,0 +1,108 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using TowerOfDaedalus_WebApp_Razor.Data;
+using TowerOfDaedalus_WebApp_Razor.Properties;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.OAuth;
+using System.Net;
+using Newtonsoft.Json.Linq;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using log4net;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.ClearProviders();
+builder.Logging.AddLog4Net();
+
+// Add services to the container.
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(connectionString));
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddRazorPages();
+
+builder.Services.AddAuthentication()
+    .AddDiscord(options =>
+    {
+        try
+        {
+            options.ClientId = Environment.GetEnvironmentVariable("DISCORD_CLIENT_ID");
+            options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
+        }
+        catch (ArgumentNullException)
+        {
+
+            throw;
+        }
+
+        options.CallbackPath = "/signin-discord";
+        options.Scope.Add("guilds.members.read");
+        options.Scope.Add("identify");
+        options.Scope.Add("email");
+
+        options.ClaimActions.MapJsonKey(ClaimTypes.Email, "email", "string");
+        options.ClaimActions.MapJsonKey(ClaimTypes.Name, "username", "string");
+
+        options.SaveTokens = true;
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("admins", policy =>
+    policy.RequireClaim(Resources.customClaim, Resources.RoleIdAdmin));
+
+    options.AddPolicy("gameMasters", policy =>
+    policy.RequireClaim(Resources.customClaim, Resources.RoleIdAssistantGameMaster, Resources.RoleIdGameMaster, Resources.RoleIdAdmin));
+
+    options.AddPolicy("allCharacters", policy =>
+    policy.RequireClaim(Resources.customClaim, Resources.RoleIdScholar, Resources.RoleIdScribe, Resources.RoleIdAdvisor, Resources.RoleIdVisitor, Resources.RoleIdClockworkSoldier, Resources.RoleIdAssistantGameMaster, Resources.RoleIdGameMaster, Resources.RoleIdAdmin));
+
+    options.AddPolicy("allPlayers", policy =>
+    policy.RequireClaim(Resources.customClaim, Resources.RoleIdScholar, Resources.RoleIdScribe, Resources.RoleIdAdvisor, Resources.RoleIdVisitor, Resources.RoleIdAssistantGameMaster, Resources.RoleIdGameMaster, Resources.RoleIdAdmin));
+
+    options.AddPolicy("permanentPlayers", policy =>
+    policy.RequireClaim(Resources.customClaim, Resources.RoleIdScholar, Resources.RoleIdScribe, Resources.RoleIdAssistantGameMaster, Resources.RoleIdGameMaster, Resources.RoleIdAdmin));
+
+    options.AddPolicy("visitingPlayers", policy =>
+    policy.RequireClaim(Resources.customClaim, Resources.RoleIdAdvisor, Resources.RoleIdVisitor, Resources.RoleIdAssistantGameMaster, Resources.RoleIdGameMaster, Resources.RoleIdAdmin));
+
+    options.AddPolicy("nonPlayerCharacters", policy =>
+    policy.RequireClaim(Resources.customClaim, Resources.RoleIdClockworkSoldier, Resources.RoleIdAssistantGameMaster, Resources.RoleIdGameMaster, Resources.RoleIdAdmin));
+
+    options.AddPolicy("viewers", policy =>
+    policy.RequireClaim(Resources.customClaim, Resources.RoleIdSpectralWatcher, Resources.RoleIdAdmin));
+
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseMigrationsEndPoint();
+}
+else
+{
+    app.UseExceptionHandler("/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseAuthorization();
+
+app.MapRazorPages();
+
+app.Run();

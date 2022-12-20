@@ -1,17 +1,28 @@
 version: '3.4'
 
 services:
-  towerofdaedelus_webapp:
-    image: ${DOCKER_REGISTRY-}towerofdaedeluswebapp
+  towerofdaedalus_webapp_razor:
+    image: ${DOCKER_REGISTRY-}towerofdaedaluswebapprazor
     build:
       context: .
-      dockerfile: TowerOfDaedelus_WebApp/Dockerfile
+      dockerfile: TowerOfDaedalus_WebApp_Razor/Dockerfile
     depends_on:
         - arangodb
         - zookeeper
         - kafka
         - towerofdaedalus_webapp_discordbot
 
+  towerofdaedalus_webapp_blazor:
+    image: ${DOCKER_REGISTRY-}towerofdaedaluswebappblazor
+    build:
+      context: .
+      dockerfile: TowerOfDaedalus_WebApp_Blazor/Dockerfile
+    depends_on:
+        - arangodb
+        - zookeeper
+        - kafka
+        - towerofdaedalus_webapp_discordbot
+        - towerofdaedalus_webapp_razor
 
   towerofdaedalus_webapp_discordbot:
     image: ${DOCKER_REGISTRY-}towerofdaedaluswebappdiscordbot
@@ -25,6 +36,8 @@ services:
         - 8529:8529
     environment:
         - ARANGO_NO_AUTH=1
+    volumes:
+        - ./Persistance/Arango:/var/lib/arangodb3
 
   zookeeper:
     image: bitnami/zookeeper:latest
@@ -32,6 +45,8 @@ services:
         - 2181:2181
     environment:
         - ALLOW_ANONYMOUS_LOGIN=yes
+    volumes:
+        - ./Persistance/zookeeper:/bitnami/zookeeper
 
   kafka:
     image: bitnami/kafka:latest
@@ -45,3 +60,7 @@ services:
       - ALLOW_PLAINTEXT_LISTENER=yes
     depends_on:
       - zookeeper
+    volumes:
+      - ./Persistance/Kafka:/bitnami/kafka
+
+

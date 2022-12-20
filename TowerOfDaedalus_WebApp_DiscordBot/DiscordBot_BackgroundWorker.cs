@@ -31,6 +31,14 @@ namespace TowerOfDaedalus_WebApp_DiscordBot
 
         private readonly ILogger<DiscordBot_BackgroundWorker> _logger;
 
+        //TODO
+        /**
+        * options.botToken = Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN");
+        * options.targetPublicChannel = Resources.targetPublicChannel;
+        * options.targetGMChannel = Resources.targetGMChannel;
+        * options.targetServer = Resources.targetGuildID;
+        * **/
+
         //declare necessary variables
         private static DiscordSocketClient _client;
         private commandHandler _cHandler;

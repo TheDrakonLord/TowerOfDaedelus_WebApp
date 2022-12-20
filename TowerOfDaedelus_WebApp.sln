@@ -3,13 +3,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TowerOfDaedelus_WebApp", "TowerOfDaedelus_WebApp\TowerOfDaedelus_WebApp.csproj", "{F3CDAF00-C3AB-4794-A209-89F7E35DDAE9}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TowerOfDaedalus_WebApp_Tests", "TowerOfDaedalus_WebApp_Tests\TowerOfDaedalus_WebApp_Tests.csproj", "{D1998C56-6A75-4E6F-AB48-631C6F599BEC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TowerOfDaedalus_WebApp_DiscordBot", "TowerOfDaedalus_WebApp_DiscordBot\TowerOfDaedalus_WebApp_DiscordBot.csproj", "{9C7C1D81-8E3B-492B-BF45-64F51D0444E4}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{BA20ED1D-DB72-4B6C-B457-FDEB1D1BC1BC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Persistance", "Persistance", "{857A33C5-B15F-407C-8229-D23EAE9A3DF1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Kafka", "Kafka", "{2A8D5B8C-6CA4-4486-AC3B-3F40BD12EB95}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "zookeeper", "zookeeper", "{E4EF0287-B004-42B2-B638-8423703883DC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Arango", "Arango", "{115C3AAD-74A4-4300-B334-36649327F733}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TowerOfDaedalus_WebApp_Razor", "TowerOfDaedalus_WebApp_Razor\TowerOfDaedalus_WebApp_Razor.csproj", "{CBE0457D-2E2E-4CA6-BA20-F7050AFF6395}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TowerOfDaedalus_WebApp_Blazor", "TowerOfDaedalus_WebApp_Blazor\TowerOfDaedalus_WebApp_Blazor.csproj", "{B8EE7FA8-E12F-443F-9FF4-3873A7E808A5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +27,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F3CDAF00-C3AB-4794-A209-89F7E35DDAE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F3CDAF00-C3AB-4794-A209-89F7E35DDAE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F3CDAF00-C3AB-4794-A209-89F7E35DDAE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F3CDAF00-C3AB-4794-A209-89F7E35DDAE9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D1998C56-6A75-4E6F-AB48-631C6F599BEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D1998C56-6A75-4E6F-AB48-631C6F599BEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1998C56-6A75-4E6F-AB48-631C6F599BEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -33,9 +39,22 @@ Global
 		{BA20ED1D-DB72-4B6C-B457-FDEB1D1BC1BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA20ED1D-DB72-4B6C-B457-FDEB1D1BC1BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA20ED1D-DB72-4B6C-B457-FDEB1D1BC1BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBE0457D-2E2E-4CA6-BA20-F7050AFF6395}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBE0457D-2E2E-4CA6-BA20-F7050AFF6395}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBE0457D-2E2E-4CA6-BA20-F7050AFF6395}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBE0457D-2E2E-4CA6-BA20-F7050AFF6395}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8EE7FA8-E12F-443F-9FF4-3873A7E808A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8EE7FA8-E12F-443F-9FF4-3873A7E808A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8EE7FA8-E12F-443F-9FF4-3873A7E808A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8EE7FA8-E12F-443F-9FF4-3873A7E808A5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2A8D5B8C-6CA4-4486-AC3B-3F40BD12EB95} = {857A33C5-B15F-407C-8229-D23EAE9A3DF1}
+		{E4EF0287-B004-42B2-B638-8423703883DC} = {857A33C5-B15F-407C-8229-D23EAE9A3DF1}
+		{115C3AAD-74A4-4300-B334-36649327F733} = {857A33C5-B15F-407C-8229-D23EAE9A3DF1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2E94A5F2-589E-400F-9F20-DD3C9115DB02}
