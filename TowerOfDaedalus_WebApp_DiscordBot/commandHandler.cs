@@ -15,14 +15,14 @@ namespace TowerOfDaedalus_WebApp_DiscordBot
     {
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
-        private readonly ILogger<DiscordBot_BackgroundWorker> _logger;
+        private readonly ILogger<DiscordBot> _logger;
 
         /// <summary>
         /// Retrieve client and CommandService instance via actor
         /// </summary>
         /// <param name="client">the discord client</param>
         /// <param name="commands">the command service</param>
-        public commandHandler(DiscordSocketClient client, CommandService commands, ILogger<DiscordBot_BackgroundWorker> logger)
+        public commandHandler(DiscordSocketClient client, CommandService commands, ILogger<DiscordBot> logger)
         {
             _commands = commands;
             _client = client;

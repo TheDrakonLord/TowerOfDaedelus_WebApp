@@ -98,4 +98,13 @@
 	<resheader name="writer">
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
+    <data name="targetGMChannel" xml:space="preserve">
+		<value>953545586852888626</value>
+    </data>
+    <data name="targetGuildID" xml:space="preserve">
+		<value>866469546109173792</value>
+    </data>
+    <data name="targetPublicChannel" xml:space="preserve">
+		<value>953545490472009768</value>
+    </data>
 </root>

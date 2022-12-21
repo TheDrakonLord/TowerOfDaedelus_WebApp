@@ -17,7 +17,7 @@ using System.IO;
 
 namespace TowerOfDaedalus_WebApp_DiscordBot
 {
-    public class DiscordBot_BackgroundWorker : BackgroundService
+    public class DiscordBot : BackgroundService
     {
         /// <summary>
         /// Status message the bot displays on the server
@@ -29,7 +29,7 @@ namespace TowerOfDaedalus_WebApp_DiscordBot
         /// </summary>
         private static List<ulong> allGuilds = new List<ulong>();
 
-        private readonly ILogger<DiscordBot_BackgroundWorker> _logger;
+        private readonly ILogger<DiscordBot> _logger;
 
         //TODO
         /**
@@ -46,7 +46,7 @@ namespace TowerOfDaedalus_WebApp_DiscordBot
         private static IMessageChannel _mainChannel;
         private static IMessageChannel _utilityChannel;
 
-        public DiscordBot_BackgroundWorker(ILogger<DiscordBot_BackgroundWorker> logger, IOptions<DiscordBotOptions> optionsAccessor)
+        public DiscordBot(ILogger<DiscordBot> logger, IOptions<DiscordBotOptions> optionsAccessor)
         {
             _logger = logger;
             Options = optionsAccessor.Value;

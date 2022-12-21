@@ -17,9 +17,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "zookeeper", "zookeeper", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Arango", "Arango", "{115C3AAD-74A4-4300-B334-36649327F733}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TowerOfDaedalus_WebApp_Razor", "TowerOfDaedalus_WebApp_Razor\TowerOfDaedalus_WebApp_Razor.csproj", "{CBE0457D-2E2E-4CA6-BA20-F7050AFF6395}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TowerOfDaedalus_WebApp_Razor", "TowerOfDaedalus_WebApp_Razor\TowerOfDaedalus_WebApp_Razor.csproj", "{CBE0457D-2E2E-4CA6-BA20-F7050AFF6395}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TowerOfDaedalus_WebApp_Blazor", "TowerOfDaedalus_WebApp_Blazor\TowerOfDaedalus_WebApp_Blazor.csproj", "{B8EE7FA8-E12F-443F-9FF4-3873A7E808A5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TowerOfDaedalus_WebApp_Blazor", "TowerOfDaedalus_WebApp_Blazor\TowerOfDaedalus_WebApp_Blazor.csproj", "{B8EE7FA8-E12F-443F-9FF4-3873A7E808A5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
