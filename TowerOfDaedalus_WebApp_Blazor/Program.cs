@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using log4net;
 using Humanizer.Localisation;
+using TowerOfDaedalus_WebApp_Arango;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,10 @@ builder.Logging.ClearProviders();
 builder.Logging.AddLog4Net();
 
 // Add services to the container.
+builder.Services
+    .AddArangoConfig(builder.Configuration)
+    .AddArangoDependencyGroup();
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));

@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using TowerOfDaedalus_WebApp_Razor.Data;
 using TowerOfDaedalus_WebApp_Razor.Properties;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
@@ -10,6 +9,7 @@ using Newtonsoft.Json.Linq;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using log4net;
+using TowerOfDaedalus_WebApp_Arango;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,13 +17,13 @@ builder.Logging.ClearProviders();
 builder.Logging.AddLog4Net();
 
 // Add services to the container.
+builder.Services
+    .AddArangoConfig(builder.Configuration)
+    .AddArangoDependencyGroup();
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
 
 builder.Services.AddAuthentication()
@@ -54,28 +54,28 @@ builder.Services.AddAuthentication()
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("admins", policy =>
-    policy.RequireClaim(Resources.customClaim, Resources.RoleIdAdmin));
+    policy.RequireClaim(Resources.ResourceManager.GetString("customClaim"), Resources.ResourceManager.GetString("RoleIdAdmin")));
 
     options.AddPolicy("gameMasters", policy =>
-    policy.RequireClaim(Resources.customClaim, Resources.RoleIdAssistantGameMaster, Resources.RoleIdGameMaster, Resources.RoleIdAdmin));
+    policy.RequireClaim(Resources.ResourceManager.GetString("customClaim"), Resources.ResourceManager.GetString("RoleIdAssistantGameMaster"), Resources.ResourceManager.GetString("RoleIdGameMaster"), Resources.ResourceManager.GetString("RoleIdAdmin")));
 
     options.AddPolicy("allCharacters", policy =>
-    policy.RequireClaim(Resources.customClaim, Resources.RoleIdScholar, Resources.RoleIdScribe, Resources.RoleIdAdvisor, Resources.RoleIdVisitor, Resources.RoleIdClockworkSoldier, Resources.RoleIdAssistantGameMaster, Resources.RoleIdGameMaster, Resources.RoleIdAdmin));
+    policy.RequireClaim(Resources.ResourceManager.GetString("customClaim"), Resources.ResourceManager.GetString("RoleIdScholar"), Resources.ResourceManager.GetString("RoleIdScribe"), Resources.ResourceManager.GetString("RoleIdAdvisor"), Resources.ResourceManager.GetString("RoleIdVisitor"), Resources.ResourceManager.GetString("RoleIdClockworkSoldier"), Resources.ResourceManager.GetString("RoleIdAssistantGameMaster"), Resources.ResourceManager.GetString("RoleIdGameMaster"), Resources.ResourceManager.GetString("RoleIdAdmin")));
 
     options.AddPolicy("allPlayers", policy =>
-    policy.RequireClaim(Resources.customClaim, Resources.RoleIdScholar, Resources.RoleIdScribe, Resources.RoleIdAdvisor, Resources.RoleIdVisitor, Resources.RoleIdAssistantGameMaster, Resources.RoleIdGameMaster, Resources.RoleIdAdmin));
+    policy.RequireClaim(Resources.ResourceManager.GetString("customClaim"), Resources.ResourceManager.GetString("RoleIdScholar"), Resources.ResourceManager.GetString("RoleIdScribe"), Resources.ResourceManager.GetString("RoleIdAdvisor"), Resources.ResourceManager.GetString("RoleIdVisitor"), Resources.ResourceManager.GetString("RoleIdAssistantGameMaster"), Resources.ResourceManager.GetString("RoleIdGameMaster"), Resources.ResourceManager.GetString("RoleIdAdmin")));
 
     options.AddPolicy("permanentPlayers", policy =>
-    policy.RequireClaim(Resources.customClaim, Resources.RoleIdScholar, Resources.RoleIdScribe, Resources.RoleIdAssistantGameMaster, Resources.RoleIdGameMaster, Resources.RoleIdAdmin));
+    policy.RequireClaim(Resources.ResourceManager.GetString("customClaim"), Resources.ResourceManager.GetString("RoleIdScholar"), Resources.ResourceManager.GetString("RoleIdScribe"), Resources.ResourceManager.GetString("RoleIdAssistantGameMaster"), Resources.ResourceManager.GetString("RoleIdGameMaster"), Resources.ResourceManager.GetString("RoleIdAdmin")));
 
     options.AddPolicy("visitingPlayers", policy =>
-    policy.RequireClaim(Resources.customClaim, Resources.RoleIdAdvisor, Resources.RoleIdVisitor, Resources.RoleIdAssistantGameMaster, Resources.RoleIdGameMaster, Resources.RoleIdAdmin));
+    policy.RequireClaim(Resources.ResourceManager.GetString("customClaim"), Resources.ResourceManager.GetString("RoleIdAdvisor"), Resources.ResourceManager.GetString("RoleIdVisitor"), Resources.ResourceManager.GetString("RoleIdAssistantGameMaster"), Resources.ResourceManager.GetString("RoleIdGameMaster"), Resources.ResourceManager.GetString("RoleIdAdmin")));
 
     options.AddPolicy("nonPlayerCharacters", policy =>
-    policy.RequireClaim(Resources.customClaim, Resources.RoleIdClockworkSoldier, Resources.RoleIdAssistantGameMaster, Resources.RoleIdGameMaster, Resources.RoleIdAdmin));
+    policy.RequireClaim(Resources.ResourceManager.GetString("customClaim"), Resources.ResourceManager.GetString("RoleIdClockworkSoldier"), Resources.ResourceManager.GetString("RoleIdAssistantGameMaster"), Resources.ResourceManager.GetString("RoleIdGameMaster"), Resources.ResourceManager.GetString("RoleIdAdmin")));
 
     options.AddPolicy("viewers", policy =>
-    policy.RequireClaim(Resources.customClaim, Resources.RoleIdSpectralWatcher, Resources.RoleIdAdmin));
+    policy.RequireClaim(Resources.ResourceManager.GetString("customClaim"), Resources.ResourceManager.GetString("RoleIdSpectralWatcher"), Resources.ResourceManager.GetString("RoleIdAdmin")));
 
     options.FallbackPolicy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()

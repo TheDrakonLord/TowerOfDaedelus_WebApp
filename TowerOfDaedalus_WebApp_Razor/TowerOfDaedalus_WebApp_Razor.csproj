@@ -10,7 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ArangoDBNetStandard" Version="1.2.0" />
     <PackageReference Include="AspNet.Security.OAuth.Discord" Version="7.0.0" />
     <PackageReference Include="log4net" Version="2.0.15" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.1" />
@@ -30,9 +29,17 @@
 
   <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Data\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TowerOfDaedalus_WebApp_Arango\TowerOfDaedalus_WebApp_Arango.csproj" />
   </ItemGroup>
 
 </Project>

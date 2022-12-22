@@ -22,7 +22,7 @@ namespace TowerOfDaedalus_WebApp_Razor.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    public class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace TowerOfDaedalus_WebApp_Razor.Properties {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TowerOfDaedalus_WebApp_Razor.Properties.Resources", typeof(Resources).Assembly);
@@ -51,12 +51,210 @@ namespace TowerOfDaedalus_WebApp_Razor.Properties {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DiscordRole.
+        /// </summary>
+        public static string customClaim {
+            get {
+                return ResourceManager.GetString("customClaim", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        public static string imgLobbyStatusClosed {
+            get {
+                return ResourceManager.GetString("imgLobbyStatusClosed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to https://i.imgur.com/7pI8GpX.png.
+        /// </summary>
+        public static string imgUriBackground {
+            get {
+                return ResourceManager.GetString("imgUriBackground", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to https://i.imgur.com/5JPb3YI.png.
+        /// </summary>
+        public static string imgUriLobbyStatusClosed {
+            get {
+                return ResourceManager.GetString("imgUriLobbyStatusClosed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to https://i.imgur.com/AUQA0o0.png.
+        /// </summary>
+        public static string imgUriLobbyStatusOpen {
+            get {
+                return ResourceManager.GetString("imgUriLobbyStatusOpen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to https://i.imgur.com/xE6sgqo.png.
+        /// </summary>
+        public static string imgUriLobbyStatusPrivate {
+            get {
+                return ResourceManager.GetString("imgUriLobbyStatusPrivate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to https://i.imgur.com/BL8eVMI.png.
+        /// </summary>
+        public static string imgUriLogoOldOnBlack {
+            get {
+                return ResourceManager.GetString("imgUriLogoOldOnBlack", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to https://i.imgur.com/VfB8v26.png.
+        /// </summary>
+        public static string imgUriLogoOldOnWhite {
+            get {
+                return ResourceManager.GetString("imgUriLogoOldOnWhite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to https://i.imgur.com/9G8RXNy.png.
+        /// </summary>
+        public static string imgUriLogoOnBlack {
+            get {
+                return ResourceManager.GetString("imgUriLogoOnBlack", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to https://i.imgur.com/jcztLp3.png.
+        /// </summary>
+        public static string imgUriLogoOnWhite {
+            get {
+                return ResourceManager.GetString("imgUriLogoOnWhite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 866470088508178452.
+        /// </summary>
+        public static string RoleIdAdmin {
+            get {
+                return ResourceManager.GetString("RoleIdAdmin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 866470007274078227.
+        /// </summary>
+        public static string RoleIdAdvisor {
+            get {
+                return ResourceManager.GetString("RoleIdAdvisor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 868206804931346463.
+        /// </summary>
+        public static string RoleIdAssistantGameMaster {
+            get {
+                return ResourceManager.GetString("RoleIdAssistantGameMaster", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 868207055620681768.
+        /// </summary>
+        public static string RoleIdClockworkSoldier {
+            get {
+                return ResourceManager.GetString("RoleIdClockworkSoldier", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 868206725268926504.
+        /// </summary>
+        public static string RoleIdGameMaster {
+            get {
+                return ResourceManager.GetString("RoleIdGameMaster", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 866469929926393866.
+        /// </summary>
+        public static string RoleIdScholar {
+            get {
+                return ResourceManager.GetString("RoleIdScholar", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 866469956677664768.
+        /// </summary>
+        public static string RoleIdScribe {
+            get {
+                return ResourceManager.GetString("RoleIdScribe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 868207008669630485.
+        /// </summary>
+        public static string RoleIdSpectralWatcher {
+            get {
+                return ResourceManager.GetString("RoleIdSpectralWatcher", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 866470040563482656.
+        /// </summary>
+        public static string RoleIdVisitor {
+            get {
+                return ResourceManager.GetString("RoleIdVisitor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 953545586852888626.
+        /// </summary>
+        public static string targetGMChannel {
+            get {
+                return ResourceManager.GetString("targetGMChannel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 866469546109173792.
+        /// </summary>
+        public static string targetGuildID {
+            get {
+                return ResourceManager.GetString("targetGuildID", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 953545490472009768.
+        /// </summary>
+        public static string targetPublicChannel {
+            get {
+                return ResourceManager.GetString("targetPublicChannel", resourceCulture);
             }
         }
     }

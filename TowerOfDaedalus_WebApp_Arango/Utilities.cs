@@ -1,0 +1,101 @@
+﻿using log4net.Core;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using ArangoDBNetStandard;
+using ArangoDBNetStandard.Transport.Http;
+
+namespace TowerOfDaedalus_WebApp_Arango
+{
+    public interface IArangoUtils
+    {
+        //public static abstract Task CreateDB();
+    }
+
+    internal class Utilities : IArangoUtils
+    {
+        private readonly ILogger _logger;
+        private const string dbName = "PrimaryDB";
+        private const string systemDbName = "_system";
+        private const string systemUsername = "-----";
+        private const string systemPassword = "-----";
+        private const string url = "http://localhost:8529/";
+        private const string newUsername = "todWebApp";
+        private const string newPass = "todWebAppPwd";
+        private static readonly string[] collectionList = {"Users","UserRoles","Roles","UserLogins","UserClaims","RoleClaims","UserTokens",
+        "RPSchedule","FeaturedArticles","QuestList","NPCDescriptions","CharacterSheets","PrimaryTraits","EquipmentTraits","Equipment","TemporaryTraits",
+        "OriginTraits", "Languages", "VisionTypes", "GMRequests","DieRolls","NPCApplications","MissionApplications","PlayerApplications","VisitorPass","edges"};
+
+        public Utilities(ILogger logger)
+        {
+            _logger = logger;
+            Task.Run(() => CreateDB()).Wait();
+        }
+
+        public static async Task CreateDB()
+        {
+            // Initiate the transport
+            using (var transport = HttpApiTransport.UsingBasicAuth(new Uri(url), systemDbName, systemUsername, systemPassword))
+            {
+                // Initiate ArangoDBClient using the transport
+                using (var db = new ArangoDBClient(transport))
+                {
+                    var response = await db.Database.GetCurrentDatabaseInfoAsync();
+
+                    if (response.Code != System.Net.HttpStatusCode.OK)
+                    {
+                        throw new HttpRequestException("Could not find the ArangoDB _System database");
+                    }
+
+                    var databases = await db.Database.GetDatabasesAsync();
+
+                    if (!databases.Result.Contains(dbName))
+                    {
+                        // Define the new database and its users
+                        var body = new ArangoDBNetStandard.DatabaseApi.Models.PostDatabaseBody()
+                        {
+                            Name = dbName,
+                            Users = new List<ArangoDBNetStandard.DatabaseApi.Models.DatabaseUser>()
+                            {
+                                new ArangoDBNetStandard.DatabaseApi.Models.DatabaseUser()
+                                {
+                                    Username=newUsername,
+                                    Passwd =newPass,
+                                    Active=true
+                                }
+                            }
+                        };
+
+                        // Create the new database
+                        var newDBResponse = await db.Database.PostDatabaseAsync(body);
+
+                        if (newDBResponse.Code != System.Net.HttpStatusCode.OK)
+                        {
+                            throw new HttpRequestException("Could not create the new database");
+                        }
+
+                        // Create collections
+                        foreach (string item in collectionList)
+                        {
+                            // Set collection properties
+                            var newColl = new ArangoDBNetStandard.CollectionApi.Models.PostCollectionBody()
+                            {
+                                Type = ArangoDBNetStandard.CollectionApi.Models.CollectionType.Document,
+                                Name = item
+                            };
+                            // Create the new collection
+                            var collResponse = await db.Collection.PostCollectionAsync(newColl, null);
+
+                            if (collResponse.Code != System.Net.HttpStatusCode.OK)
+                            {
+                                throw new HttpRequestException($"Could not add the {item} collection to ArangoDB");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
