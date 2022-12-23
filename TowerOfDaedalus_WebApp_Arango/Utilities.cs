@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ArangoDBNetStandard;
 using ArangoDBNetStandard.Transport.Http;
+using TowerOfDaedalus_WebApp_Arango.Schema;
 
 namespace TowerOfDaedalus_WebApp_Arango
 {
@@ -24,9 +25,7 @@ namespace TowerOfDaedalus_WebApp_Arango
         private const string url = "http://localhost:8529/";
         private const string newUsername = "todWebApp";
         private const string newPass = "todWebAppPwd";
-        private static readonly string[] collectionList = {"Users","UserRoles","Roles","UserLogins","UserClaims","RoleClaims","UserTokens",
-        "RPSchedule","FeaturedArticles","QuestList","NPCDescriptions","CharacterSheets","PrimaryTraits","EquipmentTraits","Equipment","TemporaryTraits",
-        "OriginTraits", "Languages", "VisionTypes", "GMRequests","DieRolls","NPCApplications","MissionApplications","PlayerApplications","VisitorPass","edges"};
+        
 
         public Utilities(ILogger logger)
         {
@@ -77,13 +76,14 @@ namespace TowerOfDaedalus_WebApp_Arango
                         }
 
                         // Create collections
-                        foreach (string item in collectionList)
+                        foreach (Collection item in ArangoSchema.Collections)
                         {
                             // Set collection properties
                             var newColl = new ArangoDBNetStandard.CollectionApi.Models.PostCollectionBody()
                             {
-                                Type = ArangoDBNetStandard.CollectionApi.Models.CollectionType.Document,
-                                Name = item
+                                Type = item.Type,
+                                WaitForSync= item.WaitForSync,
+                                Name = item.Name
                             };
                             // Create the new collection
                             var collResponse = await db.Collection.PostCollectionAsync(newColl, null);

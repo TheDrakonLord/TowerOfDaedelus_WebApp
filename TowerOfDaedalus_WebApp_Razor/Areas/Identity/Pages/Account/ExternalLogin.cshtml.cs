@@ -20,10 +20,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authentication;
 using System.Net;
 using Newtonsoft.Json.Linq;
-using TowerOfDaedelus_WebApp.Properties;
-using TowerOfDaedelus_WebApp.Models;
 
-namespace TowerOfDaedelus_WebApp.Areas.Identity.Pages.Account
+namespace TowerOfDaedelus_WebApp_Razor.Areas.Identity.Pages.Account
 {
     [AllowAnonymous]
     public class ExternalLoginModel : PageModel
