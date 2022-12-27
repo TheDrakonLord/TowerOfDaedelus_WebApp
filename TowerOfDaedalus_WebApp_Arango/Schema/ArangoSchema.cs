@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using ArangoDBNetStandard;
@@ -43,142 +44,182 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
 
         public static readonly List<Graph> Graphs = new List<Graph>
         {
-            new Graph("PrimaryGraph", new List<EdgeDefinition>
+            new Graph("PrimaryGraph", new List<ArangoDBNetStandard.GraphApi.Models.EdgeDefinition>
             {
                 // Identity Relationships
                 // UserRoles Users->Roles
-                new EdgeDefinition(Collections.Last(), new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "Users").FirstOrDefault()
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                    From = new List<string>
+                    {
+                        "Users"
+                    },
+                    To = new List<string>
+                    {
+                        "Roles"
+                    },
+                    Collection = Collections.Last().Name
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "Roles").FirstOrDefault()
-                }),
 
                 // UserRoles Roles->Users
-                new EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collections.Where(Collection => Collection.Name == "Roles").FirstOrDefault()
+                    Collection = Collections.Last().Name,
+                    From = new List<string>
+                    {
+                        "Roles"
+                    },
+                    To = new List<string>
+                    {
+                        "Users"
+                    }
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "Users").FirstOrDefault()
-                }),
 
                 // Users -> UserLogins
-                new EdgeDefinition(Collections.Last(), new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "Users").FirstOrDefault()
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                    Collection = Collections.Last().Name,
+                    From =  new List<string>
+                    {
+                        "Users"
+                    },
+                    To = new List<string>
+                    {
+                        "UserLogins"
+                    }
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "UserLogins").FirstOrDefault()
-                }),
 
                 // Users -> UserClaims
-                new EdgeDefinition(Collections.Last(), new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "Users").FirstOrDefault()
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                    Collection = Collections.Last().Name,
+                    From = new List<string>
+                    {
+                        "Users"
+                    },
+                    To = new List<string>
+                    {
+                        "UserClaims"
+                    }
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "UserClaims").FirstOrDefault()
-                }),
 
                 // Users -> UserTokens
-                new EdgeDefinition(Collections.Last(), new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "Users").FirstOrDefault()
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                    Collection = Collections.Last().Name,
+                    From = new List<string>
+                    {
+                        "Users"
+                    },
+                    To = new List<string>
+                    {
+                        "UserTokens"
+                    }
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "UserTokens").FirstOrDefault()
-                }),
 
                 // Roles -> RoleClaims
-                new EdgeDefinition(Collections.Last(), new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "Roles").FirstOrDefault()
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                    Collection = Collections.Last().Name,
+                    From = new List<string>
+                    {
+                        "Roles"
+                    },
+                    To = new List<string>
+                    {
+                        "RoleClaims"
+                    }
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "RoleClaims").FirstOrDefault()
-                }),
 
                 // Custom Relations
                 // NPCDescriptions -> QuestList
-                new EdgeDefinition(Collections.Last(), new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "NPCDescriptions").FirstOrDefault()
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                    Collection = Collections.Last().Name,
+                    From = new List<string>
+                    {
+                        "NPCDescriptions"
+                    },
+                    To = new List<string>
+                    {
+                        "QuestList"
+                    }
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "QuestList").FirstOrDefault()
-                }),
 
                 // Users -> QuestList
-                new EdgeDefinition(Collections.Last(), new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "Users").FirstOrDefault()
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                    Collection = Collections.Last().Name,
+                    From = new List<string>
+                    {
+                        "Users"
+                    },
+                    To = new List<string>
+                    {
+                        "QuestList"
+                    }
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "QuestList").FirstOrDefault()
-                }),
 
                 // Users -> CharacterSheets
-                new EdgeDefinition(Collections.Last(), new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "Users").FirstOrDefault()
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                    Collection = Collections.Last().Name,
+                    From = new List<string>
+                    {
+                        "Users"
+                    },
+                    To = new List<string>
+                    {
+                        "CharacterSheets"
+                    }
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "CharacterSheets").FirstOrDefault()
-                }),
 
                 // Users -> GMRequests
-                new EdgeDefinition(Collections.Last(), new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "Users").FirstOrDefault()
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                    Collection = Collections.Last().Name,
+                    From = new List<string>
+                    {
+                        "Users"
+                    },
+                    To = new List<string>
+                    {
+                        "GMRequests"
+                    }
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "GMRequests").FirstOrDefault()
-                }),
 
                 // Users -> DieRolls
-                new EdgeDefinition(Collections.Last(), new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "Users").FirstOrDefault()
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                    Collection = Collections.Last().Name,
+                    From = new List<string>
+                    {
+                        "Users"
+                    },
+                    To = new List<string>
+                    {
+                        "DieRolls"
+                    }
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "DieRolls").FirstOrDefault()
-                }),
 
                 // Users -> NPCApplications
-                new EdgeDefinition(Collections.Last(), new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "Users").FirstOrDefault()
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                    Collection = Collections.Last().Name,
+                    From = new List<string>
+                    {
+                        "Users"
+                    },
+                    To = new List<string>
+                    {
+                        "NPCApplications"
+                    }
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "NPCApplications").FirstOrDefault()
-                }),
 
                 // Users -> MissionApplications
-                new EdgeDefinition(Collections.Last(), new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "Users").FirstOrDefault()
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                    Collection = Collections.Last().Name,
+                    From = new List<string>
+                    {
+                        "Users"
+                    },
+                    To = new List<string>
+                    {
+                       "MissionApplications"
+                    }
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "MissionApplications").FirstOrDefault()
-                }),
 
                 // Users -> PlayerApplications
-                new EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
                 {
                     Collections.Where(Collection => Collection.Name == "Users").FirstOrDefault()
                 },
@@ -188,7 +229,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 }),
 
                 // Users -> VisitorPass
-                new EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
                 {
                     Collections.Where(Collection => Collection.Name == "Users").FirstOrDefault()
                 },
@@ -198,7 +239,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 }),
 
                 // CharacterSheets -> PrimaryTraits
-                new EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
                 {
                     Collections.Where(Collection => Collection.Name == "CharacterSheets").FirstOrDefault()
                 },
@@ -208,7 +249,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 }),
 
                 // PlayerApplications -> CharacterSheets
-                new EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
                 {
                     Collections.Where(Collection => Collection.Name == "PlayerApplications").FirstOrDefault()
                 },
@@ -218,7 +259,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 }),
 
                 // CharacterSheets -> DieRolls
-                new EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
                 {
                     Collections.Where(Collection => Collection.Name == "CharacterSheets").FirstOrDefault()
                 },
@@ -228,7 +269,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 }),
 
                 // CharacterSheets -> MissionApplications
-                new EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
                 {
                     Collections.Where(Collection => Collection.Name == "CharacterSheets").FirstOrDefault()
                 },
@@ -238,7 +279,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 }),
 
                 // MissionApplications -> CharacterSheets
-                new EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
                 {
                     Collections.Where(Collection => Collection.Name == "MissionApplications").FirstOrDefault()
                 },
@@ -248,7 +289,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 }),
 
                 // CharacterSheets -> EquipmentTraits
-                new EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
                 {
                     Collections.Where(Collection => Collection.Name == "CharacterSheets").FirstOrDefault()
                 },
@@ -258,7 +299,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 }),
 
                 // CharacterSheets -> Equipment
-                new EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
                 {
                     Collections.Where(Collection => Collection.Name == "CharacterSheets").FirstOrDefault()
                 },
@@ -268,7 +309,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 }),
 
                 // CharacterSheets -> TemporaryTraits
-                new EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
                 {
                     Collections.Where(Collection => Collection.Name == "CharacterSheets").FirstOrDefault()
                 },
@@ -278,7 +319,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 }),
 
                 // CharacterSheets -> OriginTraits
-                new EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
                 {
                     Collections.Where(Collection => Collection.Name == "CharacterSheets").FirstOrDefault()
                 },
@@ -288,7 +329,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 }),
 
                 // OriginTraits -> Languages
-                new EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
                 {
                     Collections.Where(Collection => Collection.Name == "OriginTraits").FirstOrDefault()
                 },
@@ -298,7 +339,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 }),
 
                 // OriginTraits -> VisionTypes
-                new EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
                 {
                     Collections.Where(Collection => Collection.Name == "OriginTraits").FirstOrDefault()
                 },
@@ -314,13 +355,14 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
         // Identity Documents
         public class Users
         {
-            public Users(string userName)
+            public Users(string userName, int accessFailedCount = 0, bool emailConfirmed = false, bool lockoutEnabled = false, bool phoneNumberConfirmed = false,
+                bool twoFactorEnabled = false)
             {
-                AccessFailedCount = 0;
-                EmailConfirmed = false;
-                LockoutEnabled = false;
-                PhoneNumberConfirmed = false;
-                TwoFactorEnabled = false;
+                AccessFailedCount = accessFailedCount;
+                EmailConfirmed = emailConfirmed;
+                LockoutEnabled = lockoutEnabled;
+                PhoneNumberConfirmed = phoneNumberConfirmed;
+                TwoFactorEnabled = twoFactorEnabled;
                 UserName = userName;
             }
             public int AccessFailedCount { get; set; }
@@ -369,7 +411,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
 
         public class UserClaims
         {
-            public UserClaims(string userid) 
+            public UserClaims(string userid)
             {
                 UserId = userid;
             }
@@ -381,14 +423,14 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
 
         public class RoleClaims
         {
-            public RoleClaims(string roleid) 
+            public RoleClaims(string roleid)
             {
                 RoleId = roleid;
             }
 
             public string? ClaimType { get; set; }
             public string? ClaimValue { get; set; }
-            public string RoleId { get; set;}
+            public string RoleId { get; set; }
         }
 
         public class UserTokens
@@ -418,7 +460,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
 
         public class FeaturedArticles
         {
-            public FeaturedArticles(bool isFeatured)
+            public FeaturedArticles(bool isFeatured = false)
             {
                 IsFeatured = isFeatured;
             }
@@ -429,7 +471,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
 
         public class QuestList
         {
-            public QuestList(string authorId, string associatedNPC, bool isActive)
+            public QuestList(string authorId, string associatedNPC, bool isActive = false)
             {
                 AuthorId = authorId;
                 AssociatedNPC = associatedNPC;
@@ -448,9 +490,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
 
         public class NPCDescriptions
         {
-            public NPCDescriptions(bool isVisible, bool isRecurring, bool isGMNPC)
+            public NPCDescriptions(bool isVisible = false, bool isRecurring = false, bool isGMNPC = false)
             {
-
+                IsVisible = isVisible;
+                IsRecurring = isRecurring;
+                IsGMNPC = isGMNPC;
             }
 
             public string? Name { get; set; }
@@ -468,6 +512,273 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
             public bool IsGMNPC { get; set; }
             public string? Player { get; set; }
             public string? AvatarUrl { get; set; }
+        }
+
+        public class CharacterSheets
+        {
+            public CharacterSheets(string userId, bool isVisible = false, bool previouslyNpc = false, bool isApproved = false, bool isReviewed = false)
+            {
+                UserId = userId;
+                IsVisible = isVisible;
+                PreviouslyNPC = previouslyNpc;
+                IsApproved = isApproved;
+                IsReviewed = isReviewed;
+            }
+
+            public string UserId { get; set; }
+            public string? Name { get; set; }
+            public string? Occupation { get; set; }
+            public string? OccupationDescription { get; set; }
+            public string? Biograph { get; set; }
+            public string? PhysicalDescription { get; set; }
+            public int? Mind { get; set; }
+            public int? Strength { get; set; }
+            public int? Agility { get; set; }
+            public int? Constitution { get; set; }
+            public int? Soul { get; set; }
+            public int? TraitPoints { get; set; }
+            public int? EnergyPoints { get; set; }
+            public bool IsVisible { get; set; }
+            public bool PreviouslyNPC { get; set; }
+            public string? AvatarUrl { get; set; }
+            public bool IsApproved { get; set; }
+            public bool IsReviewed { get; set; }
+            public DateTime? LastChanged { get; set; }
+        }
+
+        public class PrimaryTraits
+        {
+            public PrimaryTraits(string characterId, bool isVisible = false, bool isPassive = false, bool isMajor = false, bool isEdge = false)
+            {
+                CharacterId = characterId;
+                IsVisible = isVisible;
+                IsPassive = IsPassive;
+                IsMajor = isMajor;
+                IsEdge = isEdge;
+            }
+
+            public string CharacterId { get; set; }
+            public string? Name { get; set; }
+            public bool IsVisible { get; set; }
+            public string? Description { get; set; }
+            public bool IsPassive { get; set; }
+            public int? EnergyCost { get; set; }
+            public int? AbilityPointCost { get; set; }
+            public bool IsMajor { get; set; }
+            public bool IsEdge { get; set; }
+        }
+
+        public class EquipmentTraits
+        {
+            public EquipmentTraits(string characterId, bool isVisible = false, bool isPassive = false)
+            {
+                CharacterId = characterId;
+                IsVisible = isVisible;
+                IsPassive = IsPassive;
+            }
+
+            public string CharacterId { get; set; }
+            public string? Name { get; set; }
+            public bool IsVisible { get; set; }
+            public string? Description { get; set; }
+            public bool IsPassive { get; set; }
+            public int? EnergyCost { get; set; }
+            public int? AbilityPointCost { get; set; }
+        }
+
+        public class OriginTraits
+        {
+            public OriginTraits(string characterId, bool isVisible = false)
+            {
+                CharacterId = characterId;
+                IsVisible = isVisible;
+            }
+
+            public string CharacterId { get; set; }
+            public string? Name { get; set; }
+            public bool IsVisible { get; set; }
+            public string? Description { get; set; }
+        }
+
+        public class Languages
+        {
+            public Languages(string traitId)
+            {
+                TraitId = traitId;
+            }
+
+            public string TraitId { get; set; }
+            public string? Name { get; set; }
+            public string? Description { get; set; }
+        }
+
+        public class VisionTypes
+        {
+            public VisionTypes(string traitId)
+            {
+                TraitId = traitId;
+            }
+
+            public string TraitId { get; set; }
+            public string? Name { get; set; }
+            public string? Description { get; set; }
+        }
+
+        public class TemporaryTraits
+        {
+            public TemporaryTraits(string characterId, bool isVisible = false, bool isPassive = false)
+            {
+                CharacterId = characterId;
+                IsVisible = isVisible;
+                IsPassive = isPassive;
+            }
+
+            public string CharacterId { get; set; }
+            public string? Name { get; set; }
+            public bool IsVisible { get; set; }
+            public string? Description { get; set; }
+            public bool IsPassive { get; set; }
+            public int? EnergyCost { get; set; }
+        }
+
+        public class Equipment
+        {
+            public Equipment(string characterId)
+            {
+                CharacterId = characterId;
+            }
+
+            public string CharacterId { get; set; }
+            public string? Name { get; set; }
+            public string? Description { get; set; }
+            public int? Cost { get; set; }
+            public decimal? Weight { get; set; }
+        }
+
+        public class GMRequests
+        {
+            public GMRequests(string requesterId, bool isComplete = false, bool isRelayed = false)
+            {
+                RequesterId = requesterId;
+                IsComplete = isComplete;
+                IsRelayed = isRelayed;
+            }
+
+            public string RequesterId { get; set; }
+            public bool IsComplete { get; set; }
+            public bool IsRelayed { get; set; }
+            public DateTime? Timestamp { get; set; }
+            public string? RequesterLocation { get; set; }
+            public string? RequestReason { get; set; }
+            public int? Urgency { get; set; }
+        }
+
+        public class DieRolls
+        {
+            public DieRolls(string userId, bool isAdvantage = false, bool isDisadvantage = false)
+            {
+                UserId = userId;
+                IsAdvantage = isAdvantage;
+                IsDisadvantage = isDisadvantage;
+            }
+
+            public string UserId { get; set; }
+            public DateTime? Timestamp { get; set; }
+            public int? NumOfRolls { get; set; }
+            public int? DieType { get; set; }
+            public int? GMRollModifier { get; set; }
+            public int? CharacterAbility { get; set; }
+            public string? SourceCharacterId { get; set; }
+            public bool IsAdvantage { get; set; }
+            public bool IsDisadvantage { get; set; }
+            public int? Result { get; set; }
+            public string? DetailedResult { get; set; }
+        }
+
+        public class NPCApplications
+        {
+            public NPCApplications(string userId, bool isApproved = false, bool isDenied = false, bool isUnderReview = false)
+            {
+                UserId = userId;
+                IsApproved = isApproved;
+                IsDenied = isDenied;
+                IsUnderReview = isUnderReview;
+            }
+
+            public string UserId { get; set; }
+            public bool IsApproved { get; set; }
+            public bool IsDenied { get; set; }
+            public bool IsUnderReview { get; set; }
+            public int? ExperienceLevel { get; set; }
+            public string? Experience1 { get; set; }
+            public string? Experience2 { get; set; }
+            public string? Experience3 { get; set; }
+            public string? Experience4 { get; set; }
+            public string? Experience5 { get; set; }
+            public string? Vouch1 { get; set; }
+            public string? Vouch2 { get; set; }
+            public string? Vouch3 { get; set; }
+        }
+
+        public class MissionApplications
+        {
+            public MissionApplications(string userId, bool isApproved = false, bool isDenied = false, bool isUnderReview = false)
+            {
+                UserId = userId;
+                IsApproved = isApproved;
+                IsDenied = isDenied;
+                IsUnderReview = isUnderReview;
+            }
+
+            public string UserId { get; set; }
+            public bool IsApproved { get; set; }
+            public bool IsDenied { get; set; }
+            public bool IsUnderReview { get; set; }
+            public string? RelevantExteriorGM { get; set; }
+            public string? InformationSought { get; set; }
+            public string? TeamDescription { get; set; }
+        }
+
+        public class PlayerApplications
+        {
+            public PlayerApplications(string userId, bool isApproved = false, bool isDenied = false, bool isUnderReview = false)
+            {
+                UserId = userId;
+                IsApproved = isApproved;
+                IsDenied = isDenied;
+                IsUnderReview = isUnderReview;
+            }
+
+            public string UserId { get; set; }
+            public bool IsApproved { get; set; }
+            public bool IsDenied { get; set; }
+            public bool IsUnderReview { get; set; }
+            public int? ExperienceLevel { get; set; }
+            public string? Experience1 { get; set; }
+            public string? Experience2 { get; set; }
+            public string? Experience3 { get; set; }
+            public string? Experience4 { get; set; }
+            public string? Experience5 { get; set; }
+            public string? Vouch1 { get; set; }
+            public string? Vouch2 { get; set; }
+            public string? Vouch3 { get; set; }
+        }
+
+        public class VisitorPass
+        {
+            public VisitorPass(string userId, bool isApproved = false)
+            {
+                UserId = userId;
+                IsApproved = isApproved;
+            }
+
+            public string UserId { get; set; }
+            public bool IsApproved { get; set; }
+            public string? CharacterId { get; set; }
+            public DateTime? SessionDate { get; set; }
+            public int? entryRank { get; set; }
+            public DateTime? ValidStart { get; set; }
+            public DateTime? ValidEnd { get; set; }
         }
     }
 }

@@ -90,7 +90,25 @@ namespace TowerOfDaedalus_WebApp_Arango
 
                             if (collResponse.Code != System.Net.HttpStatusCode.OK)
                             {
-                                throw new HttpRequestException($"Could not add the {item} collection to ArangoDB");
+                                throw new HttpRequestException($"Could not add the {item.Name} collection to ArangoDB");
+                            }
+                        }
+
+                        // Create graph
+                        foreach (Graph graph in ArangoSchema.Graphs)
+                        {
+                            var newGraph = new ArangoDBNetStandard.GraphApi.Models.PostGraphBody()
+                            {
+                                Name = graph.Name,
+                                EdgeDefinitions = graph.EdgeDefinitions
+                            };
+
+                            // Create the new graph
+                            var graphResponse = await db.Graph.PostGraphAsync(newGraph, null);
+
+                            if (graphResponse.Code != System.Net.HttpStatusCode.OK)
+                            {
+                                throw new HttpRequestException($"Could not add the {graph.Name} graph to ArangoDb");
                             }
                         }
                     }
