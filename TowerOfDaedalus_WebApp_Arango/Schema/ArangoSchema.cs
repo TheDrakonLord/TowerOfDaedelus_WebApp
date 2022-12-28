@@ -48,7 +48,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
             {
                 // Identity Relationships
                 // UserRoles Users->Roles
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
+                {
+                    Collection = Collections.Last().Name,
                     From = new List<string>
                     {
                         "Users"
@@ -56,8 +58,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     To = new List<string>
                     {
                         "Roles"
-                    },
-                    Collection = Collections.Last().Name
+                    }                    
                 },
 
                 // UserRoles Roles->Users
@@ -75,7 +76,8 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 },
 
                 // Users -> UserLogins
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
+                {
                     Collection = Collections.Last().Name,
                     From =  new List<string>
                     {
@@ -88,7 +90,8 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 },
 
                 // Users -> UserClaims
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
+                {
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
@@ -101,7 +104,8 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 },
 
                 // Users -> UserTokens
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
+                {
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
@@ -114,7 +118,8 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 },
 
                 // Roles -> RoleClaims
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
+                {
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
@@ -128,7 +133,8 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
 
                 // Custom Relations
                 // NPCDescriptions -> QuestList
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
+                {
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
@@ -141,7 +147,8 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 },
 
                 // Users -> QuestList
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
+                {
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
@@ -154,7 +161,8 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 },
 
                 // Users -> CharacterSheets
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
+                {
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
@@ -167,7 +175,8 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 },
 
                 // Users -> GMRequests
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
+                {
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
@@ -180,7 +189,8 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 },
 
                 // Users -> DieRolls
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
+                {
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
@@ -193,7 +203,8 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 },
 
                 // Users -> NPCApplications
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
+                {
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
@@ -206,7 +217,8 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 },
 
                 // Users -> MissionApplications
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition{
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
+                {
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
@@ -219,134 +231,186 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 },
 
                 // Users -> PlayerApplications
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collections.Where(Collection => Collection.Name == "Users").FirstOrDefault()
+                    Collection = Collections.Last().Name,
+                    From = new List<string>
+                    {
+                        "Users"
+                    },
+                    To = new List<string>
+                    {
+                        "PlayerApplications"
+                    }
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "PlayerApplications").FirstOrDefault()
-                }),
 
                 // Users -> VisitorPass
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collections.Where(Collection => Collection.Name == "Users").FirstOrDefault()
+                    Collection = Collections.Last().Name,
+                    From = new List<string>
+                    {
+                        "Users"
+                    },
+                    To = new List<string>
+                    {
+                        "VisitorPass"
+                    }
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "VisitorPass").FirstOrDefault()
-                }),
 
                 // CharacterSheets -> PrimaryTraits
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collections.Where(Collection => Collection.Name == "CharacterSheets").FirstOrDefault()
+                    Collection = Collections.Last().Name,
+                    From = new List<string>
+                    {
+                        "CharacterSheets"
+                    },
+                    To = new List<string>
+                    {
+                        "PrimaryTraits"
+                    }
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "PrimaryTraits").FirstOrDefault()
-                }),
 
                 // PlayerApplications -> CharacterSheets
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collections.Where(Collection => Collection.Name == "PlayerApplications").FirstOrDefault()
+                    Collection = Collections.Last().Name,
+                    From = new List<string>
+                    {
+                        "PlayerApplications"
+                    },
+                    To = new List<string>
+                    {
+                        "CharacterSheets"
+                    }
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "CharacterSheets").FirstOrDefault()
-                }),
 
                 // CharacterSheets -> DieRolls
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collections.Where(Collection => Collection.Name == "CharacterSheets").FirstOrDefault()
+                    Collection = Collections.Last().Name, 
+                    From = new List<string>
+                    {
+                        "CharacterSheets"
+                    },
+                    To = new List<string>
+                    {
+                        "DieRolls"
+                    }
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "DieRolls").FirstOrDefault()
-                }),
 
                 // CharacterSheets -> MissionApplications
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collections.Where(Collection => Collection.Name == "CharacterSheets").FirstOrDefault()
+                    Collection = Collections.Last().Name,
+                    From = new List<string>
+                    {
+                        "CharacterSheets"
+                    },
+                    To = new List<string>
+                    {
+                        "MissionApplications"
+                    }
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "MissionApplications").FirstOrDefault()
-                }),
 
                 // MissionApplications -> CharacterSheets
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collections.Where(Collection => Collection.Name == "MissionApplications").FirstOrDefault()
-                },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "CharacterSheets").FirstOrDefault()
-                }),
+                    Collection = Collections.Last().Name, 
+                    From = new List<string>
+                    {
+                        "MissionApplications"
+                    },
+                    To = new List<string>
+                    {
+                        "CharacterSheets"
+                    }
+                }, 
 
                 // CharacterSheets -> EquipmentTraits
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collections.Where(Collection => Collection.Name == "CharacterSheets").FirstOrDefault()
+                    Collection = Collections.Last().Name,
+                    From = new List<string>
+                    {
+                        "CharacterSheets"
+                    },
+                    To = new List<string>
+                    {
+                        "EquipmentTraits"
+                    }
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "EquipmentTraits").FirstOrDefault()
-                }),
 
                 // CharacterSheets -> Equipment
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collections.Where(Collection => Collection.Name == "CharacterSheets").FirstOrDefault()
+                    Collection = Collections.Last().Name,
+                    From = new List<string>
+                    {
+                        "CharacterSheets"
+                    },
+                    To = new List<string>
+                    {
+                        "Equipment"
+                    }
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "Equipment").FirstOrDefault()
-                }),
 
                 // CharacterSheets -> TemporaryTraits
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collections.Where(Collection => Collection.Name == "CharacterSheets").FirstOrDefault()
+                    Collection = Collections.Last().Name,
+                    From = new List<string>
+                    {
+                        "CharacterSheets"
+                    },
+                    To = new List<string>
+                    {
+                        "TemporaryTraits"
+                    }
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "TemporaryTraits").FirstOrDefault()
-                }),
 
                 // CharacterSheets -> OriginTraits
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collections.Where(Collection => Collection.Name == "CharacterSheets").FirstOrDefault()
+                    Collection = Collections.Last().Name,
+                    From = new List<string>
+                    {
+                        "CharacterSheets"
+                    },
+                    To = new List<string>
+                    {
+                        "OriginTraits"
+                    }
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "OriginTraits").FirstOrDefault()
-                }),
 
                 // OriginTraits -> Languages
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collections.Where(Collection => Collection.Name == "OriginTraits").FirstOrDefault()
+                    Collection = Collections.Last().Name,
+                    From = new List<string>
+                    {
+                        "OriginTraits"
+                    },
+                    To = new List<string>
+                    {
+                        "Languages"
+                    }
                 },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "Languages").FirstOrDefault()
-                }),
 
                 // OriginTraits -> VisionTypes
-                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition(Collections.Last(), new List<Collection>
+                new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collections.Where(Collection => Collection.Name == "OriginTraits").FirstOrDefault()
-                },
-                new List<Collection>
-                {
-                    Collections.Where(Collection => Collection.Name == "VisionTypes").FirstOrDefault()
-                })
+                    Collection = Collections.Last().Name,
+                    From = new List<string>
+                    {
+                        "OriginTraits"
+                    },
+                    To = new List<string>
+                    {
+                        "VisionTypes"
+                    }
+                }
             })
         };
     }
