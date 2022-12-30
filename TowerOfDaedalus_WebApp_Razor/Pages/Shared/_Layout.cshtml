@@ -1,7 +1,8 @@
 ﻿@using Microsoft.AspNetCore.Authorization
-@using TowerOfDaedelus_WebApp.Models
+@using static TowerOfDaedalus_WebApp_Arango.Schema.Documents
+@using TowerOfDaedalus_WebApp_Razor.Properties
 <!DOCTYPE html>
-@inject SignInManager<ApplicationUser> signInManager;
+@inject SignInManager<Users> signInManager;
 @inject IAuthorizationService AuthorizationService;
 <html lang="en">
 <head>
@@ -17,7 +18,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <img src="@Properties.Resources.imgUriLogoOnWhite" alt="logo" width="50"/>
+                <img src="@Resources.imgUriLogoOnWhite" alt="logo" width="50"/>
                 <a class="navbar-brand" asp-area="" asp-page="/Index">The Towers of Daedelus</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">

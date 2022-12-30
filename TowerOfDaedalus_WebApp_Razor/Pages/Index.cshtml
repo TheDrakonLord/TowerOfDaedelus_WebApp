@@ -1,4 +1,5 @@
 ﻿@page
+@using TowerOfDaedalus_WebApp_Razor.Properties
 @model IndexModel
 @{
     ViewData["Title"] = "Home page";
@@ -10,7 +11,7 @@
             width: 100%;
             margin: 0 auto;
             padding: 0px;
-            background: url(@Properties.Resources.imgUriBackground) no-repeat center center fixed;
+            background: url(@Resources.imgUriBackground) no-repeat center center fixed;
             -webkit-background-size: cover;
             -moz-background-size: cover;
             -o-background-size: cover;

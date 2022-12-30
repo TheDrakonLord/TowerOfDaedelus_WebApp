@@ -9,6 +9,8 @@
   <ItemGroup>
     <PackageReference Include="ArangoDBNetStandard" Version="1.2.0" />
     <PackageReference Include="log4net" Version="2.0.15" />
+    <PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.3" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="7.0.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="6.1.0" />
   </ItemGroup>
 

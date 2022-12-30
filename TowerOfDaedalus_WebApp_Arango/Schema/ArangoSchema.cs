@@ -5,6 +5,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using ArangoDBNetStandard;
+using Microsoft.AspNet.Identity;
 
 namespace TowerOfDaedalus_WebApp_Arango.Schema
 {
@@ -417,7 +418,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
     public class Documents
     {
         // Identity Documents
-        public class Users
+        public class Users :  IUser<string>
         {
             public Users(string userName, int accessFailedCount = 0, bool emailConfirmed = false, bool lockoutEnabled = false, bool phoneNumberConfirmed = false,
                 bool twoFactorEnabled = false)
@@ -429,6 +430,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 TwoFactorEnabled = twoFactorEnabled;
                 UserName = userName;
             }
+
+            public string? _key { get; set; }
+            public string? Id { get { return _key; } set { _key = value;  } }
             public int AccessFailedCount { get; set; }
             public string? ConcurrencyStamp { get; set; }
             public string? Email { get; set; }
@@ -446,16 +450,18 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
             public string? DiscordUserName { get; set; }
         }
 
-        public class Roles
+        public class Roles : IRole<string>
         {
             public Roles()
             {
 
             }
 
+            public string? _key { get; set; }
             public string? ConcurrencyStamp { get; set; }
             public string? Name { get; set; }
             public string? NormalizedName { get; set; }
+            public string? Id { get { return _key; } set { _key = value; } }
         }
 
         public class UserLogins
@@ -467,19 +473,21 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 UserId = userId;
             }
 
+            public string? _key { get; set; }
             public string LoginProvider { get; set; }
             public string ProviderKey { get; set; }
             public string? ProviderDisplayName { get; set; }
             public string UserId { get; set; }
         }
 
-        public class UserClaims
+        public class UserClaims 
         {
             public UserClaims(string userid)
             {
                 UserId = userid;
             }
 
+            public string? _key { get; set; }
             public string? ClaimType { get; set; }
             public string? ClaimValue { get; set; }
             public string UserId { get; set; }
@@ -492,6 +500,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 RoleId = roleid;
             }
 
+            public string? _key { get; set; }
             public string? ClaimType { get; set; }
             public string? ClaimValue { get; set; }
             public string RoleId { get; set; }
@@ -506,6 +515,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 Name = name;
             }
 
+            public string? _key { get; set; }
             public string UserId { get; set; }
             public string LoginProvider { get; set; }
             public string Name { get; set; }
@@ -517,6 +527,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
         {
             public RPSchedule() { }
 
+            public string? _key { get; set; }
             public int? LobbyStatus { get; set; }
             public DateTime? StartDate { get; set; }
             public DateTime? EndDate { get; set; }
@@ -529,6 +540,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 IsFeatured = isFeatured;
             }
 
+            public string? _key { get; set; }
             public string? ArticleUrl { get; set; }
             public bool IsFeatured { get; set; }
         }
@@ -542,6 +554,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 IsActive = isActive;
             }
 
+            public string? _key { get; set; }
             public string AuthorId { get; set; }
             public string? Name { get; set; }
             public string? BriefDescription { get; set; }
@@ -561,6 +574,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 IsGMNPC = isGMNPC;
             }
 
+            public string? _key { get; set; }
             public string? Name { get; set; }
             public string? Title { get; set; }
             public string? Occupation { get; set; }
@@ -589,6 +603,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 IsReviewed = isReviewed;
             }
 
+            public string? _key { get; set; }
             public string UserId { get; set; }
             public string? Name { get; set; }
             public string? Occupation { get; set; }
@@ -621,6 +636,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 IsEdge = isEdge;
             }
 
+            public string? _key { get; set; }
             public string CharacterId { get; set; }
             public string? Name { get; set; }
             public bool IsVisible { get; set; }
@@ -641,6 +657,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 IsPassive = IsPassive;
             }
 
+            public string? _key { get; set; }
             public string CharacterId { get; set; }
             public string? Name { get; set; }
             public bool IsVisible { get; set; }
@@ -658,6 +675,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 IsVisible = isVisible;
             }
 
+            public string? _key { get; set; }
             public string CharacterId { get; set; }
             public string? Name { get; set; }
             public bool IsVisible { get; set; }
@@ -671,6 +689,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 TraitId = traitId;
             }
 
+            public string? _key { get; set; }
             public string TraitId { get; set; }
             public string? Name { get; set; }
             public string? Description { get; set; }
@@ -683,6 +702,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 TraitId = traitId;
             }
 
+            public string? _key { get; set; }
             public string TraitId { get; set; }
             public string? Name { get; set; }
             public string? Description { get; set; }
@@ -697,6 +717,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 IsPassive = isPassive;
             }
 
+            public string? _key { get; set; }
             public string CharacterId { get; set; }
             public string? Name { get; set; }
             public bool IsVisible { get; set; }
@@ -712,6 +733,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 CharacterId = characterId;
             }
 
+            public string? _key { get; set; }
             public string CharacterId { get; set; }
             public string? Name { get; set; }
             public string? Description { get; set; }
@@ -728,6 +750,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 IsRelayed = isRelayed;
             }
 
+            public string? _key { get; set; }
             public string RequesterId { get; set; }
             public bool IsComplete { get; set; }
             public bool IsRelayed { get; set; }
@@ -746,6 +769,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 IsDisadvantage = isDisadvantage;
             }
 
+            public string? _key { get; set; }
             public string UserId { get; set; }
             public DateTime? Timestamp { get; set; }
             public int? NumOfRolls { get; set; }
@@ -769,6 +793,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 IsUnderReview = isUnderReview;
             }
 
+            public string? _key { get; set; }
             public string UserId { get; set; }
             public bool IsApproved { get; set; }
             public bool IsDenied { get; set; }
@@ -794,6 +819,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 IsUnderReview = isUnderReview;
             }
 
+            public string? _key { get; set; }
             public string UserId { get; set; }
             public bool IsApproved { get; set; }
             public bool IsDenied { get; set; }
@@ -813,6 +839,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 IsUnderReview = isUnderReview;
             }
 
+            public string? _key { get; set; }
             public string UserId { get; set; }
             public bool IsApproved { get; set; }
             public bool IsDenied { get; set; }
@@ -836,6 +863,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 IsApproved = isApproved;
             }
 
+            public string? _key { get; set; }
             public string UserId { get; set; }
             public bool IsApproved { get; set; }
             public string? CharacterId { get; set; }

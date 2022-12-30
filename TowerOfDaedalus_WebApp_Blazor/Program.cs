@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using TowerOfDaedalus_WebApp_Blazor.Areas.Identity;
-using TowerOfDaedalus_WebApp_Blazor.Data;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.OAuth;
@@ -16,6 +15,8 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using log4net;
 using Humanizer.Localisation;
 using TowerOfDaedalus_WebApp_Arango;
+using TowerOfDaedalus_WebApp_Blazor.Properties;
+using Resources = TowerOfDaedalus_WebApp_Blazor.Properties.Resources;
 
 var builder = WebApplication.CreateBuilder(args);
 

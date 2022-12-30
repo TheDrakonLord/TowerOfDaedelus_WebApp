@@ -36,6 +36,7 @@
 
   <ItemGroup>
     <Folder Include="Data\" />
+    <Folder Include="Pages\CharacterSheets\" />
   </ItemGroup>
 
   <ItemGroup>
