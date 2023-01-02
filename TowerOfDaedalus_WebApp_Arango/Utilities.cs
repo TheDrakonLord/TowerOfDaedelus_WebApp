@@ -10,12 +10,18 @@ using TowerOfDaedalus_WebApp_Arango.Schema;
 
 namespace TowerOfDaedalus_WebApp_Arango
 {
+    /// <summary>
+    /// Interfance for defining arango utility classes
+    /// </summary>
     public interface IArangoUtils
     {
         //public static abstract Task CreateDB();
     }
 
-    internal class Utilities : IArangoUtils
+    /// <summary>
+    /// Class for establishing and maintaining an arango database
+    /// </summary>
+    public class Utilities : IArangoUtils
     {
         private readonly ILogger _logger;
         private const string dbName = "PrimaryDB";
@@ -26,13 +32,22 @@ namespace TowerOfDaedalus_WebApp_Arango
         private const string newUsername = "todWebApp";
         private const string newPass = "todWebAppPwd";
         
-
+        /// <summary>
+        /// Default constructor for arango utilities
+        /// </summary>
+        /// <param name="logger">logging provider for logging messages</param>
         public Utilities(ILogger logger)
         {
             _logger = logger;
             Task.Run(() => CreateDB()).Wait();
         }
 
+        /// <summary>
+        /// Checks if the DB exists, If it exists we do nothing.
+        /// Otherwise, we create the database, collections, and graph with edge definitions
+        /// </summary>
+        /// <returns>task completion status</returns>
+        /// <exception cref="HttpRequestException">This exception is thrown if the https requests return anything but OK</exception>
         public static async Task CreateDB()
         {
             // Initiate the transport

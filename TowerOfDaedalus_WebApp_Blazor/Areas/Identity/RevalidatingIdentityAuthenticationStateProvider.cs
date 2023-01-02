@@ -7,12 +7,22 @@ using System.Security.Claims;
 
 namespace TowerOfDaedalus_WebApp_Blazor.Areas.Identity
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="TUser"></typeparam>
     public class RevalidatingIdentityAuthenticationStateProvider<TUser>
         : RevalidatingServerAuthenticationStateProvider where TUser : class
     {
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IdentityOptions _options;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="loggerFactory"></param>
+        /// <param name="scopeFactory"></param>
+        /// <param name="optionsAccessor"></param>
         public RevalidatingIdentityAuthenticationStateProvider(
             ILoggerFactory loggerFactory,
             IServiceScopeFactory scopeFactory,
@@ -23,8 +33,17 @@ namespace TowerOfDaedalus_WebApp_Blazor.Areas.Identity
             _options = optionsAccessor.Value;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         protected override TimeSpan RevalidationInterval => TimeSpan.FromMinutes(30);
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="authenticationState"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         protected override async Task<bool> ValidateAuthenticationStateAsync(
             AuthenticationState authenticationState, CancellationToken cancellationToken)
         {

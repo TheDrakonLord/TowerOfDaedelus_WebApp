@@ -17,6 +17,8 @@ using Humanizer.Localisation;
 using TowerOfDaedalus_WebApp_Arango;
 using TowerOfDaedalus_WebApp_Blazor.Properties;
 using Resources = TowerOfDaedalus_WebApp_Blazor.Properties.Resources;
+using TowerOfDaedalus_WebApp_Arango.Identity;
+using static TowerOfDaedalus_WebApp_Arango.Schema.Documents;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +29,12 @@ builder.Logging.AddLog4Net();
 builder.Services
     .AddArangoConfig(builder.Configuration)
     .AddArangoDependencyGroup();
+
+builder.Services.AddIdentity<Users, Roles>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddTransient<IUserStore<Users>, ArangoUserStore>();
+builder.Services.AddTransient<IRoleStore<Roles>, ArangoRoleStore>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
