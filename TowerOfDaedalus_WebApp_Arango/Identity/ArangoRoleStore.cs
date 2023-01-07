@@ -19,9 +19,10 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// creates a new role in a store as an asynchronous operation
         /// </summary>
         /// <param name="role"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task CreateAsync(Roles role)
+        public Task<IdentityResult> CreateAsync(Roles role, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
@@ -30,9 +31,10 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// deletes a role from the store as an asynchronous operation
         /// </summary>
         /// <param name="role"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task DeleteAsync(Roles role)
+        public Task<IdentityResult> DeleteAsync(Roles role, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
@@ -50,9 +52,10 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// Finds the role who has the specified ID as an asynchornous operation
         /// </summary>
         /// <param name="roleId"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<Roles> FindByIdAsync(string roleId)
+        public Task<Roles?> FindByIdAsync(string roleId, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
@@ -60,10 +63,36 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <summary>
         /// Finds the role who has the specified normalized name as an asynchronous operation
         /// </summary>
-        /// <param name="roleName"></param>
+        /// <param name="normalizedRoleName"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<Roles> FindByNameAsync(string roleName)
+        public Task<Roles?> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<string?> GetNormalizedRoleNameAsync(Roles role, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<string> GetRoleIdAsync(Roles role, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<string?> GetRoleNameAsync(Roles role, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task SetNormalizedRoleNameAsync(Roles role, string? normalizedName, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task SetRoleNameAsync(Roles role, string? roleName, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
@@ -72,9 +101,10 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// Updates a role in a store as an asynchronous operation.
         /// </summary>
         /// <param name="role"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task UpdateAsync(Roles role)
+        public Task<IdentityResult> UpdateAsync(Roles role, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }

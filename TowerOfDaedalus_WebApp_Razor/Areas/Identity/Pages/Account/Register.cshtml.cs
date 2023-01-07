@@ -21,6 +21,9 @@ using Microsoft.Extensions.Logging;
 
 namespace TowerOfDaedelus_WebApp.Areas.Identity.Pages.Account
 {
+    /// <summary>
+    /// a page that assist the user in first timer registration
+    /// </summary>
     [AllowAnonymous]
     public class RegisterModel : PageModel
     {
@@ -31,6 +34,14 @@ namespace TowerOfDaedelus_WebApp.Areas.Identity.Pages.Account
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
 
+        /// <summary>
+        /// default constructor
+        /// </summary>
+        /// <param name="userManager">the user manager class used by the identity framework</param>
+        /// <param name="userStore">the user store class used by the identity framework</param>
+        /// <param name="signInManager">the sign in manager class ued by the identity framework</param>
+        /// <param name="logger">the logger used to log messages</param>
+        /// <param name="emailSender">the email sender used to send emails to the user</param>
         public RegisterModel(
             UserManager<IdentityUser> userManager,
             IUserStore<IdentityUser> userStore,
@@ -100,13 +111,22 @@ namespace TowerOfDaedelus_WebApp.Areas.Identity.Pages.Account
             public string ConfirmPassword { get; set; }
         }
 
-
+        /// <summary>
+        /// asyncronous method called any time a GET request is recieved
+        /// </summary>
+        /// <param name="returnUrl">the url to be executed on callback</param>
+        /// <returns>task completion status</returns>
         public async Task OnGetAsync(string returnUrl = null)
         {
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
+        /// <summary>
+        /// asyncronous method called any time a POST request is recieved
+        /// </summary>
+        /// <param name="returnUrl">the url to be executed on callback</param>
+        /// <returns>task completion status</returns>
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");

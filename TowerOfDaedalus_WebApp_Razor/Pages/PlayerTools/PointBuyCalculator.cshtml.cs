@@ -4,15 +4,42 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace TowerOfDaedelus_WebApp.Pages.PlayerTools
 {
+    /// <summary>
+    /// a page that allows users to calculate ability scores using a modified point-buy model
+    /// TODO: convert this page to a blazor page instead
+    /// </summary>
     //[Authorize(Policy = "allPlayers")]
     [AllowAnonymous]
     public class PointBuyCalculatorModel : PageModel
-    {     
+    {
+        /// <summary>
+        /// constant string representing the mind ability score
+        /// </summary>
         public const string SessionKeyIntMind = "_IntMind";
+
+        /// <summary>
+        /// constant string representing the strength ability score
+        /// </summary>
         public const string SessionKeyIntStrength = "_IntStrength";
+
+        /// <summary>
+        /// constant string representing the agility ability score
+        /// </summary>
         public const string SessionKeyIntAgility = "_IntAgility";
+
+        /// <summary>
+        /// constant string representing the constitution ability score
+        /// </summary>
         public const string SessionKeyIntConstitution = "_IntConstitution";
+
+        /// <summary>
+        /// constant string representing the soul ability score
+        /// </summary>
         public const string SessionKeyIntSoul = "_IntSoul";
+
+        /// <summary>
+        /// constant string representing the total points a user has
+        /// </summary>
         public const string SessionKeyIntPoints = "_IntPoints";
 
 
@@ -28,15 +55,42 @@ namespace TowerOfDaedelus_WebApp.Pages.PlayerTools
 
         private const int DefaultValue = 0;
 
+        /// <summary>
+        /// the current value of the mind ability score
+        /// </summary>
         public int IntMind { get; set; }
+
+        /// <summary>
+        /// the current value of the strength ability score
+        /// </summary>
         public int IntStrength { get; set; }
+
+        /// <summary>
+        /// the current value of the agility ability score
+        /// </summary>
         public int IntAgility { get; set; }
+
+        /// <summary>
+        /// the current value of the constitution ability score
+        /// </summary>
         public int IntConstitution { get; set; }
+
+        /// <summary>
+        /// the current value of the soul ability score
+        /// </summary>
         public int IntSoul { get; set; }
+
+        /// <summary>
+        /// the current amount of points the user has to spend
+        /// </summary>
         public int IntPoints { get; set; }
 
         private readonly ILogger<PointBuyCalculatorModel> _logger;
 
+        /// <summary>
+        /// default constructor
+        /// </summary>
+        /// <param name="logger">the logger used to log messages</param>
         public PointBuyCalculatorModel(ILogger<PointBuyCalculatorModel> logger)
         {
             _logger = logger;
@@ -66,12 +120,20 @@ namespace TowerOfDaedelus_WebApp.Pages.PlayerTools
             return stat;
         }
 
+        /// <summary>
+        /// method that is executed any time a POST request is recieved
+        /// </summary>
+        /// <returns></returns>
         public IActionResult OnPost()
         {
             _logger.LogInformation("Event Fired: {Event}", "OnPost");
             return Page();
         }
 
+        /// <summary>
+        /// method that is executed any time a POST request is recieved from the mind up button
+        /// </summary>
+        /// <returns>a PageResult object that renders the page</returns>
         public IActionResult OnPostMndUp()
         {
             _logger.LogInformation("Event Fired: {Event}", "OnPostMndUp");
@@ -83,6 +145,10 @@ namespace TowerOfDaedelus_WebApp.Pages.PlayerTools
             return Page();
         }
 
+        /// <summary>
+        /// method that is executed any time a POST request is recieved from the mind down button
+        /// </summary>
+        /// <returns>a PageResult object that renders the page</returns>
         public IActionResult OnPostMndDown()
         {
             _logger.LogInformation("Event Fired: {Event}", "OnPostMndDown");
@@ -94,6 +160,10 @@ namespace TowerOfDaedelus_WebApp.Pages.PlayerTools
             return Page();
         }
 
+        /// <summary>
+        /// method that is executed any time a POST request is recieved from the strength up button
+        /// </summary>
+        /// <returns>a PageResult object that renders the page</returns>
         public IActionResult OnPostStrUp()
         {
             _logger.LogInformation("Event Fired: {Event}", "OnPostStrUp");
@@ -105,6 +175,10 @@ namespace TowerOfDaedelus_WebApp.Pages.PlayerTools
             return Page();
         }
 
+        /// <summary>
+        /// method that is executed any time a POST request is recieved from the strength down button
+        /// </summary>
+        /// <returns>a PageResult object that renders the page</returns>
         public IActionResult OnPostStrDown()
         {
             _logger.LogInformation("Event Fired: {Event}", "OnPostStrDown");
@@ -116,6 +190,10 @@ namespace TowerOfDaedelus_WebApp.Pages.PlayerTools
             return Page();
         }
 
+        /// <summary>
+        /// method that is executed any time a POST request is recieved from the agility up button
+        /// </summary>
+        /// <returns>a PageResult object that renders the page</returns>
         public IActionResult OnPostAglUp()
         {
             _logger.LogInformation("Event Fired: {Event}", "OnPostAglUp");
@@ -127,6 +205,10 @@ namespace TowerOfDaedelus_WebApp.Pages.PlayerTools
             return Page();
         }
 
+        /// <summary>
+        /// method that is executed any time a POST request is recieved from the agility down button
+        /// </summary>
+        /// <returns>a PageResult object that renders the page</returns>
         public IActionResult OnPostAglDown()
         {
             _logger.LogInformation("Event Fired: {Event}", "OnPostAglDown");
@@ -138,6 +220,10 @@ namespace TowerOfDaedelus_WebApp.Pages.PlayerTools
             return Page();
         }
 
+        /// <summary>
+        /// method that is executed any time a POST request is recieved from the constitution up button
+        /// </summary>
+        /// <returns>a PageResult object that renders the page</returns>
         public IActionResult OnPostConUp()
         {
             _logger.LogInformation("Event Fired: {Event}", "OnPostConUp");
@@ -149,6 +235,10 @@ namespace TowerOfDaedelus_WebApp.Pages.PlayerTools
             return Page();
         }
 
+        /// <summary>
+        /// method that is executed any time a POST request is recieved from the constitution down button
+        /// </summary>
+        /// <returns>a PageResult object that renders the page</returns>
         public IActionResult OnPostConDown()
         {
             _logger.LogInformation("Event Fired: {Event}", "OnPostConDown");
@@ -160,6 +250,10 @@ namespace TowerOfDaedelus_WebApp.Pages.PlayerTools
             return Page();
         }
 
+        /// <summary>
+        /// method that is executed any time a POST request is recieved from the soul up button
+        /// </summary>
+        /// <returns>a PageResult object that renders the page</returns>
         public IActionResult OnPostSolUp()
         {
             _logger.LogInformation("Event Fired: {Event}", "OnPostSolUp");
@@ -171,6 +265,10 @@ namespace TowerOfDaedelus_WebApp.Pages.PlayerTools
             return Page();
         }
 
+        /// <summary>
+        /// method that is executed any time a POST request is recieved from the soul down button
+        /// </summary>
+        /// <returns>a PageResult object that renders the page</returns>
         public IActionResult OnPostSolDown()
         {
             _logger.LogInformation("Event Fired: {Event}", "OnPostSolDown");
@@ -211,7 +309,10 @@ namespace TowerOfDaedelus_WebApp.Pages.PlayerTools
             _logger.LogInformation("Session IntPoints: {IntPoints}", IntPoints);
         }
 
-
+        /// <summary>
+        /// method that is executed any time a GET request is recieived
+        /// populates all fields on the page with their values
+        /// </summary>
         public void OnGet()
         {
             initializeSessionkey(SessionKeyIntMind);

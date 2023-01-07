@@ -11,6 +11,9 @@ using System;
 
 namespace TowerOfDaedalus_WebApp_DiscordBot
 {
+    /// <summary>
+    /// class that specified how commands should be recieved and handled by the bot
+    /// </summary>
     internal class commandHandler
     {
         private readonly DiscordSocketClient _client;
@@ -22,6 +25,7 @@ namespace TowerOfDaedalus_WebApp_DiscordBot
         /// </summary>
         /// <param name="client">the discord client</param>
         /// <param name="commands">the command service</param>
+        /// <param name="logger">the logger to be used for logging messages</param>
         public commandHandler(DiscordSocketClient client, CommandService commands, ILogger<DiscordBot> logger)
         {
             _commands = commands;

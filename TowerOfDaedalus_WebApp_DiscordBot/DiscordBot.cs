@@ -17,6 +17,9 @@ using System.IO;
 
 namespace TowerOfDaedalus_WebApp_DiscordBot
 {
+    /// <summary>
+    /// Primary base class of a discord bot used to respond to commands and send messages in Discord
+    /// </summary>
     public class DiscordBot : BackgroundService
     {
         /// <summary>
@@ -46,6 +49,11 @@ namespace TowerOfDaedalus_WebApp_DiscordBot
         private static IMessageChannel _mainChannel;
         private static IMessageChannel _utilityChannel;
 
+        /// <summary>
+        /// default constructor
+        /// </summary>
+        /// <param name="logger">the logger used to send messages</param>
+        /// <param name="optionsAccessor">the options accessor to set the bot options</param>
         public DiscordBot(ILogger<DiscordBot> logger, IOptions<DiscordBotOptions> optionsAccessor)
         {
             _logger = logger;
@@ -53,9 +61,17 @@ namespace TowerOfDaedalus_WebApp_DiscordBot
         }
 
 
-
+        /// <summary>
+        /// field to store the configuration options for the bot
+        /// </summary>
         public DiscordBotOptions Options { get; }
 
+        /// <summary>
+        /// method called when the service starts.
+        /// logs a message and then starts the bot
+        /// </summary>
+        /// <param name="stoppingToken">token to indicate that the bot should stop</param>
+        /// <returns>task completion status</returns>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)

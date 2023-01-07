@@ -18,12 +18,20 @@ using static TowerOfDaedalus_WebApp_Arango.Schema.Documents;
 
 namespace TowerOfDaedelus_WebApp.Areas.Identity.Pages.Account
 {
+    /// <summary>
+    /// a page that assists the user in logging in to the site
+    /// </summary>
     [AllowAnonymous]
     public class LoginModel : PageModel
     {
         private readonly SignInManager<Users> _signInManager;
         private readonly ILogger<LoginModel> _logger;
 
+        /// <summary>
+        /// default constructor
+        /// </summary>
+        /// <param name="signInManager">the sign in manager used by the identity framework</param>
+        /// <param name="logger">the logger used to log messages</param>
         public LoginModel(SignInManager<Users> signInManager, ILogger<LoginModel> logger)
         {
             _signInManager = signInManager;
@@ -86,6 +94,11 @@ namespace TowerOfDaedelus_WebApp.Areas.Identity.Pages.Account
             public bool RememberMe { get; set; }
         }
 
+        /// <summary>
+        /// asynchronous method called any time a GET request is recieved
+        /// </summary>
+        /// <param name="returnUrl">the url to be executed on callback</param>
+        /// <returns>task completion status</returns>
         public async Task OnGetAsync(string returnUrl = null)
         {
             if (!string.IsNullOrEmpty(ErrorMessage))
@@ -103,6 +116,11 @@ namespace TowerOfDaedelus_WebApp.Areas.Identity.Pages.Account
             ReturnUrl = returnUrl;
         }
 
+        /// <summary>
+        /// asynchronous method called any time a POST request is recieved
+        /// </summary>
+        /// <param name="returnUrl">the url to be executed on callback</param>
+        /// <returns>task completion status</returns>
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");

@@ -25,6 +25,9 @@ using TowerOfDaedalus_WebApp_Razor.Properties;
 
 namespace TowerOfDaedelus_WebApp_Razor.Areas.Identity.Pages.Account
 {
+    /// <summary>
+    /// a page that assists the user in logging in through an external login provider
+    /// </summary>
     [AllowAnonymous]
     public class ExternalLoginModel : PageModel
     {
@@ -35,7 +38,14 @@ namespace TowerOfDaedelus_WebApp_Razor.Areas.Identity.Pages.Account
         private readonly IEmailSender _emailSender;
         private readonly ILogger<ExternalLoginModel> _logger;
 
-
+        /// <summary>
+        /// default constructor
+        /// </summary>
+        /// <param name="signInManager">the sign in manager class used by the identity framework</param>
+        /// <param name="userManager">the user manager class used by the identity framework</param>
+        /// <param name="userStore">the user store class used by the identity framework</param>
+        /// <param name="logger">the logger used to log messages</param>
+        /// <param name="emailSender">the email sender used to send emails to the user</param>
         public ExternalLoginModel(
             SignInManager<Users> signInManager,
             UserManager<Users> userManager,
@@ -92,8 +102,18 @@ namespace TowerOfDaedelus_WebApp_Razor.Areas.Identity.Pages.Account
             public string Email { get; set; }
         }
         
+        /// <summary>
+        /// method called any time a GET request is recieved
+        /// </summary>
+        /// <returns></returns>
         public IActionResult OnGet() => RedirectToPage("./Login");
 
+        /// <summary>
+        /// method called any time a POST request is recieved
+        /// </summary>
+        /// <param name="provider">the login provider used</param>
+        /// <param name="returnUrl">the callback url to be executed</param>
+        /// <returns>returns a new instance of ChallengeResult with the specified authentication scheme and properities</returns>
         public IActionResult OnPost(string provider, string returnUrl = null)
         {
             // Request a redirect to the external login provider.
@@ -102,6 +122,12 @@ namespace TowerOfDaedelus_WebApp_Razor.Areas.Identity.Pages.Account
             return new ChallengeResult(provider, properties);
         }
 
+        /// <summary>
+        /// aynchronous method to be executed any time a callback is recieved
+        /// </summary>
+        /// <param name="returnUrl">the callback url to be executed</param>
+        /// <param name="remoteError"></param>
+        /// <returns>a page redirect</returns>
         public async Task<IActionResult> OnGetCallbackAsync(string returnUrl = null, string remoteError = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
@@ -149,6 +175,11 @@ namespace TowerOfDaedelus_WebApp_Razor.Areas.Identity.Pages.Account
             }
         }
 
+        /// <summary>
+        /// asynchronous method called anytime POSt request with a confirmation is recieved
+        /// </summary>
+        /// <param name="returnUrl">the callback url to be executed</param>
+        /// <returns>a page redirect</returns>
         public async Task<IActionResult> OnPostConfirmationAsync(string returnUrl = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");

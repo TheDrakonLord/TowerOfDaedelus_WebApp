@@ -14,12 +14,20 @@ using Microsoft.AspNetCore.WebUtilities;
 
 namespace TowerOfDaedelus_WebApp.Areas.Identity.Pages.Account
 {
+    /// <summary>
+    /// a page that is used to assist the user in confirming their email
+    /// </summary>
     [AllowAnonymous]
     public class RegisterConfirmationModel : PageModel
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IEmailSender _sender;
 
+        /// <summary>
+        /// default constructor
+        /// </summary>
+        /// <param name="userManager">the user manager class used by the identify framework</param>
+        /// <param name="sender">the email sender to send confirmation emails to the user</param>
         public RegisterConfirmationModel(UserManager<IdentityUser> userManager, IEmailSender sender)
         {
             _userManager = userManager;
@@ -44,6 +52,12 @@ namespace TowerOfDaedelus_WebApp.Areas.Identity.Pages.Account
         /// </summary>
         public string EmailConfirmationUrl { get; set; }
 
+        /// <summary>
+        /// default constructor
+        /// </summary>
+        /// <param name="email">the users email address</param>
+        /// <param name="returnUrl">the return callback url</param>
+        /// <returns>a PageResult object that renders the page</returns>
         public async Task<IActionResult> OnGetAsync(string email, string returnUrl = null)
         {
             if (email == null)
