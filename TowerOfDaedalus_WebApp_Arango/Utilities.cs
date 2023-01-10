@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ArangoDBNetStandard;
 using ArangoDBNetStandard.Transport.Http;
 using TowerOfDaedalus_WebApp_Arango.Schema;
+using Microsoft.Extensions.Logging;
 
 namespace TowerOfDaedalus_WebApp_Arango
 {
@@ -23,22 +24,31 @@ namespace TowerOfDaedalus_WebApp_Arango
     /// </summary>
     public class Utilities : IArangoUtils
     {
-        private readonly ILogger _logger;
-        private const string dbName = "PrimaryDB";
-        private const string systemDbName = "_system";
-        private const string systemUsername = "-----";
-        private const string systemPassword = "-----";
-        private const string url = "http://localhost:8529/";
-        private const string newUsername = "todWebApp";
-        private const string newPass = "todWebAppPwd";
-        
+        private readonly ILogger<Utilities> _logger;
+        private static string dbName;
+        private static string systemDbName;
+        private static string systemUsername;
+        private static string systemPassword;
+        private static string url;
+        private static string newUsername;
+        private static string newPass;
+
         /// <summary>
         /// Default constructor for arango utilities
         /// </summary>
         /// <param name="logger">logging provider for logging messages</param>
-        public Utilities(ILogger logger)
+        public Utilities(ILogger<Utilities> logger)
         {
             _logger = logger;
+
+            dbName = Environment.GetEnvironmentVariable("ARANGO_DB_NAME");
+            systemDbName = Environment.GetEnvironmentVariable("ARANGO_SYSTEM_DB_NAME");
+            systemUsername = Environment.GetEnvironmentVariable("ARANGO_SYSTEM_USER_NAME");
+            systemPassword = Environment.GetEnvironmentVariable("ARANGO_SYSTEM_PASSWORD");
+            url = Environment.GetEnvironmentVariable("ARANGO_URL");
+            newUsername = Environment.GetEnvironmentVariable("ARANGO_NEW_USERNAME");
+            newPass = Environment.GetEnvironmentVariable("ARANGO_NEW_PASSWORD");
+
             Task.Run(() => CreateDB()).Wait();
         }
 

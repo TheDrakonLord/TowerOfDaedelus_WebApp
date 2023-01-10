@@ -5,6 +5,7 @@ using TowerOfDaedalus_WebApp_Arango;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging.ClearProviders();
+log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.config"));
 builder.Logging.AddLog4Net();
 
 builder.Services

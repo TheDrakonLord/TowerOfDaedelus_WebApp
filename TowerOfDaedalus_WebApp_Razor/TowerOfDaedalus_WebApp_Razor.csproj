@@ -45,4 +45,10 @@
     <ProjectReference Include="..\TowerOfDaedalus_WebApp_Arango\TowerOfDaedalus_WebApp_Arango.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="log4net.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

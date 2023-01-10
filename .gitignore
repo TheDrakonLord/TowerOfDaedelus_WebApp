@@ -365,3 +365,4 @@ FodyWeavers.xsd
 # User Defined
 launchSettings.json
 /Persistance
+/.env

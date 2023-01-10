@@ -23,12 +23,11 @@ using static TowerOfDaedalus_WebApp_Arango.Schema.Documents;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging.ClearProviders();
+log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.config"));
 builder.Logging.AddLog4Net();
 
 // Add services to the container.
-builder.Services
-    .AddArangoConfig(builder.Configuration)
-    .AddArangoDependencyGroup();
+
 
 builder.Services.AddIdentity<Users, Roles>()
     .AddDefaultTokenProviders();
@@ -97,6 +96,10 @@ builder.Services.AddAuthorization(options =>
         .RequireAuthenticatedUser()
         .Build();
 });
+
+builder.Services
+    .AddArangoConfig(builder.Configuration)
+    .AddArangoDependencyGroup();
 
 var app = builder.Build();
 
