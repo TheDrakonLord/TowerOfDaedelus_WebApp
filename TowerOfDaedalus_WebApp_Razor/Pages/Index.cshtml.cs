@@ -27,6 +27,7 @@ namespace TowerOfDaedelus_WebApp.Pages
         /// </summary>
         public void OnGet()
         {
+            _logger.LogDebug("index get called");
         }
     }
 }

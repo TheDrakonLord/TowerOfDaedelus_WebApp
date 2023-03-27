@@ -16,9 +16,16 @@ services:
       - ASPNETCORE_URLS=https://+:443;http://+:80
       - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
       - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
+      - ARANGO_DB_NAME=${ARANGO_DB_NAME}
+      - ARANGO_SYSTEM_DB_NAME=${ARANGO_SYSTEM_DB_NAME}
+      - ARANGO_SYSTEM_USER_NAME=${ARANGO_SYSTEM_USER_NAME}
+      - ARANGO_SYSTEM_PASSWORD=${ARANGO_SYSTEM_PASSWORD}
+      - ARANGO_URL=${ARANGO_URL}
+      - ARANGO_NEW_USERNAME=${ARANGO_NEW_USERNAME}
+      - ARANGO_NEW_PASSWORD=${ARANGO_NEW_PASSWORD}
     ports:
-      - "80"
-      - "443"
+      - 5000:80
+      - 5100:443
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
@@ -33,9 +40,16 @@ services:
       - ASPNETCORE_URLS=https://+:443;http://+:80
       - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
       - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
+      - ARANGO_DB_NAME=${ARANGO_DB_NAME}
+      - ARANGO_SYSTEM_DB_NAME=${ARANGO_SYSTEM_DB_NAME}
+      - ARANGO_SYSTEM_USER_NAME=${ARANGO_SYSTEM_USER_NAME}
+      - ARANGO_SYSTEM_PASSWORD=${ARANGO_SYSTEM_PASSWORD}
+      - ARANGO_URL=${ARANGO_URL}
+      - ARANGO_NEW_USERNAME=${ARANGO_NEW_USERNAME}
+      - ARANGO_NEW_PASSWORD=${ARANGO_NEW_PASSWORD}
     ports:
-      - "80"
-      - "443"
+      - 5001:80
+      - 5101:443
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
@@ -54,6 +68,13 @@ services:
     environment:
       - DOTNET_ENVIRONMENT=Development
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - ARANGO_DB_NAME=${ARANGO_DB_NAME}
+      - ARANGO_SYSTEM_DB_NAME=${ARANGO_SYSTEM_DB_NAME}
+      - ARANGO_SYSTEM_USER_NAME=${ARANGO_SYSTEM_USER_NAME}
+      - ARANGO_SYSTEM_PASSWORD=${ARANGO_SYSTEM_PASSWORD}
+      - ARANGO_URL=${ARANGO_URL}
+      - ARANGO_NEW_USERNAME=${ARANGO_NEW_USERNAME}
+      - ARANGO_NEW_PASSWORD=${ARANGO_NEW_PASSWORD}
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
 
@@ -62,7 +83,7 @@ services:
     ports:
         - 8529:8529
     environment:
-        - ARANGO_NO_AUTH=1
+        - ARANGO_ROOT_PASSWORD=${ARANGO_SYSTEM_PASSWORD}
     volumes:
         - ./Persistance/Arango:/var/lib/arangodb3
 
@@ -90,4 +111,17 @@ services:
     volumes:
       - ./Persistance/Kafka:/bitnami/kafka
 
+
+
+  towerofdaedalus_webapp_restapi:
+    image: ${DOCKER_REGISTRY-}towerofdaedaluswebapprestapi
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+    ports:
+        - 5002:80
+        - 5102:443
+    build:
+      context: .
+      dockerfile: TowerOfDaedalus_WebApp_RESTApi/Dockerfile
 

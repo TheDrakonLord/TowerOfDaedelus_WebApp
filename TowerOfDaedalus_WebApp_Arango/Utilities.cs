@@ -21,7 +21,7 @@ namespace TowerOfDaedalus_WebApp_Arango
         /// Otherwise, we create the database, collections, and graph with edge definitions
         /// </summary>
         /// <returns>task completion status</returns>
-        public static abstract Task CreateDB();
+        //public static abstract Task CreateDB();
     }
 
     /// <summary>
