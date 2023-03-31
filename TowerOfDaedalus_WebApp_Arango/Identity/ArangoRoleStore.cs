@@ -1,22 +1,34 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using ArangoDBNetStandard.Transport.Http;
+using ArangoDBNetStandard;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static TowerOfDaedalus_WebApp_Arango.Schema.Documents;
+using Microsoft.Extensions.Logging;
 
 namespace TowerOfDaedalus_WebApp_Arango.Identity
 {
     /// <summary>
     /// Custome Role Store class that changes the data provider for Microsoft Identity from SQL to Arango
     /// </summary>
-    public class ArangoRoleStore : IRoleStore<Roles>, IQueryableRoleStore<Roles>
+    public class ArangoRoleStore : IRoleStore<Roles>
     {
+        private static ILogger<Utilities> _logger;
+        private HttpApiTransport transport;
+        private ArangoDBClient db;
+
         /// <summary>
-        /// a navigation property for the roles the store contains
+        /// 
         /// </summary>
-        public IQueryable<Roles> Roles => throw new NotImplementedException();
+        ArangoRoleStore(ILogger<Utilities> logger)
+        {
+            _logger = logger;
+            transport = HttpApiTransport.UsingBasicAuth(new Uri(ArangoDbContext.getUrl()), ArangoDbContext.getSystemDbName(), ArangoDbContext.getSystemUsername(), ArangoDbContext.getSystemPassword());
+            db = new ArangoDBClient(transport);
+        }
 
         /// <summary>
         /// creates a new role in a store as an asynchronous operation
@@ -48,7 +60,8 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public void Dispose()
         {
-            throw new NotImplementedException();
+            db.Dispose();
+            transport.Dispose();
         }
 
         /// <summary>

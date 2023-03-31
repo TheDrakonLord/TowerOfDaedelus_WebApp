@@ -22,6 +22,19 @@ namespace TowerOfDaedalus_WebApp_DiscordBot
     /// </summary>
     public class DiscordBot : BackgroundService
     {
+        public enum AppState
+        {
+            SHUTDOWN,
+            STARTING,
+            HEALTHY,
+            UNHEALTHY,
+            STOPPING
+        }
+
+        private static AppState appState_ = AppState.SHUTDOWN;
+
+        public static AppState getAppState() { return appState_; }
+
         /// <summary>
         /// Status message the bot displays on the server
         /// </summary>
@@ -79,10 +92,12 @@ namespace TowerOfDaedalus_WebApp_DiscordBot
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                 await StartBot(stoppingToken);
             }
+            appState_ = AppState.STOPPING;
         }
 
         private async Task StartBot(CancellationToken stoppingToken)
         {
+            appState_ = AppState.STARTING;
             //initialize the client, command handler, and command service
             _client = new DiscordSocketClient();
             _cService = new CommandService();
@@ -182,6 +197,7 @@ namespace TowerOfDaedalus_WebApp_DiscordBot
         private async Task botReady()
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
+            appState_ = AppState.HEALTHY;
             _logger.LogInformation(Strings.logBotReady);
             IReadOnlyCollection<SocketGuild> conGuilds = _client.Guilds;
             foreach (SocketGuild x in conGuilds)

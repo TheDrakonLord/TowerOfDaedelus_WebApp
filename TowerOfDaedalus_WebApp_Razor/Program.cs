@@ -92,7 +92,12 @@ builder.Services
     .AddArangoConfig(builder.Configuration)
     .AddArangoDependencyGroup();
 
+// Add health checks to report to docker
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -114,5 +119,8 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapRazorPages();
+
+// Specify health check route for docker
+app.MapHealthChecks("/healthz");
 
 app.Run();

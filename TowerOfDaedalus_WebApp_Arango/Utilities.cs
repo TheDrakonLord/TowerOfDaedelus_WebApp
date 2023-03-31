@@ -30,13 +30,7 @@ namespace TowerOfDaedalus_WebApp_Arango
     public class Utilities : IArangoUtils
     {
         private static ILogger<Utilities> _logger;
-        private static string dbName;
-        private static string systemDbName;
-        private static string systemUsername;
-        private static string systemPassword;
-        private static string url;
-        private static string newUsername;
-        private static string newPass;
+
 
         /// <summary>
         /// Default constructor for arango utilities
@@ -47,13 +41,7 @@ namespace TowerOfDaedalus_WebApp_Arango
             _logger = logger;
 
             _logger.LogDebug("retrieving database environment variables");
-            dbName = Environment.GetEnvironmentVariable("ARANGO_DB_NAME");
-            systemDbName = Environment.GetEnvironmentVariable("ARANGO_SYSTEM_DB_NAME");
-            systemUsername = Environment.GetEnvironmentVariable("ARANGO_SYSTEM_USER_NAME");
-            systemPassword = Environment.GetEnvironmentVariable("ARANGO_SYSTEM_PASSWORD");
-            url = Environment.GetEnvironmentVariable("ARANGO_URL");
-            newUsername = Environment.GetEnvironmentVariable("ARANGO_NEW_USERNAME");
-            newPass = Environment.GetEnvironmentVariable("ARANGO_NEW_PASSWORD");
+            ArangoDbContext.setEnvVariables();
 
             _logger.LogDebug("lauching createDB task");
             Task.Run(() => CreateDB()).Wait();
@@ -69,7 +57,7 @@ namespace TowerOfDaedalus_WebApp_Arango
         {
             _logger.LogInformation("checking for existing database");
             // Initiate the transport
-            using (var transport = HttpApiTransport.UsingBasicAuth(new Uri(url), systemDbName, systemUsername, systemPassword))
+            using (var transport = HttpApiTransport.UsingBasicAuth(new Uri(ArangoDbContext.getUrl()), ArangoDbContext.getSystemDbName(), ArangoDbContext.getSystemUsername(), ArangoDbContext.getSystemPassword()))
             {
                 // Initiate ArangoDBClient using the transport
                 using (var db = new ArangoDBClient(transport))
@@ -84,19 +72,19 @@ namespace TowerOfDaedalus_WebApp_Arango
 
                     var databases = await db.Database.GetDatabasesAsync();
 
-                    if (!databases.Result.Contains(dbName))
+                    if (!databases.Result.Contains(ArangoDbContext.getDbName()))
                     {
                         _logger.LogInformation("Database not found, creating new database");
                         // Define the new database and its users
                         var body = new ArangoDBNetStandard.DatabaseApi.Models.PostDatabaseBody()
                         {
-                            Name = dbName,
+                            Name = ArangoDbContext.getDbName(),
                             Users = new List<ArangoDBNetStandard.DatabaseApi.Models.DatabaseUser>()
                             {
                                 new ArangoDBNetStandard.DatabaseApi.Models.DatabaseUser()
                                 {
-                                    Username=newUsername,
-                                    Passwd =newPass,
+                                    Username=ArangoDbContext.getNewUsername(),
+                                    Passwd =ArangoDbContext.getNewPass(),
                                     Active=true
                                 }
                             }

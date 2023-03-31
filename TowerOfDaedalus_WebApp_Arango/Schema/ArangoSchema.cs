@@ -15,39 +15,68 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
     /// </summary>
     public static class ArangoSchema
     {
+        // Identity Framework
+        public const string collUsers = "Users";
+        public const string collRoles = "Roles";
+        public const string collUserLogins = "UserLogins";
+        public const string collUserClaims = "UserClaims";
+        public const string collRoleClaims = "RoleClaims";
+        public const string collUserTokens = "UserTokens";
+        // Custom Data
+        public const string collRPSchedule = "RPSchedule";
+        public const string collFeaturedArticles = "FeaturedArticles";
+        public const string collQuestList = "QuestList";
+        public const string collNPCDescriptions = "NPCDescriptions";
+        public const string collCharacterSheets = "CharacterSheets";
+        public const string collPrimaryTraits = "PrimaryTraits";
+        public const string collEquipmentTraits = "EquipmentTraits";
+        public const string collEquipment = "Equipment";
+        public const string collTemporaryTraits = "TemporaryTraits";
+        public const string collOriginTraits = "OriginTraits";
+        public const string collLanguages = "Languages";
+        public const string collVisionTypes = "VisionTypes";
+        public const string collGMRequests = "GMRequests";
+        public const string collDieRolls = "DieRolls";
+        public const string collNPCApplications = "NPCApplications";
+        public const string collMissionApplications = "MissionApplications";
+        public const string collPlayerApplications = "PlayerApplications";
+        public const string collVisitorPass = "VisitorPass";
+        public const string collEdges = "edges";
+        public const string graphPrimary = "PrimaryGraph";
+
         /// <summary>
         /// list of collections to be added
         /// </summary>
         public static readonly List<Collection> Collections = new List<Collection>
         {
             // Identity Framework
-            new Collection("Users"),
-            new Collection("Roles"),
-            new Collection("UserLogins"),
-            new Collection("UserClaims"),
-            new Collection("RoleClaims"),
-            new Collection("UserTokens"),
+            new Collection(collUsers),
+            new Collection(collRoles),
+            new Collection(collUserLogins),
+            new Collection(collUserClaims),
+            new Collection(collRoleClaims),
+            new Collection(collUserTokens),
             // Custom Data
-            new Collection("RPSchedule"),
-            new Collection("FeaturedArticles"),
-            new Collection("QuestList"),
-            new Collection("NPCDescriptions"),
-            new Collection("CharacterSheets"),
-            new Collection("PrimaryTraits"),
-            new Collection("EquipmentTraits"),
-            new Collection("Equipment"),
-            new Collection("TemporaryTraits"),
-            new Collection("OriginTraits"),
-            new Collection("Languages"),
-            new Collection("VisionTypes"),
-            new Collection("GMRequests"),
-            new Collection("DieRolls"),
-            new Collection("NPCApplications"),
-            new Collection("MissionApplications"),
-            new Collection("PlayerApplications"),
-            new Collection("VisitorPass"),
+            new Collection(collRPSchedule),
+            new Collection(collFeaturedArticles),
+            new Collection(collQuestList),
+            new Collection(collNPCDescriptions),
+            new Collection(collCharacterSheets),
+            new Collection(collPrimaryTraits),
+            new Collection(collEquipmentTraits),
+            new Collection(collEquipment),
+            new Collection(collTemporaryTraits),
+            new Collection(collOriginTraits),
+            new Collection(collLanguages),
+            new Collection(collVisionTypes),
+            new Collection(collGMRequests),
+            new Collection(collDieRolls),
+            new Collection(collNPCApplications),
+            new Collection(collMissionApplications),
+            new Collection(collPlayerApplications),
+            new Collection(collVisitorPass),
             // Arango specific collections
-            new Collection("edges", type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge)
+            new Collection(collEdges, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge)
         };
 
         /// <summary>
@@ -55,7 +84,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
         /// </summary>
         public static readonly List<Graph> Graphs = new List<Graph>
         {
-            new Graph("PrimaryGraph", new List<ArangoDBNetStandard.GraphApi.Models.EdgeDefinition>
+            new Graph(graphPrimary, new List<ArangoDBNetStandard.GraphApi.Models.EdgeDefinition>
             {
                 // Identity Relationships
                 // UserRoles Users->Roles
@@ -64,11 +93,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
-                        "Users"
+                        collUsers
                     },
                     To = new List<string>
                     {
-                        "Roles"
+                        collRoles
                     }                    
                 },
 
@@ -78,11 +107,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
-                        "Roles"
+                        collRoles
                     },
                     To = new List<string>
                     {
-                        "Users"
+                        collUsers
                     }
                 },
 
@@ -92,11 +121,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From =  new List<string>
                     {
-                        "Users"
+                        collUsers
                     },
                     To = new List<string>
                     {
-                        "UserLogins"
+                        collUserLogins
                     }
                 },
 
@@ -106,11 +135,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
-                        "Users"
+                        collUsers
                     },
                     To = new List<string>
                     {
-                        "UserClaims"
+                        collUserClaims
                     }
                 },
 
@@ -120,11 +149,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
-                        "Users"
+                        collUsers
                     },
                     To = new List<string>
                     {
-                        "UserTokens"
+                        collUserTokens
                     }
                 },
 
@@ -134,11 +163,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
-                        "Roles"
+                        collRoles
                     },
                     To = new List<string>
                     {
-                        "RoleClaims"
+                        collRoleClaims
                     }
                 },
 
@@ -149,11 +178,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
-                        "NPCDescriptions"
+                        collNPCDescriptions
                     },
                     To = new List<string>
                     {
-                        "QuestList"
+                        collQuestList
                     }
                 },
 
@@ -163,11 +192,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
-                        "Users"
+                        collUsers
                     },
                     To = new List<string>
                     {
-                        "QuestList"
+                        collQuestList
                     }
                 },
 
@@ -177,11 +206,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
-                        "Users"
+                        collUsers
                     },
                     To = new List<string>
                     {
-                        "CharacterSheets"
+                        collCharacterSheets
                     }
                 },
 
@@ -191,11 +220,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
-                        "Users"
+                        collUsers
                     },
                     To = new List<string>
                     {
-                        "GMRequests"
+                        collGMRequests
                     }
                 },
 
@@ -205,11 +234,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
-                        "Users"
+                        collUsers
                     },
                     To = new List<string>
                     {
-                        "DieRolls"
+                        collDieRolls
                     }
                 },
 
@@ -219,11 +248,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
-                        "Users"
+                        collUsers
                     },
                     To = new List<string>
                     {
-                        "NPCApplications"
+                        collNPCApplications
                     }
                 },
 
@@ -233,11 +262,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
-                        "Users"
+                        collUsers
                     },
                     To = new List<string>
                     {
-                       "MissionApplications"
+                       collMissionApplications
                     }
                 },
 
@@ -247,11 +276,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
-                        "Users"
+                        collUsers
                     },
                     To = new List<string>
                     {
-                        "PlayerApplications"
+                        collPlayerApplications
                     }
                 },
 
@@ -261,11 +290,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
-                        "Users"
+                        collUsers
                     },
                     To = new List<string>
                     {
-                        "VisitorPass"
+                        collVisitorPass
                     }
                 },
 
@@ -275,11 +304,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
-                        "CharacterSheets"
+                        collCharacterSheets
                     },
                     To = new List<string>
                     {
-                        "PrimaryTraits"
+                        collPrimaryTraits
                     }
                 },
 
@@ -289,11 +318,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
-                        "PlayerApplications"
+                        collPlayerApplications
                     },
                     To = new List<string>
                     {
-                        "CharacterSheets"
+                        collCharacterSheets
                     }
                 },
 
@@ -303,11 +332,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name, 
                     From = new List<string>
                     {
-                        "CharacterSheets"
+                        collCharacterSheets
                     },
                     To = new List<string>
                     {
-                        "DieRolls"
+                        collDieRolls
                     }
                 },
 
@@ -317,11 +346,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
-                        "CharacterSheets"
+                        collCharacterSheets
                     },
                     To = new List<string>
                     {
-                        "MissionApplications"
+                        collMissionApplications
                     }
                 },
 
@@ -331,11 +360,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name, 
                     From = new List<string>
                     {
-                        "MissionApplications"
+                        collMissionApplications
                     },
                     To = new List<string>
                     {
-                        "CharacterSheets"
+                        collCharacterSheets
                     }
                 }, 
 
@@ -345,11 +374,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
-                        "CharacterSheets"
+                        collCharacterSheets
                     },
                     To = new List<string>
                     {
-                        "EquipmentTraits"
+                        collEquipmentTraits
                     }
                 },
 
@@ -359,11 +388,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
-                        "CharacterSheets"
+                        collCharacterSheets
                     },
                     To = new List<string>
                     {
-                        "Equipment"
+                        collEquipment
                     }
                 },
 
@@ -373,11 +402,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
-                        "CharacterSheets"
+                        collCharacterSheets
                     },
                     To = new List<string>
                     {
-                        "TemporaryTraits"
+                        collTemporaryTraits
                     }
                 },
 
@@ -387,11 +416,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
-                        "CharacterSheets"
+                        collCharacterSheets
                     },
                     To = new List<string>
                     {
-                        "OriginTraits"
+                        collOriginTraits
                     }
                 },
 
@@ -401,11 +430,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
-                        "OriginTraits"
+                        collOriginTraits
                     },
                     To = new List<string>
                     {
-                        "Languages"
+                        collLanguages
                     }
                 },
 
@@ -415,11 +444,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                     Collection = Collections.Last().Name,
                     From = new List<string>
                     {
-                        "OriginTraits"
+                        collOriginTraits
                     },
                     To = new List<string>
                     {
-                        "VisionTypes"
+                        collVisionTypes
                     }
                 }
             })
@@ -1891,8 +1920,8 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
             /// <summary>
             /// Default constructor
             /// </summary>
-            /// <param name="from">a document handle representing the origin vertex of the edge</param>
-            /// <param name="to">a document handle representing the destination vertex of the edge</param>
+            /// <param name="from">a document handle representing the origin vertex of the edge expressed in the format collection/_key</param>
+            /// <param name="to">a document handle representing the destination vertex of the edge expressed in the format collection/_key</param>
             public Edges(string from, string to)
             {
                 _from = from;

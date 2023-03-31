@@ -7,19 +7,40 @@ services:
       context: .
       dockerfile: TowerOfDaedalus_WebApp_Razor/Dockerfile
     depends_on:
-        - arangodb
-        - zookeeper
-        - kafka
-        - towerofdaedalus_webapp_discordbot
+        arangodb:
+            condition: service_started
+        zookeeper:
+            condition: service_started
+        kafka:
+            condition: service_started
+        towerofdaedalus_webapp_discordbot:
+            condition: service_started
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=https://+:443;http://+:80
+      - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
+      - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
+      - ARANGO_DB_NAME=${ARANGO_DB_NAME}
+      - ARANGO_SYSTEM_DB_NAME=${ARANGO_SYSTEM_DB_NAME}
+      - ARANGO_SYSTEM_USER_NAME=${ARANGO_SYSTEM_USER_NAME}
+      - ARANGO_SYSTEM_PASSWORD=${ARANGO_SYSTEM_PASSWORD}
+      - ARANGO_URL=${ARANGO_URL}
+      - ARANGO_NEW_USERNAME=${ARANGO_NEW_USERNAME}
+      - ARANGO_NEW_PASSWORD=${ARANGO_NEW_PASSWORD}
     ports:
       - 5000:80
       - 5100:443
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+    #healthcheck:
+    #  test: ["CMD", "wget", "--fail", "http://localhost:5000/healthz"]
+    #  interval: 1m30s
+    #  timeout: 10s
+    #  retries: 3
+    #  start_period: 40s
+    networks:
+        - daedalus-dev
 
   towerofdaedalus_webapp_blazor:
     image: ${DOCKER_REGISTRY-}towerofdaedaluswebappblazor
@@ -29,6 +50,15 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=https://+:443;http://+:80
+      - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
+      - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
+      - ARANGO_DB_NAME=${ARANGO_DB_NAME}
+      - ARANGO_SYSTEM_DB_NAME=${ARANGO_SYSTEM_DB_NAME}
+      - ARANGO_SYSTEM_USER_NAME=${ARANGO_SYSTEM_USER_NAME}
+      - ARANGO_SYSTEM_PASSWORD=${ARANGO_SYSTEM_PASSWORD}
+      - ARANGO_URL=${ARANGO_URL}
+      - ARANGO_NEW_USERNAME=${ARANGO_NEW_USERNAME}
+      - ARANGO_NEW_PASSWORD=${ARANGO_NEW_PASSWORD}
     ports:
       - 5001:80
       - 5101:443
@@ -36,11 +66,24 @@ services:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
     depends_on:
-        - arangodb
-        - zookeeper
-        - kafka
-        - towerofdaedalus_webapp_discordbot
-        - towerofdaedalus_webapp_razor
+        arangodb:
+            condition: service_started
+        zookeeper:
+            condition: service_started
+        kafka:
+            condition: service_started
+        towerofdaedalus_webapp_discordbot:
+            condition: service_started
+        towerofdaedalus_webapp_razor:
+            condition: service_started
+    #healthcheck:
+    #  test: ["CMD", "wget", "--fail", "http://localhost:5001/healthz"]
+    #  interval: 1m30s
+    #  timeout: 10s
+    #  retries: 3
+    #  start_period: 40s
+    networks:
+        - daedalus-dev
 
   towerofdaedalus_webapp_discordbot:
     image: ${DOCKER_REGISTRY-}towerofdaedaluswebappdiscordbot
@@ -49,17 +92,61 @@ services:
       dockerfile: TowerOfDaedalus_WebApp_DiscordBot/Dockerfile
     environment:
       - DOTNET_ENVIRONMENT=Development
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - ARANGO_DB_NAME=${ARANGO_DB_NAME}
+      - ARANGO_SYSTEM_DB_NAME=${ARANGO_SYSTEM_DB_NAME}
+      - ARANGO_SYSTEM_USER_NAME=${ARANGO_SYSTEM_USER_NAME}
+      - ARANGO_SYSTEM_PASSWORD=${ARANGO_SYSTEM_PASSWORD}
+      - ARANGO_URL=${ARANGO_URL}
+      - ARANGO_NEW_USERNAME=${ARANGO_NEW_USERNAME}
+      - ARANGO_NEW_PASSWORD=${ARANGO_NEW_PASSWORD}
+    ports:
+      - 5003:80
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+    #healthcheck:
+        #  test: ["CMD", "wget", "--fail", "http://localhost:5003/healthz"]
+        #  interval: 1m30s
+        #  timeout: 10s
+        #  retries: 3
+        #  start_period: 40s
+    networks:
+        - daedalus-dev
+
+  towerofdaedalus_webapp_restapi:
+    image: ${DOCKER_REGISTRY-}towerofdaedaluswebapprestapi
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+    ports:
+        - 5002:80
+        - 5102:443
+    build:
+      context: .
+      dockerfile: TowerOfDaedalus_WebApp_RESTApi/Dockerfile
+    depends_on:
+        - arangodb
+        - zookeeper
+        - kafka
+    #healthcheck:
+    #  test: ["CMD", "wget", "--fail", "http://localhost:5002/healthz"]
+    #  interval: 1m30s
+    #  timeout: 10s
+    #  retries: 3
+    #  start_period: 40s
+    networks:
+        - daedalus-dev
 
   arangodb:
     image: arangodb:latest
     ports:
         - 8529:8529
     environment:
-        - ARANGO_NO_AUTH=1
+        - ARANGO_ROOT_PASSWORD=${ARANGO_SYSTEM_PASSWORD}
     volumes:
         - ./Persistance/Arango:/var/lib/arangodb3
+    networks:
+        - daedalus-dev
 
   zookeeper:
     image: bitnami/zookeeper:latest
@@ -69,6 +156,8 @@ services:
         - ALLOW_ANONYMOUS_LOGIN=yes
     volumes:
         - ./Persistance/zookeeper:/bitnami/zookeeper
+    networks:
+        - daedalus-dev
 
   kafka:
     image: bitnami/kafka:latest
@@ -84,16 +173,10 @@ services:
       - zookeeper
     volumes:
       - ./Persistance/Kafka:/bitnami/kafka
+    networks:
+        - daedalus-dev
 
-
-
-  towerofdaedalus_webapp_restapi:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=https://+:443;http://+:80
-    ports:
-      - 5002:80
-      - 5102:443
-    volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+networks:
+  daedalus-dev:
+    driver: overlay
+    attachable: true
