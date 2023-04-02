@@ -15,6 +15,7 @@ using ArangoDBNetStandard.GraphApi.Models;
 using TowerOfDaedalus_WebApp_Arango.Schema;
 using ArangoDBNetStandard.CursorApi.Models;
 using Microsoft.Extensions.Logging;
+using System.Data;
 
 namespace TowerOfDaedalus_WebApp_Arango.Identity
 {
@@ -25,18 +26,31 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         IUserSecurityStampStore<Users>, IUserEmailStore<Users>, IUserPhoneNumberStore<Users>, IUserLoginStore<Users>,
         IUserTwoFactorStore<Users>, IUserLockoutStore<Users>
     {
-        private static ILogger<Utilities> _logger;
-        private readonly HttpApiTransport transport;
-        private readonly ArangoDBClient db;
+        private HttpApiTransport? transport;
+        private ArangoDBClient? db;
+        private bool disposed_ = false;
+        private bool created_ = false;
 
         /// <summary>
         /// 
         /// </summary>
-        ArangoUserStore(ILogger<Utilities> logger)
+        private async Task CreateConnection()
         {
-            _logger = logger;
-            transport = HttpApiTransport.UsingBasicAuth(new Uri(ArangoDbContext.getUrl()), ArangoDbContext.getSystemDbName(), ArangoDbContext.getSystemUsername(), ArangoDbContext.getSystemPassword());
-            db = new ArangoDBClient(transport);
+            if (!created_)
+            {
+                await Utilities.CreateDB();
+                transport = HttpApiTransport.UsingBasicAuth(new Uri(ArangoDbContext.getUrl()), ArangoDbContext.getSystemDbName(), ArangoDbContext.getSystemUsername(), ArangoDbContext.getSystemPassword());
+                db = new ArangoDBClient(transport);
+                created_ = true;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ~ArangoUserStore()
+        {
+            Dispose(disposing: false);
         }
 
         /// <summary>
@@ -49,24 +63,18 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task AddClaimsAsync(Users user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
         {
+            await CreateConnection();
+
             if (user.Id is null)
             {
-                _logger.LogError("a user id must be supplied to add claims");
+                //_logger.LogError("a user id must be supplied to add claims");
                 return;
             }
-            List<UserClaims> userClaims = new List<UserClaims>();
             List<Edges> edges = new List<Edges>();
-            foreach (var claim in claims)
-            {
-                UserClaims userClaim = new UserClaims(user.Id);
-                userClaim.ClaimType = claim.Type;
-                userClaim.ClaimValue = claim.Value;
-                userClaims.Add(userClaim);
-            }
 
-            foreach (UserClaims item in userClaims)
+            foreach (Claim item in claims)
             {
-                PostDocumentResponse<UserClaims> docResponse = await db.Document.PostDocumentAsync<UserClaims>(ArangoSchema.collUserClaims, item, token: cancellationToken);
+                PostDocumentResponse<ArangoClaims> docResponse = await db.Document.PostDocumentAsync<ArangoClaims>(ArangoSchema.collUserClaims, new ArangoClaims(item), token: cancellationToken);
                 Edges edge = new Edges($"{ArangoSchema.collUsers}/{user._key}",$"{ArangoSchema.collUserClaims}/{docResponse._key}");
                 edge.Type = "Claim";
                 edges.Add(edge);
@@ -78,7 +86,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
 
                 if (edgeResponse.Error)
                 {
-                    _logger.LogError("failed to post edge for user claim");
+                    //_logger.LogError("failed to post edge for user claim");
                 }
             }
 
@@ -95,13 +103,14 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task AddLoginAsync(Users user, UserLoginInfo login, CancellationToken cancellationToken)
         {
+            await CreateConnection();
+
             if (user.Id is null)
             {
-                _logger.LogError("a user id must be supplied to add claims");
+                //_logger.LogError("a user id must be supplied to add claims");
                 return;
             }
-            UserLogins newLogin = new UserLogins(login.LoginProvider, login.ProviderKey, user.Id);
-            newLogin.ProviderDisplayName = login.ProviderDisplayName;
+            UserLogins newLogin = new UserLogins(login.LoginProvider, login.ProviderKey, login.ProviderDisplayName, user.Id);
             PostDocumentResponse<UserLogins> docResponse = await db.Document.PostDocumentAsync<UserLogins>(ArangoSchema.collUserLogins, newLogin, token: cancellationToken);
             Edges edge = new Edges($"{ArangoSchema.collUsers}/{user._key}",$"{ArangoSchema.collUserLogins}/{docResponse._key}");
             edge.Type = "Login";
@@ -110,7 +119,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
 
             if (edgeResponse.Error)
             {
-                _logger.LogError("failed to post edge for user login");
+                //_logger.LogError("failed to post edge for user login");
             }
 
             return;
@@ -126,16 +135,18 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task AddToRoleAsync(Users user, string roleName, CancellationToken cancellationToken)
         {
+            await CreateConnection();
+
             PostCursorBody roleQuery = new PostCursorBody();
             roleQuery.BatchSize = 1;
-            roleQuery.Query = $"FOR doc IN {ArangoSchema.collRoles} FILTER doc.Name == \"{roleName}\" RETURN doc LIMIT 1";
+            roleQuery.Query = $"FOR doc IN {ArangoSchema.collRoles} FILTER doc.Name == \"{roleName}\" LIMIT 1 RETURN doc";
 
             CursorResponse<Roles> queryResponse = await db.Cursor.PostCursorAsync<Roles>(roleQuery, token: cancellationToken);
             Roles queryResult = queryResponse.Result.First();
 
             if (queryResponse.Error)
             {
-                _logger.LogError("Query to obtain role failed");
+                //_logger.LogError("Query to obtain role failed");
             }
 
             if (queryResponse.Result == null)
@@ -151,12 +162,12 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             PostEdgeResponse<Edges> edgeResponseA = await db.Graph.PostEdgeAsync<Edges>(ArangoSchema.graphPrimary, ArangoSchema.collEdges, edgeA, token: cancellationToken);
             if (edgeResponseA.Error)
             {
-                _logger.LogError("failed to post edge for user role");
+                //_logger.LogError("failed to post edge for user role");
             }
             PostEdgeResponse<Edges> edgeResponseB = await db.Graph.PostEdgeAsync<Edges>(ArangoSchema.graphPrimary, ArangoSchema.collEdges, edgeB, token: cancellationToken);
             if (edgeResponseB.Error)
             {
-                _logger.LogError("failed to post edge for role user");
+                //_logger.LogError("failed to post edge for role user");
             }
 
             return;
@@ -171,6 +182,8 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<IdentityResult> CreateAsync(Users user, CancellationToken cancellationToken)
         {
+            await CreateConnection();
+
             PostDocumentResponse<Users> userResponse = await db.Document.PostDocumentAsync<Users>(ArangoSchema.collUsers, user, token: cancellationToken);
 
             return IdentityResult.Success;
@@ -185,6 +198,8 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<IdentityResult> DeleteAsync(Users user, CancellationToken cancellationToken)
         {
+            await CreateConnection();
+
             DeleteDocumentResponse<Users> deleteResponse = await db.Document.DeleteDocumentAsync<Users>(ArangoSchema.collUsers, user._key, token: cancellationToken);
 
             return IdentityResult.Success;
@@ -196,8 +211,27 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public void Dispose()
         {
-            db.Dispose();
-            transport.Dispose();
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if(!this.disposed_)
+            {
+                if(disposing)
+                {
+                    db.Dispose();
+                    transport.Dispose();
+                    created_ = false;
+                }
+
+                disposed_ = true;
+            }
         }
 
         /// <summary>
@@ -207,9 +241,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<Users?> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
+        public async Task<Users?> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
         {
-            string query = $"FOR doc IN {ArangoSchema.collUsers} FILTER doc.NormalizedEmail == {normalizedEmail} RETURN doc LIMIT 1";
+            await CreateConnection();
+
+            string query = $"FOR doc IN {ArangoSchema.collUsers} FILTER doc.NormalizedEmail == \"{normalizedEmail}\" LIMIT 1 RETURN doc";
 
             CursorResponse<Users> queryResponse = await db.Cursor.PostCursorAsync<Users>(query, token: cancellationToken);
             if (queryResponse.Result.Any())
@@ -230,9 +266,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<Users?> FindByIdAsync(string userId, CancellationToken cancellationToken)
+        public async Task<Users?> FindByIdAsync(string userId, CancellationToken cancellationToken)
         {
-            string query = $"FOR doc IN {ArangoSchema.collUsers} FILTER doc.Id == {userId} RETURN doc LIMIT 1";
+            await CreateConnection();
+
+            string query = $"FOR doc IN {ArangoSchema.collUsers} FILTER doc.Id == \"{userId}\" LIMIT 1 RETURN doc";
 
             CursorResponse<Users> queryResponse = await db.Cursor.PostCursorAsync<Users>(query, token: cancellationToken);
             if (queryResponse.Result.Any())
@@ -256,15 +294,27 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<Users?> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
-            string query = $"FOR doc IN {ArangoSchema.collUserLogins} FILTER doc.LoginProvider == {loginProvider} && doc.ProviderKey == {providerKey} RETURN doc LIMIT 1";
+            await CreateConnection();
 
-            CursorResponse<UserLogins> queryResponse = await db.Cursor.PostCursorAsync<UserLogins>(query, token: cancellationToken);
+            string loginQuery = $"FOR doc IN {ArangoSchema.collUserLogins} FILTER doc.LoginProvider == \"{loginProvider}\" && doc.ProviderKey == \"{providerKey}\" LIMIT 1 RETURN doc";
 
-            if (queryResponse.Result.Any())
+            CursorResponse<UserLogins> loginResponse = await db.Cursor.PostCursorAsync<UserLogins>(loginQuery, token: cancellationToken);
+            if (loginResponse.Result.Any())
             {
-                UserLogins queryResult = queryResponse.Result.First();
-                Users result = await db.Document.GetDocumentAsync<Users>(queryResult.UserId);
-                return result;
+                UserLogins loginResult = loginResponse.Result.First();
+                string edgeQuery = $"FOR doc in {ArangoSchema.collEdges} FILTER doc._to == \"{ArangoSchema.collUserLogins}/{loginResult._key}\" && doc.Type == \"Claim\" LIMIT 1 RETURN doc";
+                CursorResponse<Edges> edgeResponse = await db.Cursor.PostCursorAsync<Edges>(edgeQuery, token: cancellationToken);
+                if (edgeResponse.Result.Any())
+                {
+                    Edges edgeResult = edgeResponse.Result.First();
+                    string[] edgeFrom = edgeResult._from.Split('/');
+                    Users result = await db.Document.GetDocumentAsync<Users>(ArangoSchema.collUsers, edgeFrom[1]);
+                    return result;
+                }
+                else
+                {
+                    return null;
+                }
             }
             else
             {
@@ -279,9 +329,22 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<Users?> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
+        public async Task<Users?> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            await CreateConnection();
+
+            string query = $"FOR doc IN {ArangoSchema.collUsers} FILTER doc.NormalizedUserName == \"{normalizedUserName}\" LIMIT 1 RETURN doc";
+
+            CursorResponse<Users> queryResponse = await db.Cursor.PostCursorAsync<Users>(query, token: cancellationToken);
+            if (queryResponse.Result.Any())
+            {
+                Users queryResult = queryResponse.Result.First();
+                return queryResult;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         /// <summary>
@@ -291,9 +354,13 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<int> GetAccessFailedCountAsync(Users user, CancellationToken cancellationToken)
+        public async Task<int> GetAccessFailedCountAsync(Users user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            await CreateConnection();
+
+            Users result = await db.Document.GetDocumentAsync<Users>(ArangoSchema.collUsers, user.Id);
+
+            return result.AccessFailedCount;
         }
 
         /// <summary>
@@ -303,9 +370,41 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<IList<Claim>> GetClaimsAsync(Users user, CancellationToken cancellationToken)
+        public async Task<IList<Claim>> GetClaimsAsync(Users user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            await CreateConnection();
+
+            List<Claim> result = new List<Claim>();
+            string query = $"FOR doc in {ArangoSchema.collEdges} FILTER doc._from == \"{ArangoSchema.collUsers}/{user._key}\" && doc.Type == \"Claim\" RETURN doc";
+            CursorResponse<Edges> queryResponse = await db.Cursor.PostCursorAsync<Edges>(query, token: cancellationToken);
+            if (queryResponse.Result.Any())
+            {
+                foreach (Edges item in queryResponse.Result)
+                {
+                    string[] edgeTo = item._to.Split('/');
+                    ArangoClaims itemClaim = await db.Document.GetDocumentAsync<ArangoClaims>(ArangoSchema.collUserClaims, edgeTo[1]);
+                    result.Add(itemClaim.getClaim());
+                }
+                bool hasMore = queryResponse.HasMore;
+                while (hasMore)
+                {
+                    PutCursorResponse<Edges> cursorResponse = await db.Cursor.PutCursorAsync<Edges>(queryResponse.Id, token: cancellationToken);
+                    hasMore = cursorResponse.HasMore;
+
+                    foreach (Edges item in cursorResponse.Result)
+                    {
+
+                        string[] edgeTo = item._to.Split('/');
+                        ArangoClaims itemClaim = await db.Document.GetDocumentAsync<ArangoClaims>(ArangoSchema.collUserClaims, edgeTo[1]);
+                        result.Add(itemClaim.getClaim());
+                    }
+                }
+                return result;
+            }
+            else
+            {
+                throw new ArgumentNullException("queryResponse.Result");
+            }
         }
 
         /// <summary>
@@ -315,9 +414,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<string?> GetEmailAsync(Users user, CancellationToken cancellationToken)
+        public async Task<string?> GetEmailAsync(Users user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return user.Email;
         }
 
         /// <summary>
@@ -328,9 +427,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<bool> GetEmailConfirmedAsync(Users user, CancellationToken cancellationToken)
+        public async Task<bool> GetEmailConfirmedAsync(Users user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return user.EmailConfirmed;
         }
 
         /// <summary>
@@ -340,9 +439,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<bool> GetLockoutEnabledAsync(Users user, CancellationToken cancellationToken)
+        public async Task<bool> GetLockoutEnabledAsync(Users user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return user.LockoutEnabled;
         }
 
         /// <summary>
@@ -353,9 +452,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<DateTimeOffset?> GetLockoutEndDateAsync(Users user, CancellationToken cancellationToken)
+        public async Task<DateTimeOffset?> GetLockoutEndDateAsync(Users user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return user.LockoutEnd;
         }
 
         /// <summary>
@@ -365,9 +464,40 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<IList<UserLoginInfo>> GetLoginsAsync(Users user, CancellationToken cancellationToken)
+        public async Task<IList<UserLoginInfo>> GetLoginsAsync(Users user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            await CreateConnection();
+
+            List<UserLoginInfo> result = new List<UserLoginInfo>();
+            string query = $"FOR doc in {ArangoSchema.collEdges} FILTER doc._from == \"{ArangoSchema.collUsers}/{user._key}\" && doc.Type == \"Login\" RETURN doc";
+            CursorResponse<Edges> queryResponse = await db.Cursor.PostCursorAsync<Edges>(query, token: cancellationToken);
+            if (queryResponse.Result.Any())
+            {
+                foreach (Edges item in queryResponse.Result)
+                {
+                    string[] edgeTo = item._to.Split('/');
+                    UserLogins login = await db.Document.GetDocumentAsync<UserLogins>(ArangoSchema.collUserLogins, edgeTo[1]);
+                    result.Add(login.getUserLoginInfo());
+                }
+                bool hasMore = queryResponse.HasMore;
+                while (hasMore)
+                {
+                    PutCursorResponse<Edges> cursorResponse = await db.Cursor.PutCursorAsync<Edges>(queryResponse.Id, token: cancellationToken);
+                    hasMore = cursorResponse.HasMore;
+
+                    foreach (Edges item in cursorResponse.Result)
+                    {
+                        string[] edgeTo = item._to.Split('/');
+                        UserLogins login = await db.Document.GetDocumentAsync<UserLogins>(ArangoSchema.collUserLogins, edgeTo[1]);
+                        result.Add(login.getUserLoginInfo());
+                    }
+                }
+                return result;
+            }
+            else
+            {
+                throw new ArgumentNullException("queryResponse.Result");
+            }
         }
 
         /// <summary>
@@ -377,9 +507,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<string?> GetNormalizedEmailAsync(Users user, CancellationToken cancellationToken)
+        public async Task<string?> GetNormalizedEmailAsync(Users user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return user.NormalizedEmail;
         }
 
         /// <summary>
@@ -389,9 +519,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<string?> GetNormalizedUserNameAsync(Users user, CancellationToken cancellationToken)
+        public async Task<string?> GetNormalizedUserNameAsync(Users user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return user.NormalizedUserName;
         }
 
         /// <summary>
@@ -401,9 +531,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<string?> GetPasswordHashAsync(Users user, CancellationToken cancellationToken)
+        public async Task<string?> GetPasswordHashAsync(Users user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return user.PasswordHash;
         }
 
         /// <summary>
@@ -413,9 +543,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<string?> GetPhoneNumberAsync(Users user, CancellationToken cancellationToken)
+        public async Task<string?> GetPhoneNumberAsync(Users user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return user.PhoneNumber;
         }
 
         /// <summary>
@@ -425,9 +555,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<bool> GetPhoneNumberConfirmedAsync(Users user, CancellationToken cancellationToken)
+        public async Task<bool> GetPhoneNumberConfirmedAsync(Users user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return user.PhoneNumberConfirmed;
         }
 
         /// <summary>
@@ -437,9 +567,40 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<IList<string>> GetRolesAsync(Users user, CancellationToken cancellationToken)
+        public async Task<IList<string>> GetRolesAsync(Users user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            await CreateConnection();
+
+            List<string> result = new List<string>();
+            string query = $"FOR doc in {ArangoSchema.collEdges} FILTER doc._from == \"{ArangoSchema.collUsers}/{user._key}\" && doc.Type == \"UserRole\" RETURN doc";
+            CursorResponse<Edges> queryResponse = await db.Cursor.PostCursorAsync<Edges>(query, token: cancellationToken);
+            if (queryResponse.Result.Any())
+            {
+                foreach (Edges item in queryResponse.Result)
+                {
+                    string[] edgeTo = item._to.Split('/');
+                    Roles role = await db.Document.GetDocumentAsync<Roles>(ArangoSchema.collRoles, edgeTo[1]);
+                    result.Add(role.Name);
+                }
+                bool hasMore = queryResponse.HasMore;
+                while (hasMore)
+                {
+                    PutCursorResponse<Edges> cursorResponse = await db.Cursor.PutCursorAsync<Edges>(queryResponse.Id, token: cancellationToken);
+                    hasMore = cursorResponse.HasMore;
+
+                    foreach (Edges item in cursorResponse.Result)
+                    {
+                        string[] edgeTo = item._to.Split('/');
+                        Roles role = await db.Document.GetDocumentAsync<Roles>(ArangoSchema.collRoles, edgeTo[1]);
+                        result.Add(role.Name);
+                    }
+                }
+                return result;
+            }
+            else
+            {
+                throw new ArgumentNullException("queryResponse.Result");
+            }
         }
 
         /// <summary>
@@ -449,9 +610,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<string?> GetSecurityStampAsync(Users user, CancellationToken cancellationToken)
+        public async Task<string?> GetSecurityStampAsync(Users user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return user.SecurityStamp;
         }
 
         /// <summary>
@@ -462,9 +623,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<bool> GetTwoFactorEnabledAsync(Users user, CancellationToken cancellationToken)
+        public async Task<bool> GetTwoFactorEnabledAsync(Users user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return user.TwoFactorEnabled;
         }
 
         /// <summary>
@@ -474,9 +635,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<string> GetUserIdAsync(Users user, CancellationToken cancellationToken)
+        public async Task<string> GetUserIdAsync(Users user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return user.Id;
         }
 
         /// <summary>
@@ -486,9 +647,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<string?> GetUserNameAsync(Users user, CancellationToken cancellationToken)
+        public async Task<string?> GetUserNameAsync(Users user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return user.UserName;
         }
 
         /// <summary>
@@ -498,9 +659,44 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<IList<Users>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken)
+        public async Task<IList<Users>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            await CreateConnection();
+
+            string claimQuery = $"FOR doc IN {ArangoSchema.collUserClaims} FILTER doc.Value == \"{claim.Value}\" && doc.Type == \"{claim.Type}\" && doc.Issuer == \"{claim.Issuer}\" LIMIT 1 RETURN doc";
+            CursorResponse<ArangoClaims> claimResponse = await db.Cursor.PostCursorAsync<ArangoClaims>(claimQuery, token: cancellationToken);
+            string claimKey = claimResponse.Result.First()._key;
+
+            List<Users> result = new List<Users>();
+            string edgesQuery = $"FOR doc in {ArangoSchema.collEdges} FILTER doc._to == \"{ArangoSchema.collUserClaims}/{claimKey}\" && doc.Type == \"Claim\" RETURN doc";
+            CursorResponse<Edges> queryResponse = await db.Cursor.PostCursorAsync<Edges>(edgesQuery, token: cancellationToken);
+            if (queryResponse.Result.Any())
+            {
+                foreach (Edges item in queryResponse.Result)
+                {
+                    string[] edgeFrom = item._from.Split('/');
+                    Users user = await db.Document.GetDocumentAsync<Users>(ArangoSchema.collUsers, edgeFrom[1]);
+                    result.Add(user);
+                }
+                bool hasMore = queryResponse.HasMore;
+                while (hasMore)
+                {
+                    PutCursorResponse<Edges> cursorResponse = await db.Cursor.PutCursorAsync<Edges>(queryResponse.Id, token: cancellationToken);
+                    hasMore = cursorResponse.HasMore;
+
+                    foreach (Edges item in cursorResponse.Result)
+                    {
+                        string[] edgeFrom = item._from.Split('/');
+                        Users user = await db.Document.GetDocumentAsync<Users>(ArangoSchema.collUsers, edgeFrom[1]);
+                        result.Add(user);
+                    }
+                }
+                return result;
+            }
+            else
+            {
+                throw new ArgumentNullException("queryResponse.Result");
+            }
         }
 
         /// <summary>
@@ -510,9 +706,44 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<IList<Users>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
+        public async Task<IList<Users>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            await CreateConnection();
+
+            string roleQuery = $"FOR doc IN {ArangoSchema.collRoles} FILTER doc.Name == \"{roleName}\" LIMIT 1 RETURN doc";
+            CursorResponse<ArangoClaims> roleResponse = await db.Cursor.PostCursorAsync<ArangoClaims>(roleQuery, token: cancellationToken);
+            string roleKey = roleResponse.Result.First()._key;
+
+            List<Users> result = new List<Users>();
+            string edgesQuery = $"FOR doc in {ArangoSchema.collEdges} FILTER doc._from == \"{ArangoSchema.collRoles}/{roleKey}\" && doc.Type == \"UserRole\" RETURN doc";
+            CursorResponse<Edges> queryResponse = await db.Cursor.PostCursorAsync<Edges>(edgesQuery, token: cancellationToken);
+            if (queryResponse.Result.Any())
+            {
+                foreach (Edges item in queryResponse.Result)
+                {
+                    string[] edgeTo = item._to.Split('/');
+                    Users user = await db.Document.GetDocumentAsync<Users>(ArangoSchema.collUsers, edgeTo[1]);
+                    result.Add(user);
+                }
+                bool hasMore = queryResponse.HasMore;
+                while (hasMore)
+                {
+                    PutCursorResponse<Edges> cursorResponse = await db.Cursor.PutCursorAsync<Edges>(queryResponse.Id, token: cancellationToken);
+                    hasMore = cursorResponse.HasMore;
+
+                    foreach (Edges item in cursorResponse.Result)
+                    {
+                        string[] edgeTo = item._to.Split('/');
+                        Users user = await db.Document.GetDocumentAsync<Users>(ArangoSchema.collUsers, edgeTo[1]);
+                        result.Add(user);
+                    }
+                }
+                return result;
+            }
+            else
+            {
+                throw new ArgumentNullException("queryResponse.Result");
+            }
         }
 
         /// <summary>
@@ -522,9 +753,16 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<bool> HasPasswordAsync(Users user, CancellationToken cancellationToken)
+        public async Task<bool> HasPasswordAsync(Users user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            if (user.PasswordHash is null)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
 
         /// <summary>
@@ -534,9 +772,10 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<int> IncrementAccessFailedCountAsync(Users user, CancellationToken cancellationToken)
+        public async Task<int> IncrementAccessFailedCountAsync(Users user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            user.AccessFailedCount++;
+            return user.AccessFailedCount;
         }
 
         /// <summary>
@@ -547,8 +786,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<bool> IsInRoleAsync(Users user, string roleName, CancellationToken cancellationToken)
+        public async Task<bool> IsInRoleAsync(Users user, string roleName, CancellationToken cancellationToken)
         {
+            await CreateConnection();
             throw new NotImplementedException();
         }
 
@@ -560,8 +800,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task RemoveClaimsAsync(Users user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
+        public async Task RemoveClaimsAsync(Users user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
         {
+            await CreateConnection();
             throw new NotImplementedException();
         }
 
@@ -573,8 +814,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task RemoveFromRoleAsync(Users user, string roleName, CancellationToken cancellationToken)
+        public async Task RemoveFromRoleAsync(Users user, string roleName, CancellationToken cancellationToken)
         {
+            await CreateConnection();
             throw new NotImplementedException();
         }
 
@@ -587,8 +829,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task RemoveLoginAsync(Users user, string loginProvider, string providerKey, CancellationToken cancellationToken)
+        public async Task RemoveLoginAsync(Users user, string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
+            await CreateConnection();
             throw new NotImplementedException();
         }
 
@@ -601,8 +844,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task ReplaceClaimAsync(Users user, Claim claim, Claim newClaim, CancellationToken cancellationToken)
+        public async Task ReplaceClaimAsync(Users user, Claim claim, Claim newClaim, CancellationToken cancellationToken)
         {
+            await CreateConnection();
             throw new NotImplementedException();
         }
 
@@ -613,9 +857,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task ResetAccessFailedCountAsync(Users user, CancellationToken cancellationToken)
+        public async Task ResetAccessFailedCountAsync(Users user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            user.AccessFailedCount = 0;
         }
 
         /// <summary>
@@ -626,9 +870,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task SetEmailAsync(Users user, string? email, CancellationToken cancellationToken)
+        public async Task SetEmailAsync(Users user, string? email, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            user.Email= email;
         }
 
         /// <summary>
@@ -640,9 +884,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task SetEmailConfirmedAsync(Users user, bool confirmed, CancellationToken cancellationToken)
+        public async Task SetEmailConfirmedAsync(Users user, bool confirmed, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            user.EmailConfirmed = confirmed;
         }
 
         /// <summary>
@@ -653,9 +897,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task SetLockoutEnabledAsync(Users user, bool enabled, CancellationToken cancellationToken)
+        public async Task SetLockoutEnabledAsync(Users user, bool enabled, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            user.LockoutEnabled = enabled;
         }
 
         /// <summary>
@@ -667,9 +911,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task SetLockoutEndDateAsync(Users user, DateTimeOffset? lockoutEnd, CancellationToken cancellationToken)
+        public async Task SetLockoutEndDateAsync(Users user, DateTimeOffset? lockoutEnd, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            user.LockoutEnd = lockoutEnd;
         }
 
         /// <summary>
@@ -680,9 +924,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task SetNormalizedEmailAsync(Users user, string? normalizedEmail, CancellationToken cancellationToken)
+        public async Task SetNormalizedEmailAsync(Users user, string? normalizedEmail, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            user.NormalizedEmail = normalizedEmail;
         }
 
         /// <summary>
@@ -693,9 +937,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task SetNormalizedUserNameAsync(Users user, string? normalizedName, CancellationToken cancellationToken)
+        public async Task SetNormalizedUserNameAsync(Users user, string? normalizedName, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            user.NormalizedUserName = normalizedName;
         }
 
         /// <summary>
@@ -706,9 +950,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task SetPasswordHashAsync(Users user, string? passwordHash, CancellationToken cancellationToken)
+        public async Task SetPasswordHashAsync(Users user, string? passwordHash, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            user.PasswordHash = passwordHash;
         }
 
         /// <summary>
@@ -719,9 +963,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task SetPhoneNumberAsync(Users user, string? phoneNumber, CancellationToken cancellationToken)
+        public async Task SetPhoneNumberAsync(Users user, string? phoneNumber, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            user.PhoneNumber = phoneNumber;
         }
 
         /// <summary>
@@ -732,9 +976,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task SetPhoneNumberConfirmedAsync(Users user, bool confirmed, CancellationToken cancellationToken)
+        public async Task SetPhoneNumberConfirmedAsync(Users user, bool confirmed, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            user.PhoneNumberConfirmed = confirmed;
         }
 
         /// <summary>
@@ -745,9 +989,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task SetSecurityStampAsync(Users user, string stamp, CancellationToken cancellationToken)
+        public async Task SetSecurityStampAsync(Users user, string stamp, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            user.SecurityStamp = stamp;
         }
 
         /// <summary>
@@ -759,9 +1003,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task SetTwoFactorEnabledAsync(Users user, bool enabled, CancellationToken cancellationToken)
+        public async Task SetTwoFactorEnabledAsync(Users user, bool enabled, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            user.TwoFactorEnabled = enabled;
         }
 
         /// <summary>
@@ -772,9 +1016,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task SetUserNameAsync(Users user, string? userName, CancellationToken cancellationToken)
+        public async Task SetUserNameAsync(Users user, string? userName, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            user.UserName = userName;
         }
 
         /// <summary>
@@ -784,9 +1028,20 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<IdentityResult> UpdateAsync(Users user, CancellationToken cancellationToken)
+        public async Task<IdentityResult> UpdateAsync(Users user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            if (user._key is null)
+            {
+                PostDocumentResponse<Users> postResponse = await db.Document.PostDocumentAsync<Users>(ArangoSchema.collUsers, user, token: cancellationToken);
+            }
+            else 
+            {
+                PatchDocumentQuery patchQuery = new PatchDocumentQuery();
+                patchQuery.KeepNull = true;
+
+                PatchDocumentResponse<object> patchResponse = await db.Document.PatchDocumentAsync<Users>($"{ArangoSchema.collUsers}/{user._key}", user, patchQuery, cancellationToken);
+            }
+            return IdentityResult.Success;
         }
     }
 }

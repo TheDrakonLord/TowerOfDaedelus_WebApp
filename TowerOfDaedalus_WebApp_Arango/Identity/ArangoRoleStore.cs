@@ -16,18 +16,31 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
     /// </summary>
     public class ArangoRoleStore : IRoleStore<Roles>
     {
-        private static ILogger<Utilities> _logger;
-        private HttpApiTransport transport;
-        private ArangoDBClient db;
+        private HttpApiTransport? transport;
+        private ArangoDBClient? db;
+        private bool disposed_ = false;
+        private bool created_ = false;
 
         /// <summary>
         /// 
         /// </summary>
-        ArangoRoleStore(ILogger<Utilities> logger)
+        private async Task CreateConnection()
         {
-            _logger = logger;
-            transport = HttpApiTransport.UsingBasicAuth(new Uri(ArangoDbContext.getUrl()), ArangoDbContext.getSystemDbName(), ArangoDbContext.getSystemUsername(), ArangoDbContext.getSystemPassword());
-            db = new ArangoDBClient(transport);
+            if (!created_)
+            {
+                await Utilities.CreateDB();
+                transport = HttpApiTransport.UsingBasicAuth(new Uri(ArangoDbContext.getUrl()), ArangoDbContext.getSystemDbName(), ArangoDbContext.getSystemUsername(), ArangoDbContext.getSystemPassword());
+                db = new ArangoDBClient(transport);
+                created_ = true;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ~ArangoRoleStore()
+        {
+            Dispose(disposing: false);
         }
 
         /// <summary>
@@ -37,8 +50,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>A Task that represents the IdentityResult of the asynchronous query</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<IdentityResult> CreateAsync(Roles role, CancellationToken cancellationToken)
+        public async Task<IdentityResult> CreateAsync(Roles role, CancellationToken cancellationToken)
         {
+            await CreateConnection();
             throw new NotImplementedException();
         }
 
@@ -49,19 +63,39 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>A Task that represents the IdentityResult of the asynchronous query</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<IdentityResult> DeleteAsync(Roles role, CancellationToken cancellationToken)
+        public async Task<IdentityResult> DeleteAsync(Roles role, CancellationToken cancellationToken)
         {
+            await CreateConnection();
             throw new NotImplementedException();
         }
 
         /// <summary>
-        /// dispose the stores
+        /// Dispose the store
         /// </summary>
         /// <exception cref="NotImplementedException"></exception>
         public void Dispose()
         {
-            db.Dispose();
-            transport.Dispose();
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.disposed_)
+            {
+                if (disposing)
+                {
+                    db.Dispose();
+                    transport.Dispose();
+                    created_ = false;
+                }
+
+                disposed_ = true;
+            }
         }
 
         /// <summary>
@@ -71,8 +105,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>A Task that result of the look up</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<Roles?> FindByIdAsync(string roleId, CancellationToken cancellationToken)
+        public async Task<Roles?> FindByIdAsync(string roleId, CancellationToken cancellationToken)
         {
+            await CreateConnection();
             throw new NotImplementedException();
         }
 
@@ -83,8 +118,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>A Task that result of the look up</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<Roles?> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
+        public async Task<Roles?> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
         {
+            await CreateConnection();
             throw new NotImplementedException();
         }
 
@@ -95,8 +131,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>A Task that contains the name of the role</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<string?> GetNormalizedRoleNameAsync(Roles role, CancellationToken cancellationToken)
+        public async Task<string?> GetNormalizedRoleNameAsync(Roles role, CancellationToken cancellationToken)
         {
+            await CreateConnection();
             throw new NotImplementedException();
         }
 
@@ -107,8 +144,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">the CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>A Task that contains the ID of the role</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<string> GetRoleIdAsync(Roles role, CancellationToken cancellationToken)
+        public async Task<string> GetRoleIdAsync(Roles role, CancellationToken cancellationToken)
         {
+            await CreateConnection();
             throw new NotImplementedException();
         }
 
@@ -119,8 +157,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>A Task that contains the name of the role</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<string?> GetRoleNameAsync(Roles role, CancellationToken cancellationToken)
+        public async Task<string?> GetRoleNameAsync(Roles role, CancellationToken cancellationToken)
         {
+            await CreateConnection();
             throw new NotImplementedException();
         }
 
@@ -132,8 +171,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task SetNormalizedRoleNameAsync(Roles role, string? normalizedName, CancellationToken cancellationToken)
+        public async Task SetNormalizedRoleNameAsync(Roles role, string? normalizedName, CancellationToken cancellationToken)
         {
+            await CreateConnection();
             throw new NotImplementedException();
         }
 
@@ -145,8 +185,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>The Task that represents the asynchronous operation</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task SetRoleNameAsync(Roles role, string? roleName, CancellationToken cancellationToken)
+        public async Task SetRoleNameAsync(Roles role, string? roleName, CancellationToken cancellationToken)
         {
+            await CreateConnection();
             throw new NotImplementedException();
         }
 
@@ -157,8 +198,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <param name="cancellationToken">The CancellationToken used to propagate notifications that the operation should be canceled</param>
         /// <returns>A Task that represents the IdentityResult of the asynchronous query</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public Task<IdentityResult> UpdateAsync(Roles role, CancellationToken cancellationToken)
+        public async Task<IdentityResult> UpdateAsync(Roles role, CancellationToken cancellationToken)
         {
+            await CreateConnection();
             throw new NotImplementedException();
         }
     }

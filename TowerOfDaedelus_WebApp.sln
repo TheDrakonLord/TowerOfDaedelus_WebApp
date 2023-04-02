@@ -23,7 +23,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TowerOfDaedalus_WebApp_Blaz
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TowerOfDaedalus_WebApp_Arango", "TowerOfDaedalus_WebApp_Arango\TowerOfDaedalus_WebApp_Arango.csproj", "{31881403-F8F7-4BFE-88BF-5A92102D6FA8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TowerOfDaedalus_WebApp_RESTApi", "TowerOfDaedalus_WebApp_RESTApi\TowerOfDaedalus_WebApp_RESTApi.csproj", "{844D693C-615F-40FB-8CA2-49617FAE0FF6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TowerOfDaedalus_WebApp_RESTApi", "TowerOfDaedalus_WebApp_RESTApi\TowerOfDaedalus_WebApp_RESTApi.csproj", "{844D693C-615F-40FB-8CA2-49617FAE0FF6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TowerOfDaedalus_WebApp_IntegrationTests", "TowerOfDaedalus_WebApp_IntegrationTests\TowerOfDaedalus_WebApp_IntegrationTests.csproj", "{E7F9D42D-BFEB-4047-ADD3-9A56535F7580}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,6 +61,10 @@ Global
 		{844D693C-615F-40FB-8CA2-49617FAE0FF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{844D693C-615F-40FB-8CA2-49617FAE0FF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{844D693C-615F-40FB-8CA2-49617FAE0FF6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7F9D42D-BFEB-4047-ADD3-9A56535F7580}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7F9D42D-BFEB-4047-ADD3-9A56535F7580}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7F9D42D-BFEB-4047-ADD3-9A56535F7580}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7F9D42D-BFEB-4047-ADD3-9A56535F7580}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
