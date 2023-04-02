@@ -223,7 +223,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         {
             if(!this.disposed_)
             {
-                if(disposing)
+                if(disposing && created_)
                 {
                     db.Dispose();
                     transport.Dispose();

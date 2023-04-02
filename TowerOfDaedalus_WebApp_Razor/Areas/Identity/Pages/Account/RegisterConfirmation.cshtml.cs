@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using static TowerOfDaedalus_WebApp_Arango.Schema.Documents;
 
 namespace TowerOfDaedelus_WebApp.Areas.Identity.Pages.Account
 {
@@ -20,18 +21,16 @@ namespace TowerOfDaedelus_WebApp.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class RegisterConfirmationModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly IEmailSender _sender;
+        private readonly UserManager<Users> _userManager;
 
         /// <summary>
         /// default constructor
         /// </summary>
         /// <param name="userManager">the user manager class used by the identify framework</param>
         /// <param name="sender">the email sender to send confirmation emails to the user</param>
-        public RegisterConfirmationModel(UserManager<IdentityUser> userManager, IEmailSender sender)
+        public RegisterConfirmationModel(UserManager<Users> userManager)
         {
             _userManager = userManager;
-            _sender = sender;
         }
 
         /// <summary>
