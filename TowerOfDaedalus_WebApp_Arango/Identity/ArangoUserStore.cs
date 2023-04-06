@@ -16,6 +16,7 @@ using TowerOfDaedalus_WebApp_Arango.Schema;
 using ArangoDBNetStandard.CursorApi.Models;
 using Microsoft.Extensions.Logging;
 using System.Data;
+using System.Collections;
 
 namespace TowerOfDaedalus_WebApp_Arango.Identity
 {
@@ -139,7 +140,10 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
 
             PostCursorBody roleQuery = new PostCursorBody();
             roleQuery.BatchSize = 1;
-            roleQuery.Query = $"FOR doc IN {ArangoSchema.collRoles} FILTER doc.Name == \"{roleName}\" LIMIT 1 RETURN doc";
+            ArangoQueryBuilder qb = new ArangoQueryBuilder(ArangoSchema.collRoles);
+            qb.filter("Name", roleName);
+            qb.limit(1);
+            roleQuery.Query = qb.ToString();
 
             CursorResponse<Roles> queryResponse = await db.Cursor.PostCursorAsync<Roles>(roleQuery, token: cancellationToken);
             Roles queryResult = queryResponse.Result.First();
@@ -245,7 +249,10 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         {
             await CreateConnection();
 
-            string query = $"FOR doc IN {ArangoSchema.collUsers} FILTER doc.NormalizedEmail == \"{normalizedEmail}\" LIMIT 1 RETURN doc";
+            ArangoQueryBuilder qb = new ArangoQueryBuilder(ArangoSchema.collUsers);
+            qb.filter("NormalizedEmail", normalizedEmail);
+            qb.limit(1);
+            string query = qb.ToString();
 
             CursorResponse<Users> queryResponse = await db.Cursor.PostCursorAsync<Users>(query, token: cancellationToken);
             if (queryResponse.Result.Any())
@@ -270,7 +277,10 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         {
             await CreateConnection();
 
-            string query = $"FOR doc IN {ArangoSchema.collUsers} FILTER doc.Id == \"{userId}\" LIMIT 1 RETURN doc";
+            ArangoQueryBuilder qb = new ArangoQueryBuilder(ArangoSchema.collUsers);
+            qb.filter("Id", userId);
+            qb.limit(1);
+            string query = qb.ToString();
 
             CursorResponse<Users> queryResponse = await db.Cursor.PostCursorAsync<Users>(query, token: cancellationToken);
             if (queryResponse.Result.Any())
@@ -296,13 +306,21 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         {
             await CreateConnection();
 
-            string loginQuery = $"FOR doc IN {ArangoSchema.collUserLogins} FILTER doc.LoginProvider == \"{loginProvider}\" && doc.ProviderKey == \"{providerKey}\" LIMIT 1 RETURN doc";
+            ArangoQueryBuilder loginQb = new ArangoQueryBuilder(ArangoSchema.collUserLogins);
+            loginQb.filter("LoginProvider", loginProvider);
+            loginQb.filter("ProviderKey", providerKey);
+            loginQb.limit(1);
+            string loginQuery = loginQb.ToString();
 
             CursorResponse<UserLogins> loginResponse = await db.Cursor.PostCursorAsync<UserLogins>(loginQuery, token: cancellationToken);
             if (loginResponse.Result.Any())
             {
                 UserLogins loginResult = loginResponse.Result.First();
-                string edgeQuery = $"FOR doc in {ArangoSchema.collEdges} FILTER doc._to == \"{ArangoSchema.collUserLogins}/{loginResult._key}\" && doc.Type == \"Claim\" LIMIT 1 RETURN doc";
+                ArangoQueryBuilder edgeQb = new ArangoQueryBuilder(ArangoSchema.collEdges);
+                edgeQb.filter("_to", $"{ArangoSchema.collUserLogins}/{loginResult._key}");
+                edgeQb.filter("Type", "Claim");
+                edgeQb.limit(1);
+                string edgeQuery = edgeQb.ToString();
                 CursorResponse<Edges> edgeResponse = await db.Cursor.PostCursorAsync<Edges>(edgeQuery, token: cancellationToken);
                 if (edgeResponse.Result.Any())
                 {
@@ -333,7 +351,10 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         {
             await CreateConnection();
 
-            string query = $"FOR doc IN {ArangoSchema.collUsers} FILTER doc.NormalizedUserName == \"{normalizedUserName}\" LIMIT 1 RETURN doc";
+            ArangoQueryBuilder qb = new ArangoQueryBuilder(ArangoSchema.collUsers);
+            qb.filter("NormalizedUserName", normalizedUserName);
+            qb.limit(1);
+            string query = qb.ToString();
 
             CursorResponse<Users> queryResponse = await db.Cursor.PostCursorAsync<Users>(query, token: cancellationToken);
             if (queryResponse.Result.Any())
@@ -375,7 +396,10 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             await CreateConnection();
 
             List<Claim> result = new List<Claim>();
-            string query = $"FOR doc in {ArangoSchema.collEdges} FILTER doc._from == \"{ArangoSchema.collUsers}/{user._key}\" && doc.Type == \"Claim\" RETURN doc";
+            ArangoQueryBuilder qb = new ArangoQueryBuilder(ArangoSchema.collEdges);
+            qb.filter("_from", $"{ArangoSchema.collUsers}/{user._key}");
+            qb.filter("Type", "Claim");
+            string query = qb.ToString();
             CursorResponse<Edges> queryResponse = await db.Cursor.PostCursorAsync<Edges>(query, token: cancellationToken);
             if (queryResponse.Result.Any())
             {
@@ -469,7 +493,10 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             await CreateConnection();
 
             List<UserLoginInfo> result = new List<UserLoginInfo>();
-            string query = $"FOR doc in {ArangoSchema.collEdges} FILTER doc._from == \"{ArangoSchema.collUsers}/{user._key}\" && doc.Type == \"Login\" RETURN doc";
+            ArangoQueryBuilder qb = new ArangoQueryBuilder(ArangoSchema.collEdges);
+            qb.filter("_from", $"{ArangoSchema.collUsers}/{user._key}");
+            qb.filter("Type", "Login");
+            string query = qb.ToString();
             CursorResponse<Edges> queryResponse = await db.Cursor.PostCursorAsync<Edges>(query, token: cancellationToken);
             if (queryResponse.Result.Any())
             {
@@ -572,7 +599,10 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             await CreateConnection();
 
             List<string> result = new List<string>();
-            string query = $"FOR doc in {ArangoSchema.collEdges} FILTER doc._from == \"{ArangoSchema.collUsers}/{user._key}\" && doc.Type == \"UserRole\" RETURN doc";
+            ArangoQueryBuilder qb = new ArangoQueryBuilder(ArangoSchema.collEdges);
+            qb.filter("_from", $"{ArangoSchema.collUsers}/{user._key}");
+            qb.filter("Type", "UserRole");
+            string query = qb.ToString();
             CursorResponse<Edges> queryResponse = await db.Cursor.PostCursorAsync<Edges>(query, token: cancellationToken);
             if (queryResponse.Result.Any())
             {
@@ -663,12 +693,20 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         {
             await CreateConnection();
 
-            string claimQuery = $"FOR doc IN {ArangoSchema.collUserClaims} FILTER doc.Value == \"{claim.Value}\" && doc.Type == \"{claim.Type}\" && doc.Issuer == \"{claim.Issuer}\" LIMIT 1 RETURN doc";
+            ArangoQueryBuilder claimQb = new ArangoQueryBuilder(ArangoSchema.collUserClaims);
+            claimQb.filter("Value", claim.Value);
+            claimQb.filter("Type", claim.Type);
+            claimQb.filter("Issuer", claim.Issuer);
+            claimQb.limit(1);
+            string claimQuery = claimQb.ToString();
             CursorResponse<ArangoClaims> claimResponse = await db.Cursor.PostCursorAsync<ArangoClaims>(claimQuery, token: cancellationToken);
             string claimKey = claimResponse.Result.First()._key;
 
             List<Users> result = new List<Users>();
-            string edgesQuery = $"FOR doc in {ArangoSchema.collEdges} FILTER doc._to == \"{ArangoSchema.collUserClaims}/{claimKey}\" && doc.Type == \"Claim\" RETURN doc";
+            ArangoQueryBuilder edgesQb = new ArangoQueryBuilder(ArangoSchema.collEdges);
+            edgesQb.filter("_to", $"{ArangoSchema.collUserClaims}/{claimKey}");
+            edgesQb.filter("Type", "Claim");
+            string edgesQuery = edgesQb.ToString();
             CursorResponse<Edges> queryResponse = await db.Cursor.PostCursorAsync<Edges>(edgesQuery, token: cancellationToken);
             if (queryResponse.Result.Any())
             {
@@ -710,12 +748,18 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         {
             await CreateConnection();
 
-            string roleQuery = $"FOR doc IN {ArangoSchema.collRoles} FILTER doc.Name == \"{roleName}\" LIMIT 1 RETURN doc";
+            ArangoQueryBuilder roleQb = new ArangoQueryBuilder(ArangoSchema.collRoles);
+            roleQb.filter("Name", roleName);
+            roleQb.limit(1);
+            string roleQuery = roleQb.ToString();
             CursorResponse<ArangoClaims> roleResponse = await db.Cursor.PostCursorAsync<ArangoClaims>(roleQuery, token: cancellationToken);
             string roleKey = roleResponse.Result.First()._key;
 
             List<Users> result = new List<Users>();
-            string edgesQuery = $"FOR doc in {ArangoSchema.collEdges} FILTER doc._from == \"{ArangoSchema.collRoles}/{roleKey}\" && doc.Type == \"UserRole\" RETURN doc";
+            ArangoQueryBuilder edgesQb = new ArangoQueryBuilder(ArangoSchema.collEdges);
+            edgesQb.filter("_from", $"{ArangoSchema.collRoles}/{roleKey}");
+            edgesQb.filter("Type", "UserRole");
+            string edgesQuery = edgesQb.ToString();
             CursorResponse<Edges> queryResponse = await db.Cursor.PostCursorAsync<Edges>(edgesQuery, token: cancellationToken);
             if (queryResponse.Result.Any())
             {
@@ -789,7 +833,28 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         public async Task<bool> IsInRoleAsync(Users user, string roleName, CancellationToken cancellationToken)
         {
             await CreateConnection();
-            throw new NotImplementedException();
+
+            ArangoQueryBuilder roleQb = new ArangoQueryBuilder(ArangoSchema.collRoles);
+            roleQb.filter("Name", roleName);
+            roleQb.limit(1);
+            string roleQuery = roleQb.ToString();
+            CursorResponse<ArangoClaims> roleResponse = await db.Cursor.PostCursorAsync<ArangoClaims>(roleQuery, token: cancellationToken);
+            string roleKey = roleResponse.Result.First()._key;
+
+            ArangoQueryBuilder edgesQb = new ArangoQueryBuilder(ArangoSchema.collEdges);
+            edgesQb.filter("_from", $"{ArangoSchema.collRoles}/{roleKey}");
+            edgesQb.filter("_to", $"{ArangoSchema.collUsers}/{user.Id}");
+            edgesQb.filter("Type", "UserRole");
+            string edgesQuery = edgesQb.ToString();
+            CursorResponse<Edges> queryResponse = await db.Cursor.PostCursorAsync<Edges>(edgesQuery, token: cancellationToken);
+            if (queryResponse.Result.Any())
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -803,6 +868,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         public async Task RemoveClaimsAsync(Users user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
         {
             await CreateConnection();
+
             throw new NotImplementedException();
         }
 
@@ -860,6 +926,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         public async Task ResetAccessFailedCountAsync(Users user, CancellationToken cancellationToken)
         {
             user.AccessFailedCount = 0;
+            await UpdateAsync(user, cancellationToken);
         }
 
         /// <summary>
@@ -873,6 +940,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         public async Task SetEmailAsync(Users user, string? email, CancellationToken cancellationToken)
         {
             user.Email= email;
+            await UpdateAsync(user, cancellationToken);
         }
 
         /// <summary>
@@ -887,6 +955,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         public async Task SetEmailConfirmedAsync(Users user, bool confirmed, CancellationToken cancellationToken)
         {
             user.EmailConfirmed = confirmed;
+            await UpdateAsync(user, cancellationToken);
         }
 
         /// <summary>
@@ -900,6 +969,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         public async Task SetLockoutEnabledAsync(Users user, bool enabled, CancellationToken cancellationToken)
         {
             user.LockoutEnabled = enabled;
+            await UpdateAsync(user, cancellationToken);
         }
 
         /// <summary>
@@ -914,6 +984,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         public async Task SetLockoutEndDateAsync(Users user, DateTimeOffset? lockoutEnd, CancellationToken cancellationToken)
         {
             user.LockoutEnd = lockoutEnd;
+            await UpdateAsync(user, cancellationToken);
         }
 
         /// <summary>
@@ -927,6 +998,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         public async Task SetNormalizedEmailAsync(Users user, string? normalizedEmail, CancellationToken cancellationToken)
         {
             user.NormalizedEmail = normalizedEmail;
+            await UpdateAsync(user, cancellationToken);
         }
 
         /// <summary>
@@ -940,6 +1012,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         public async Task SetNormalizedUserNameAsync(Users user, string? normalizedName, CancellationToken cancellationToken)
         {
             user.NormalizedUserName = normalizedName;
+            await UpdateAsync(user, cancellationToken);
         }
 
         /// <summary>
@@ -953,6 +1026,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         public async Task SetPasswordHashAsync(Users user, string? passwordHash, CancellationToken cancellationToken)
         {
             user.PasswordHash = passwordHash;
+            await UpdateAsync(user, cancellationToken);
         }
 
         /// <summary>
@@ -966,6 +1040,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         public async Task SetPhoneNumberAsync(Users user, string? phoneNumber, CancellationToken cancellationToken)
         {
             user.PhoneNumber = phoneNumber;
+            await UpdateAsync(user, cancellationToken);
         }
 
         /// <summary>
@@ -979,6 +1054,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         public async Task SetPhoneNumberConfirmedAsync(Users user, bool confirmed, CancellationToken cancellationToken)
         {
             user.PhoneNumberConfirmed = confirmed;
+            await UpdateAsync(user, cancellationToken);
         }
 
         /// <summary>
@@ -992,6 +1068,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         public async Task SetSecurityStampAsync(Users user, string stamp, CancellationToken cancellationToken)
         {
             user.SecurityStamp = stamp;
+            await UpdateAsync(user, cancellationToken);
         }
 
         /// <summary>
@@ -1006,6 +1083,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         public async Task SetTwoFactorEnabledAsync(Users user, bool enabled, CancellationToken cancellationToken)
         {
             user.TwoFactorEnabled = enabled;
+            await UpdateAsync(user, cancellationToken);
         }
 
         /// <summary>
@@ -1019,6 +1097,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         public async Task SetUserNameAsync(Users user, string? userName, CancellationToken cancellationToken)
         {
             user.UserName = userName;
+            await UpdateAsync(user, cancellationToken);
         }
 
         /// <summary>
