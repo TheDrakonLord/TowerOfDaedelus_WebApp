@@ -19,6 +19,12 @@ builder.Logging.ClearProviders();
 log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.config"));
 builder.Logging.AddLog4Net();
 
+// Add services to the container.
+builder.Services.AddScoped<IArangoUtils, Utilities>();
+
+// Add health checks to report to docker
+builder.Services.AddHealthChecks();
+
 
 builder.Services.AddIdentity<Users, Roles>()
     .AddDefaultTokenProviders();
@@ -87,17 +93,15 @@ builder.Services.AddAuthorization(options =>
         .Build();
 });
 
-// Add services to the container.
-builder.Services
-    .AddArangoConfig(builder.Configuration)
-    .AddArangoDependencyGroup();
-
-// Add health checks to report to docker
-builder.Services.AddHealthChecks();
-
 var app = builder.Build();
 
+using (var serviceScope = app.Services.CreateScope())
+{
+    var services = serviceScope.ServiceProvider;
 
+    var arangoUtils = services.GetRequiredService<IArangoUtils>();
+    arangoUtils.CreateDB();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

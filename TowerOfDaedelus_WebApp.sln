@@ -4,10 +4,20 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TowerOfDaedalus_WebApp_Tests", "TowerOfDaedalus_WebApp_Tests\TowerOfDaedalus_WebApp_Tests.csproj", "{D1998C56-6A75-4E6F-AB48-631C6F599BEC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{844D693C-615F-40FB-8CA2-49617FAE0FF6} = {844D693C-615F-40FB-8CA2-49617FAE0FF6}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TowerOfDaedalus_WebApp_DiscordBot", "TowerOfDaedalus_WebApp_DiscordBot\TowerOfDaedalus_WebApp_DiscordBot.csproj", "{9C7C1D81-8E3B-492B-BF45-64F51D0444E4}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{BA20ED1D-DB72-4B6C-B457-FDEB1D1BC1BC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{31881403-F8F7-4BFE-88BF-5A92102D6FA8} = {31881403-F8F7-4BFE-88BF-5A92102D6FA8}
+		{844D693C-615F-40FB-8CA2-49617FAE0FF6} = {844D693C-615F-40FB-8CA2-49617FAE0FF6}
+		{9C7C1D81-8E3B-492B-BF45-64F51D0444E4} = {9C7C1D81-8E3B-492B-BF45-64F51D0444E4}
+		{B8EE7FA8-E12F-443F-9FF4-3873A7E808A5} = {B8EE7FA8-E12F-443F-9FF4-3873A7E808A5}
+		{CBE0457D-2E2E-4CA6-BA20-F7050AFF6395} = {CBE0457D-2E2E-4CA6-BA20-F7050AFF6395}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Persistance", "Persistance", "{857A33C5-B15F-407C-8229-D23EAE9A3DF1}"
 EndProject
@@ -25,7 +35,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TowerOfDaedalus_WebApp_Aran
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TowerOfDaedalus_WebApp_RESTApi", "TowerOfDaedalus_WebApp_RESTApi\TowerOfDaedalus_WebApp_RESTApi.csproj", "{844D693C-615F-40FB-8CA2-49617FAE0FF6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TowerOfDaedalus_WebApp_IntegrationTests", "TowerOfDaedalus_WebApp_IntegrationTests\TowerOfDaedalus_WebApp_IntegrationTests.csproj", "{E7F9D42D-BFEB-4047-ADD3-9A56535F7580}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TowerOfDaedalus_WebApp_IntegrationTests", "TowerOfDaedalus_WebApp_IntegrationTests\TowerOfDaedalus_WebApp_IntegrationTests.csproj", "{E7F9D42D-BFEB-4047-ADD3-9A56535F7580}"
+	ProjectSection(ProjectDependencies) = postProject
+		{31881403-F8F7-4BFE-88BF-5A92102D6FA8} = {31881403-F8F7-4BFE-88BF-5A92102D6FA8}
+		{844D693C-615F-40FB-8CA2-49617FAE0FF6} = {844D693C-615F-40FB-8CA2-49617FAE0FF6}
+		{9C7C1D81-8E3B-492B-BF45-64F51D0444E4} = {9C7C1D81-8E3B-492B-BF45-64F51D0444E4}
+		{B8EE7FA8-E12F-443F-9FF4-3873A7E808A5} = {B8EE7FA8-E12F-443F-9FF4-3873A7E808A5}
+		{CBE0457D-2E2E-4CA6-BA20-F7050AFF6395} = {CBE0457D-2E2E-4CA6-BA20-F7050AFF6395}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

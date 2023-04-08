@@ -17,33 +17,223 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
     public static class ArangoSchema
     {
         // Identity Framework
+        /// <summary>
+        /// name of the Users collection
+        /// </summary>
         public const string collUsers = "Users";
+        /// <summary>
+        /// name of the roles collection
+        /// </summary>
         public const string collRoles = "Roles";
+        /// <summary>
+        /// name of the user logins collection
+        /// </summary>
         public const string collUserLogins = "UserLogins";
+        /// <summary>
+        /// name of the user claims collection
+        /// </summary>
         public const string collUserClaims = "UserClaims";
+        /// <summary>
+        /// name of the role claims collection
+        /// </summary>
         public const string collRoleClaims = "RoleClaims";
+        /// <summary>
+        /// name of hte user tokens collection
+        /// </summary>
         public const string collUserTokens = "UserTokens";
+
+
         // Custom Data
+        /// <summary>
+        /// name of the rp schedule collection
+        /// </summary>
         public const string collRPSchedule = "RPSchedule";
+        /// <summary>
+        /// name of the featured articles collection
+        /// </summary>
         public const string collFeaturedArticles = "FeaturedArticles";
+        /// <summary>
+        /// name of the quest list collection
+        /// </summary>
         public const string collQuestList = "QuestList";
+        /// <summary>
+        /// name of the npc descriptions collection
+        /// </summary>
         public const string collNPCDescriptions = "NPCDescriptions";
+        /// <summary>
+        /// name of the character sheets collection
+        /// </summary>
         public const string collCharacterSheets = "CharacterSheets";
+        /// <summary>
+        /// name of the primary traits collection
+        /// </summary>
         public const string collPrimaryTraits = "PrimaryTraits";
+        /// <summary>
+        /// name of the equipment traits collection
+        /// </summary>
         public const string collEquipmentTraits = "EquipmentTraits";
+        /// <summary>
+        /// name of the equipment collection
+        /// </summary>
         public const string collEquipment = "Equipment";
+        /// <summary>
+        /// name of the temporary traits collection
+        /// </summary>
         public const string collTemporaryTraits = "TemporaryTraits";
+        /// <summary>
+        /// name of the origin traits collection
+        /// </summary>
         public const string collOriginTraits = "OriginTraits";
+        /// <summary>
+        /// name of the languages collection
+        /// </summary>
         public const string collLanguages = "Languages";
+        /// <summary>
+        /// name of the vision types collection
+        /// </summary>
         public const string collVisionTypes = "VisionTypes";
+        /// <summary>
+        /// name of the GM Requests collection
+        /// </summary>
         public const string collGMRequests = "GMRequests";
+        /// <summary>
+        /// name of the Die rolls collection
+        /// </summary>
         public const string collDieRolls = "DieRolls";
+        /// <summary>
+        /// name of the NPC Applications collection
+        /// </summary>
         public const string collNPCApplications = "NPCApplications";
+        /// <summary>
+        /// name of the mission applications collection
+        /// </summary>
         public const string collMissionApplications = "MissionApplications";
+        /// <summary>
+        /// name of the player applications collection
+        /// </summary>
         public const string collPlayerApplications = "PlayerApplications";
+        /// <summary>
+        /// name of the visitor pass collection
+        /// </summary>
         public const string collVisitorPass = "VisitorPass";
-        public const string collEdges = "edges";
+
+
+        // graph definitions
+        /// <summary>
+        /// name of the primary named graph
+        /// </summary>
         public const string graphPrimary = "PrimaryGraph";
+
+
+        // identity edge definitions
+        /// <summary>
+        /// name of the collection for edge definitions from Users -> roles
+        /// </summary>
+        public const string edgeUserRoles = "eUserRoles";
+        /// <summary>
+        /// name of the collection for edge definitions from Roles -> Users
+        /// </summary>
+        public const string edgeRoleUsers = "eRoleUsers";
+        /// <summary>
+        /// name of the collection for edge definitions from Users -> Logins
+        /// </summary>
+        public const string edgeUserLogins = "eUserLogins";
+        /// <summary>
+        /// name of the collection for edge definitions from Users -> Claims
+        /// </summary>
+        public const string edgeUserClaims = "eUserClaims";
+        /// <summary>
+        /// name of the collection for edge definitions from Users -> tokens
+        /// </summary>
+        public const string edgeUserTokens = "eUserTokens";
+        /// <summary>
+        /// name of the collection for edge definitions from Roles -> Claims
+        /// </summary>
+        public const string edgeRoleClaims = "eRoleClaims";
+
+
+        // custom data edge definitions
+        /// <summary>
+        /// name of the collection for edge definitions from NPCDescriptions -> Quest List
+        /// </summary>
+        public const string edgeQuestGivers = "eQuestGivers";
+        /// <summary>
+        /// name of the collection for edge definitions from Users -> Quest List
+        /// </summary>
+        public const string edgeQuestAuthor = "eQuestAuthor";
+        /// <summary>
+        /// name of the collection for edge definitions from Users -> Character Sheets
+        /// </summary>
+        public const string edgeCharacterOwner = "eCharacterOwner";
+        /// <summary>
+        /// name of the collection for edge definitions from Users -> GM Requests
+        /// </summary>
+        public const string edgeRequestor = "eRequestor";
+        /// <summary>
+        /// name of the collection for edge definitions from Users -> Die rolls
+        /// </summary>
+        public const string edgeRoller = "eRoller";
+        /// <summary>
+        /// name of the collection for edge definitions from Users -> NPC Applications
+        /// </summary>
+        public const string edgeNPCApplicant = "eNPCApplicant";
+        /// <summary>
+        /// name of the collection for edge definitions from Users -> Mission Applications
+        /// </summary>
+        public const string edgeMissionApplicant = "eMissionApplicant";
+        /// <summary>
+        /// name of the collection for edge definitions from Users -> Player Applications
+        /// </summary>
+        public const string edgePlayerApplicant = "ePlayerApplicant";
+        /// <summary>
+        /// name of the collection for edge definitions from Users -> Visitor Passes
+        /// </summary>
+        public const string edgeVisitorApplicant = "eVisitorApplicant";
+        /// <summary>
+        /// name of the collection for edge definitions from Character Sheets -> Primary Traits
+        /// </summary>
+        public const string edgePrimaryTrait = "ePrimaryTrait";
+        /// <summary>
+        /// name of the collection for edge definitions from Player Applications -> Character Sheets
+        /// </summary>
+        public const string edgeCharacterApplication = "eCharacterApplication";
+        /// <summary>
+        /// name of the collection for edge definitions from Character Sheets -> Die Rolls
+        /// </summary>
+        public const string edgeCharacterRoll = "eCharacterRoll";
+        /// <summary>
+        /// name of the collection for edge definitions from Character Sheets -> Mission Applications
+        /// </summary>
+        public const string edgeCharacterMissions = "eCharacterMissions";
+        /// <summary>
+        /// name of the collection for edge definitions from Mission Applications -> Character Sheets
+        /// </summary>
+        public const string edgeTeamMembers = "eTeamMembers";
+        /// <summary>
+        /// name of the collection for edge definitions from Character Sheets -> Equipment Traits
+        /// </summary>
+        public const string edgeEquipmentTrait = "eEquipmentTrait";
+        /// <summary>
+        /// name of the collection for edge definitions from Character Sheets -> Equipment
+        /// </summary>
+        public const string edgeInventory = "eInventory";
+        /// <summary>
+        /// name of the collection for edge definitions from Character Sheets -> Temporary Traits
+        /// </summary>
+        public const string edgeTemporaryTrait = "eTemporaryTrait";
+        /// <summary>
+        /// name of the collection for edge definitions from Character Sheets -> Origin Traits
+        /// </summary>
+        public const string edgeOriginTrait = "eOriginTrait";
+        /// <summary>
+        /// name of the collection for edge definitions from Origin Traits -> Languages
+        /// </summary>
+        public const string edgeLanguage = "eLanguage";
+        /// <summary>
+        /// name of the collection for edge definitions from Origin Traits -> Vision Types
+        /// </summary>
+        public const string edgeVisionType = "eVisionType";
+
 
         /// <summary>
         /// list of collections to be added
@@ -76,8 +266,34 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
             new Collection(collMissionApplications),
             new Collection(collPlayerApplications),
             new Collection(collVisitorPass),
-            // Arango specific collections
-            new Collection(collEdges, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge)
+            // Identity framework edge definition collections
+            new Collection(edgeUserRoles, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgeRoleUsers, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgeUserLogins, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgeUserClaims, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgeUserTokens, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgeRoleClaims, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            // Custom data edge definition collections
+            new Collection(edgeQuestGivers, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgeQuestAuthor, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgeCharacterOwner, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgeRequestor, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgeRoller, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgeNPCApplicant, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgeMissionApplicant, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgePlayerApplicant, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgeVisitorApplicant, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgePrimaryTrait, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgeCharacterApplication, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgeCharacterRoll, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgeCharacterMissions, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgeTeamMembers, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgeEquipmentTrait, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgeInventory, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgeTemporaryTrait, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgeOriginTrait, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgeLanguage, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge),
+            new Collection(edgeVisionType, type: ArangoDBNetStandard.CollectionApi.Models.CollectionType.Edge)
         };
 
         /// <summary>
@@ -91,7 +307,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // UserRoles Users->Roles
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgeUserRoles,
                     From = new List<string>
                     {
                         collUsers
@@ -105,7 +321,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // UserRoles Roles->Users
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgeRoleUsers,
                     From = new List<string>
                     {
                         collRoles
@@ -119,7 +335,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // Users -> UserLogins
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgeUserLogins,
                     From =  new List<string>
                     {
                         collUsers
@@ -133,7 +349,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // Users -> UserClaims
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgeUserClaims,
                     From = new List<string>
                     {
                         collUsers
@@ -147,7 +363,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // Users -> UserTokens
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgeUserTokens,
                     From = new List<string>
                     {
                         collUsers
@@ -161,7 +377,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // Roles -> RoleClaims
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgeRoleClaims,
                     From = new List<string>
                     {
                         collRoles
@@ -176,7 +392,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // NPCDescriptions -> QuestList
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgeQuestGivers,
                     From = new List<string>
                     {
                         collNPCDescriptions
@@ -190,7 +406,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // Users -> QuestList
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgeQuestAuthor,
                     From = new List<string>
                     {
                         collUsers
@@ -204,7 +420,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // Users -> CharacterSheets
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgeCharacterOwner,
                     From = new List<string>
                     {
                         collUsers
@@ -218,7 +434,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // Users -> GMRequests
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgeRequestor,
                     From = new List<string>
                     {
                         collUsers
@@ -232,7 +448,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // Users -> DieRolls
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgeRoller,
                     From = new List<string>
                     {
                         collUsers
@@ -246,7 +462,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // Users -> NPCApplications
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgeNPCApplicant,
                     From = new List<string>
                     {
                         collUsers
@@ -260,7 +476,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // Users -> MissionApplications
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgeMissionApplicant,
                     From = new List<string>
                     {
                         collUsers
@@ -274,7 +490,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // Users -> PlayerApplications
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgePlayerApplicant,
                     From = new List<string>
                     {
                         collUsers
@@ -288,7 +504,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // Users -> VisitorPass
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgeVisitorApplicant,
                     From = new List<string>
                     {
                         collUsers
@@ -302,7 +518,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // CharacterSheets -> PrimaryTraits
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgePrimaryTrait,
                     From = new List<string>
                     {
                         collCharacterSheets
@@ -316,7 +532,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // PlayerApplications -> CharacterSheets
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgeCharacterApplication,
                     From = new List<string>
                     {
                         collPlayerApplications
@@ -330,7 +546,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // CharacterSheets -> DieRolls
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name, 
+                    Collection = edgeCharacterRoll, 
                     From = new List<string>
                     {
                         collCharacterSheets
@@ -344,7 +560,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // CharacterSheets -> MissionApplications
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgeCharacterMissions,
                     From = new List<string>
                     {
                         collCharacterSheets
@@ -358,7 +574,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // MissionApplications -> CharacterSheets
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name, 
+                    Collection = edgeTeamMembers, 
                     From = new List<string>
                     {
                         collMissionApplications
@@ -372,7 +588,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // CharacterSheets -> EquipmentTraits
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgeEquipmentTrait,
                     From = new List<string>
                     {
                         collCharacterSheets
@@ -386,7 +602,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // CharacterSheets -> Equipment
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgeInventory,
                     From = new List<string>
                     {
                         collCharacterSheets
@@ -400,7 +616,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // CharacterSheets -> TemporaryTraits
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgeTemporaryTrait,
                     From = new List<string>
                     {
                         collCharacterSheets
@@ -414,7 +630,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // CharacterSheets -> OriginTraits
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgeOriginTrait,
                     From = new List<string>
                     {
                         collCharacterSheets
@@ -428,7 +644,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // OriginTraits -> Languages
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgeLanguage,
                     From = new List<string>
                     {
                         collOriginTraits
@@ -442,7 +658,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
                 // OriginTraits -> VisionTypes
                 new ArangoDBNetStandard.GraphApi.Models.EdgeDefinition
                 {
-                    Collection = Collections.Last().Name,
+                    Collection = edgeVisionType,
                     From = new List<string>
                     {
                         collOriginTraits

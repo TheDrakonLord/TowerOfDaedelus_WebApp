@@ -8,9 +8,7 @@ builder.Logging.ClearProviders();
 log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.config"));
 builder.Logging.AddLog4Net();
 
-builder.Services
-    .AddArangoConfig(builder.Configuration)
-    .AddArangoDependencyGroup();
+builder.Services.AddScoped<IArangoUtils, Utilities>();
 
 builder.Services.AddHostedService<DiscordBot>();
 

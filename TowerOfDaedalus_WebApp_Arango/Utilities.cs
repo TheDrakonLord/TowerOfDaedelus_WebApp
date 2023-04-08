@@ -21,7 +21,7 @@ namespace TowerOfDaedalus_WebApp_Arango
         /// Otherwise, we create the database, collections, and graph with edge definitions
         /// </summary>
         /// <returns>task completion status</returns>
-        //public static abstract Task CreateDB();
+        void CreateDB();
     }
 
     /// <summary>
@@ -44,7 +44,7 @@ namespace TowerOfDaedalus_WebApp_Arango
             ArangoDbContext.setEnvVariables();
 
             _logger.LogDebug("lauching createDB task");
-            Task.Run(() => CreateDB()).Wait();
+            CreateDB();
         }
 
         /// <summary>
@@ -53,8 +53,9 @@ namespace TowerOfDaedalus_WebApp_Arango
         /// </summary>
         /// <returns>task completion status</returns>
         /// <exception cref="HttpRequestException">This exception is thrown if the https requests return anything but OK</exception>
-        public static async Task CreateDB()
+        public void CreateDB()
         {
+            bool skipCreate = false;
             _logger.LogInformation("checking for existing database");
             // Initiate the transport
             using (var transport = HttpApiTransport.UsingBasicAuth(new Uri(ArangoDbContext.getUrl()), ArangoDbContext.getSystemDbName(), ArangoDbContext.getSystemUsername(), ArangoDbContext.getSystemPassword()))
@@ -62,7 +63,7 @@ namespace TowerOfDaedalus_WebApp_Arango
                 // Initiate ArangoDBClient using the transport
                 using (var db = new ArangoDBClient(transport))
                 {
-                    var response = await db.Database.GetCurrentDatabaseInfoAsync();
+                    var response = Task.Run(() => db.Database.GetCurrentDatabaseInfoAsync()).Result;
 
                     if (response.Code != System.Net.HttpStatusCode.OK)
                     {
@@ -70,9 +71,10 @@ namespace TowerOfDaedalus_WebApp_Arango
                         throw new HttpRequestException("Could not find the ArangoDB _System database");
                     }
 
-                    var databases = await db.Database.GetDatabasesAsync();
+                    var databases = Task.Run(() => db.Database.GetDatabasesAsync()).Result;
 
-                    if (!databases.Result.Contains(ArangoDbContext.getDbName()))
+                    skipCreate = databases.Result.Contains(ArangoDbContext.getDbName());
+                    if (!skipCreate)
                     {
                         _logger.LogInformation("Database not found, creating new database");
                         // Define the new database and its users
@@ -91,14 +93,22 @@ namespace TowerOfDaedalus_WebApp_Arango
                         };
 
                         // Create the new database
-                        var newDBResponse = await db.Database.PostDatabaseAsync(body);
+                        var newDBResponse = Task.Run(() => db.Database.PostDatabaseAsync(body)).Result;
 
-                        if (newDBResponse.Code != System.Net.HttpStatusCode.OK)
+                        if (newDBResponse.Code != System.Net.HttpStatusCode.Created)
                         {
                             _logger.LogError("Arango returned a non-ok status code");
                             throw new HttpRequestException("Could not create the new database");
                         }
-
+                    }
+                }
+            }
+            if (!skipCreate)
+            {
+                using (var transport2 = HttpApiTransport.UsingBasicAuth(new Uri(ArangoDbContext.getUrl()), ArangoDbContext.getDbName(), ArangoDbContext.getNewUsername(), ArangoDbContext.getNewPass()))
+                {
+                    using (var db = new ArangoDBClient(transport2))
+                    {
                         // Create collections
                         _logger.LogInformation("creating collections");
                         foreach (Collection item in ArangoSchema.Collections)
@@ -111,7 +121,7 @@ namespace TowerOfDaedalus_WebApp_Arango
                                 Name = item.Name
                             };
                             // Create the new collection
-                            var collResponse = await db.Collection.PostCollectionAsync(newColl, null);
+                            var collResponse = Task.Run(() => db.Collection.PostCollectionAsync(newColl, null)).Result;
 
                             if (collResponse.Code != System.Net.HttpStatusCode.OK)
                             {
@@ -131,9 +141,9 @@ namespace TowerOfDaedalus_WebApp_Arango
                             };
 
                             // Create the new graph
-                            var graphResponse = await db.Graph.PostGraphAsync(newGraph, null);
+                            var graphResponse = Task.Run(() => db.Graph.PostGraphAsync(newGraph, null)).Result;
 
-                            if (graphResponse.Code != System.Net.HttpStatusCode.OK)
+                            if (graphResponse.Code != System.Net.HttpStatusCode.Accepted)
                             {
                                 _logger.LogError("Arango returned a non-ok status code");
                                 throw new HttpRequestException($"Could not add the {graph.Name} graph to ArangoDb");
@@ -145,3 +155,4 @@ namespace TowerOfDaedalus_WebApp_Arango
         }
     }
 }
+

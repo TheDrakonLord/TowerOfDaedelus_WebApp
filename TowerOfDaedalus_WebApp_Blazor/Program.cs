@@ -97,9 +97,7 @@ builder.Services.AddAuthorization(options =>
         .Build();
 });
 
-builder.Services
-    .AddArangoConfig(builder.Configuration)
-    .AddArangoDependencyGroup();
+builder.Services.AddScoped<IArangoUtils, Utilities>();
 
 // Add health checks to report to docker
 builder.Services.AddHealthChecks();
