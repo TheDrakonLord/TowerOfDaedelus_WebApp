@@ -848,6 +848,10 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
             /// </summary>
             public string? _key { get; set; }
 
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns></returns>
             public Claim getClaim()
             {
                 Claim returnClaim = Clone();

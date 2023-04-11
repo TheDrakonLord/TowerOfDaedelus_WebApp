@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Authorization;
 
-namespace TowerOfDaedelus_WebApp.Pages
+namespace TowerOfDaedelus_WebApp_Razor.Pages
 {
     /// <summary>
     /// A page detailing the privacy policy of the site

@@ -24,10 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ArangoDBNetStandard" Version="1.3.0" />
+    <PackageReference Include="ArangoDBNetStandard" Version="2.0.1" />
     <PackageReference Include="log4net" Version="2.0.15" />
     <PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="6.1.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.0.2" />
     <PackageReference Include="MSTest.TestFramework" Version="3.0.2" />
     <PackageReference Include="coverlet.collector" Version="3.2.0">
@@ -40,7 +40,7 @@
     <ProjectReference Include="..\TowerOfDaedalus_WebApp_Arango\TowerOfDaedalus_WebApp_Arango.csproj" />
     <ProjectReference Include="..\TowerOfDaedalus_WebApp_Blazor\TowerOfDaedalus_WebApp_Blazor.csproj" />
     <ProjectReference Include="..\TowerOfDaedalus_WebApp_DiscordBot\TowerOfDaedalus_WebApp_DiscordBot.csproj" />
-    <ProjectReference Include="..\TowerOfDaedalus_WebApp_Razor\TowerOfDaedalus_WebApp_Razor.csproj" />
+    <ProjectReference Include="..\TowerOfDaedalus_WebApp_RESTApi\TowerOfDaedalus_WebApp_RESTApi.csproj" />
   </ItemGroup>
 
 </Project>

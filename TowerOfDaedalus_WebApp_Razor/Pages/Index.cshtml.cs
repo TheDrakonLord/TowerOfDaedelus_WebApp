@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 
-namespace TowerOfDaedelus_WebApp.Pages
+namespace TowerOfDaedalus_WebApp_Razor.Pages
 {
     /// <summary>
     /// A page that acts as the home page of the website

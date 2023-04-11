@@ -13,7 +13,6 @@ using Newtonsoft.Json.Linq;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using log4net;
-using Humanizer.Localisation;
 using TowerOfDaedalus_WebApp_Arango;
 using TowerOfDaedalus_WebApp_Blazor.Properties;
 using Resources = TowerOfDaedalus_WebApp_Blazor.Properties.Resources;

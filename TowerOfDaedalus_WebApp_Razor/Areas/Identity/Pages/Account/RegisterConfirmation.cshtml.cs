@@ -13,24 +13,18 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using static TowerOfDaedalus_WebApp_Arango.Schema.Documents;
 
-namespace TowerOfDaedelus_WebApp.Areas.Identity.Pages.Account
+namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
 {
-    /// <summary>
-    /// a page that is used to assist the user in confirming their email
-    /// </summary>
     [AllowAnonymous]
     public class RegisterConfirmationModel : PageModel
     {
         private readonly UserManager<Users> _userManager;
+        private readonly IEmailSender _sender;
 
-        /// <summary>
-        /// default constructor
-        /// </summary>
-        /// <param name="userManager">the user manager class used by the identify framework</param>
-        /// <param name="sender">the email sender to send confirmation emails to the user</param>
-        public RegisterConfirmationModel(UserManager<Users> userManager)
+        public RegisterConfirmationModel(UserManager<Users> userManager, IEmailSender sender)
         {
             _userManager = userManager;
+            _sender = sender;
         }
 
         /// <summary>
@@ -51,12 +45,6 @@ namespace TowerOfDaedelus_WebApp.Areas.Identity.Pages.Account
         /// </summary>
         public string EmailConfirmationUrl { get; set; }
 
-        /// <summary>
-        /// default constructor
-        /// </summary>
-        /// <param name="email">the users email address</param>
-        /// <param name="returnUrl">the return callback url</param>
-        /// <returns>a PageResult object that renders the page</returns>
         public async Task<IActionResult> OnGetAsync(string email, string returnUrl = null)
         {
             if (email == null)
@@ -73,7 +61,7 @@ namespace TowerOfDaedelus_WebApp.Areas.Identity.Pages.Account
 
             Email = email;
             // Once you add a real email sender, you should remove this code that lets you confirm the account
-            DisplayConfirmAccountLink = false;
+            DisplayConfirmAccountLink = true;
             if (DisplayConfirmAccountLink)
             {
                 var userId = await _userManager.GetUserIdAsync(user);

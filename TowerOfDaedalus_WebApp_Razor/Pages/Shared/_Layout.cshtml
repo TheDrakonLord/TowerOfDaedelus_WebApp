@@ -1,9 +1,5 @@
-﻿@using Microsoft.AspNetCore.Authorization
-@using static TowerOfDaedalus_WebApp_Arango.Schema.Documents
-@using TowerOfDaedalus_WebApp_Razor.Properties
+﻿@using TowerOfDaedalus_WebApp_Razor.Properties
 <!DOCTYPE html>
-@inject SignInManager<Users> signInManager;
-@inject IAuthorizationService AuthorizationService;
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -11,8 +7,8 @@
     <title>@ViewData["Title"] - The Towers of Daedelus</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/TowerOfDaedelus_WebApp.styles.css" asp-append-version="true" />
-    <link rel="icon" href= "@Url.Content("~/favicon.ico")" />
+    <link rel="stylesheet" href="~/TowerOfDaedalus_WebApp_Razor.styles.css" asp-append-version="true" />
+    <link rel="icon" href="@Url.Content("~/favicon.ico")" />
 </head>
 <body>
     <header>
@@ -32,17 +28,8 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
                         </li>
-                        @if ((await AuthorizationService.AuthorizeAsync(User, "allPlayers")).Succeeded)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/PlayerTools/PointBuyCalculator">Point Buy Calculator</a>
-                            </li>
-                        }
-                        <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/PlayerTools/PointBuyCalculator">Point Buy Calculator</a>
-                        </li>
                     </ul>
-                    <partial name="_LobbyStatusPartial"/>
+                    <partial name="_LobbyStatusPartial" />
                     <partial name="_LoginPartial" />
                 </div>
             </div>

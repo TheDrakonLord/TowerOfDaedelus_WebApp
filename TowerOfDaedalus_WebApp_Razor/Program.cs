@@ -1,17 +1,11 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using TowerOfDaedalus_WebApp_Razor.Properties;
+using TowerOfDaedalus_WebApp_Arango.Identity;
+using static TowerOfDaedalus_WebApp_Arango.Schema.Documents;
+using TowerOfDaedalus_WebApp_Arango;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication.OAuth;
-using System.Net;
-using Newtonsoft.Json.Linq;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using log4net;
-using TowerOfDaedalus_WebApp_Arango;
-using static TowerOfDaedalus_WebApp_Arango.Schema.Documents;
-using TowerOfDaedalus_WebApp_Arango.Identity;
+using TowerOfDaedalus_WebApp_Razor.Properties;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,16 +20,13 @@ builder.Services.AddScoped<IArangoUtils, Utilities>();
 builder.Services.AddHealthChecks();
 
 
+// Add Identity types
 builder.Services.AddIdentity<Users, Roles>()
     .AddDefaultTokenProviders();
 
+// Identity Services
 builder.Services.AddTransient<IUserStore<Users>, ArangoUserStore>();
 builder.Services.AddTransient<IRoleStore<Roles>, ArangoRoleStore>();
-
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-builder.Services.AddRazorPages();
 
 builder.Services.AddAuthentication()
     .AddDiscord(options =>
@@ -92,6 +83,8 @@ builder.Services.AddAuthorization(options =>
         .RequireAuthenticatedUser()
         .Build();
 });
+
+builder.Services.AddRazorPages();
 
 var app = builder.Build();
 

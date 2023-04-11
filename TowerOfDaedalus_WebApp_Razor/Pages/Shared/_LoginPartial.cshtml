@@ -1,6 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@using System.Security.Claims
-@using static TowerOfDaedalus_WebApp_Arango.Schema.Documents
+@using static TowerOfDaedalus_WebApp_Arango.Schema.Documents;
 @inject SignInManager<Users> SignInManager
 @inject UserManager<Users> UserManager
 
@@ -8,7 +7,7 @@
 @if (SignInManager.IsSignedIn(User))
 {
     <li class="nav-item">
-        <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Claims?.Last(x => x.Type == ClaimTypes.Name).Value! </a>
+        <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
     </li>
     <li class="nav-item">
         <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post" >

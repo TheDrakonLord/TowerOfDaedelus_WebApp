@@ -17,17 +17,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Authentication;
-using System.Net;
-using Newtonsoft.Json.Linq;
 using static TowerOfDaedalus_WebApp_Arango.Schema.Documents;
-using TowerOfDaedalus_WebApp_Razor.Properties;
 
-namespace TowerOfDaedelus_WebApp_Razor.Areas.Identity.Pages.Account
+namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
 {
-    /// <summary>
-    /// a page that assists the user in logging in through an external login provider
-    /// </summary>
     [AllowAnonymous]
     public class ExternalLoginModel : PageModel
     {
@@ -35,27 +28,22 @@ namespace TowerOfDaedelus_WebApp_Razor.Areas.Identity.Pages.Account
         private readonly UserManager<Users> _userManager;
         private readonly IUserStore<Users> _userStore;
         private readonly IUserEmailStore<Users> _emailStore;
+        private readonly IEmailSender _emailSender;
         private readonly ILogger<ExternalLoginModel> _logger;
 
-        /// <summary>
-        /// default constructor
-        /// </summary>
-        /// <param name="signInManager">the sign in manager class used by the identity framework</param>
-        /// <param name="userManager">the user manager class used by the identity framework</param>
-        /// <param name="userStore">the user store class used by the identity framework</param>
-        /// <param name="logger">the logger used to log messages</param>
-        /// <param name="emailSender">the email sender used to send emails to the user</param>
         public ExternalLoginModel(
             SignInManager<Users> signInManager,
             UserManager<Users> userManager,
             IUserStore<Users> userStore,
-            ILogger<ExternalLoginModel> logger)
+            ILogger<ExternalLoginModel> logger,
+            IEmailSender emailSender)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _userStore = userStore;
-            _emailStore = GetEmailStore();
+            _emailStore = (IUserEmailStore<Users>)GetEmailStore();
             _logger = logger;
+            _emailSender = emailSender;
         }
 
         /// <summary>
@@ -99,18 +87,8 @@ namespace TowerOfDaedelus_WebApp_Razor.Areas.Identity.Pages.Account
             public string Email { get; set; }
         }
         
-        /// <summary>
-        /// method called any time a GET request is recieved
-        /// </summary>
-        /// <returns></returns>
         public IActionResult OnGet() => RedirectToPage("./Login");
 
-        /// <summary>
-        /// method called any time a POST request is recieved
-        /// </summary>
-        /// <param name="provider">the login provider used</param>
-        /// <param name="returnUrl">the callback url to be executed</param>
-        /// <returns>returns a new instance of ChallengeResult with the specified authentication scheme and properities</returns>
         public IActionResult OnPost(string provider, string returnUrl = null)
         {
             // Request a redirect to the external login provider.
@@ -119,12 +97,6 @@ namespace TowerOfDaedelus_WebApp_Razor.Areas.Identity.Pages.Account
             return new ChallengeResult(provider, properties);
         }
 
-        /// <summary>
-        /// aynchronous method to be executed any time a callback is recieved
-        /// </summary>
-        /// <param name="returnUrl">the callback url to be executed</param>
-        /// <param name="remoteError"></param>
-        /// <returns>a page redirect</returns>
         public async Task<IActionResult> OnGetCallbackAsync(string returnUrl = null, string remoteError = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
@@ -144,11 +116,6 @@ namespace TowerOfDaedelus_WebApp_Razor.Areas.Identity.Pages.Account
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
             if (result.Succeeded)
             {
-                // Include the access token in the properties
-                var props = new AuthenticationProperties();
-                props.StoreTokens(info.AuthenticationTokens);
-                props.IsPersistent = true;
-
                 _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
                 return LocalRedirect(returnUrl);
             }
@@ -172,11 +139,6 @@ namespace TowerOfDaedelus_WebApp_Razor.Areas.Identity.Pages.Account
             }
         }
 
-        /// <summary>
-        /// asynchronous method called anytime POSt request with a confirmation is recieved
-        /// </summary>
-        /// <param name="returnUrl">the callback url to be executed</param>
-        /// <returns>a page redirect</returns>
         public async Task<IActionResult> OnPostConfirmationAsync(string returnUrl = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
@@ -201,54 +163,6 @@ namespace TowerOfDaedelus_WebApp_Razor.Areas.Identity.Pages.Account
                     result = await _userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {
-                                               
-                        // If they exist, add claims to the user for:
-                        //    Username
-                        //    Email Address
-                        if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Name))
-                        {
-                            await _userManager.AddClaimAsync(user,
-                                info.Principal.FindFirst(ClaimTypes.Name));
-                        }
-                        
-                        if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
-                        {
-                            await _userManager.AddClaimAsync(user,
-                                info.Principal.FindFirst(ClaimTypes.Email));
-                        }
-
-                        // Include the access token in the properties
-                        var props = new AuthenticationProperties();
-                        props.StoreTokens(info.AuthenticationTokens);
-                        props.IsPersistent = true;
-
-                        // Send a request to discord to obtain the user's Role IDs in the target server
-                        HttpWebRequest webRequest1 = (HttpWebRequest)WebRequest.Create($"https://discordapp.com/api/users/@me/guilds/{Resources.targetGuildID}/member");
-                        webRequest1.Method = "Get";
-                        webRequest1.ContentLength = 0;
-                        webRequest1.Headers.Add("Authorization", "Bearer " + props.GetTokenValue("access_token"));
-                        webRequest1.ContentType = "application/x-www-form-urlencoded";
-
-                        // recieve and interpret the response from discord
-                        string[] resultArray;
-                        using (HttpWebResponse response1 = webRequest1.GetResponse() as HttpWebResponse)
-                        {
-                            using (StreamReader reader = new StreamReader(response1.GetResponseStream()))
-                            {
-                                string jString = reader.ReadToEnd();
-                                JObject jsonObject = JObject.Parse(jString);
-                                JToken jRoles = jsonObject.SelectToken("roles");
-                                resultArray = jRoles.ToObject<string[]>();
-                            }
-                        }
-
-                        // Create a claim for each role reported by discord
-                        foreach (string x in resultArray)
-                        {
-                            Claim y = new Claim(Resources.customClaim, x);
-                            await _userManager.AddClaimAsync(user, y);
-                        }
-
                         _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
 
                         var userId = await _userManager.GetUserIdAsync(user);
@@ -259,6 +173,9 @@ namespace TowerOfDaedelus_WebApp_Razor.Areas.Identity.Pages.Account
                             pageHandler: null,
                             values: new { area = "Identity", userId = userId, code = code },
                             protocol: Request.Scheme);
+
+                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
                         // If account confirmation is required, we need to show the link if we don't have a real email sender
                         if (_userManager.Options.SignIn.RequireConfirmedAccount)

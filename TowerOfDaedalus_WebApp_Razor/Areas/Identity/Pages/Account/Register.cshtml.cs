@@ -20,12 +20,8 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using static TowerOfDaedalus_WebApp_Arango.Schema.Documents;
 
-namespace TowerOfDaedelus_WebApp.Areas.Identity.Pages.Account
+namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
 {
-    /// <summary>
-    /// a page that assist the user in first timer registration
-    /// </summary>
-    [AllowAnonymous]
     public class RegisterModel : PageModel
     {
         private readonly SignInManager<Users> _signInManager;
@@ -33,26 +29,21 @@ namespace TowerOfDaedelus_WebApp.Areas.Identity.Pages.Account
         private readonly IUserStore<Users> _userStore;
         private readonly IUserEmailStore<Users> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
+        private readonly IEmailSender _emailSender;
 
-        /// <summary>
-        /// default constructor
-        /// </summary>
-        /// <param name="userManager">the user manager class used by the identity framework</param>
-        /// <param name="userStore">the user store class used by the identity framework</param>
-        /// <param name="signInManager">the sign in manager class ued by the identity framework</param>
-        /// <param name="logger">the logger used to log messages</param>
-        /// <param name="emailSender">the email sender used to send emails to the user</param>
         public RegisterModel(
             UserManager<Users> userManager,
             IUserStore<Users> userStore,
             SignInManager<Users> signInManager,
-            ILogger<RegisterModel> logger)
+            ILogger<RegisterModel> logger,
+            IEmailSender emailSender)
         {
             _userManager = userManager;
             _userStore = userStore;
             _emailStore = (IUserEmailStore<Users>)GetEmailStore();
             _signInManager = signInManager;
             _logger = logger;
+            _emailSender = emailSender;
         }
 
         /// <summary>
@@ -109,22 +100,13 @@ namespace TowerOfDaedelus_WebApp.Areas.Identity.Pages.Account
             public string ConfirmPassword { get; set; }
         }
 
-        /// <summary>
-        /// asyncronous method called any time a GET request is recieved
-        /// </summary>
-        /// <param name="returnUrl">the url to be executed on callback</param>
-        /// <returns>task completion status</returns>
+
         public async Task OnGetAsync(string returnUrl = null)
         {
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
-        /// <summary>
-        /// asyncronous method called any time a POST request is recieved
-        /// </summary>
-        /// <param name="returnUrl">the url to be executed on callback</param>
-        /// <returns>task completion status</returns>
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
@@ -149,6 +131,9 @@ namespace TowerOfDaedelus_WebApp.Areas.Identity.Pages.Account
                         pageHandler: null,
                         values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                         protocol: Request.Scheme);
+
+                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
