@@ -20,13 +20,6 @@ builder.Services.Configure<DiscordBotOptions>(options =>
     options.targetServer = Resources.targetGuildID;
 });
 
-// Add health checks to report to docker
-builder.Services.AddHealthChecks()
-    .AddCheck<DockerHealthCheck>("Docker");
-
 var app = builder.Build();
-
-// Specify health check route for docker
-app.MapHealthChecks("/healthz");
 
 app.Run();

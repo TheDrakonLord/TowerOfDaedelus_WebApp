@@ -297,6 +297,24 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
         };
 
         /// <summary>
+        /// list of indicies to be added
+        /// </summary>
+        public static readonly List<ArangoIndex> indices = new List<ArangoIndex>
+        {
+            new ArangoIndex
+            {
+                CollectionName = collUsers,
+                Fields = new List<string>
+                {
+                    "UserName"
+                },
+                InBackground = false,
+                Name = "UserNameIndex",
+                Type = ArangoDBNetStandard.IndexApi.Models.IndexTypes.Persistent
+            }
+        };
+
+        /// <summary>
         /// list of graphs to be added
         /// </summary>
         public static readonly List<Graph> Graphs = new List<Graph>
@@ -693,7 +711,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
             /// <param name="lockoutEnabled">boolean indicating if the user can be locked out</param>
             /// <param name="phoneNumberConfirmed">boolean indicating if the user has confirmed their phone number</param>
             /// <param name="twoFactorEnabled">boolean if the user has enabled two factor authentication</param>
-            public Users(string userName, int accessFailedCount = 0, bool emailConfirmed = false, bool lockoutEnabled = false, bool phoneNumberConfirmed = false,
+            public Users(string userName = "", int accessFailedCount = 0, bool emailConfirmed = false, bool lockoutEnabled = false, bool phoneNumberConfirmed = false,
                 bool twoFactorEnabled = false)
             {
                 AccessFailedCount = accessFailedCount;

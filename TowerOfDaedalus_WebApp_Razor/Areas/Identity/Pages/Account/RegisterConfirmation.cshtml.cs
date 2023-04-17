@@ -19,12 +19,10 @@ namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
     public class RegisterConfirmationModel : PageModel
     {
         private readonly UserManager<Users> _userManager;
-        private readonly IEmailSender _sender;
 
-        public RegisterConfirmationModel(UserManager<Users> userManager, IEmailSender sender)
+        public RegisterConfirmationModel(UserManager<Users> userManager)
         {
             _userManager = userManager;
-            _sender = sender;
         }
 
         /// <summary>

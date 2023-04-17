@@ -21,7 +21,6 @@
   <ItemGroup>
     <ProjectReference Include="..\TowerOfDaedalus_WebApp_Arango\TowerOfDaedalus_WebApp_Arango.csproj" />
     <ProjectReference Include="..\TowerOfDaedalus_WebApp_Blazor\TowerOfDaedalus_WebApp_Blazor.csproj" />
-    <ProjectReference Include="..\TowerOfDaedalus_WebApp_DiscordBot\TowerOfDaedalus_WebApp_DiscordBot.csproj" />
     <ProjectReference Include="..\TowerOfDaedalus_WebApp_RESTApi\TowerOfDaedalus_WebApp_RESTApi.csproj" />
   </ItemGroup>
 

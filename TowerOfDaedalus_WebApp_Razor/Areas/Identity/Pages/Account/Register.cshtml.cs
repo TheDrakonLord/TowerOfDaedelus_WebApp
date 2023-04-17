@@ -22,6 +22,7 @@ using static TowerOfDaedalus_WebApp_Arango.Schema.Documents;
 
 namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
 {
+    [AllowAnonymous]
     public class RegisterModel : PageModel
     {
         private readonly SignInManager<Users> _signInManager;
@@ -29,21 +30,18 @@ namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
         private readonly IUserStore<Users> _userStore;
         private readonly IUserEmailStore<Users> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
-        private readonly IEmailSender _emailSender;
 
         public RegisterModel(
             UserManager<Users> userManager,
             IUserStore<Users> userStore,
             SignInManager<Users> signInManager,
-            ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            ILogger<RegisterModel> logger)
         {
             _userManager = userManager;
             _userStore = userStore;
             _emailStore = (IUserEmailStore<Users>)GetEmailStore();
             _signInManager = signInManager;
             _logger = logger;
-            _emailSender = emailSender;
         }
 
         /// <summary>
@@ -131,9 +129,6 @@ namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
                         pageHandler: null,
                         values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                         protocol: Request.Scheme);
-
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {

@@ -28,6 +28,11 @@ builder.Services.AddIdentity<Users, Roles>()
 builder.Services.AddTransient<IUserStore<Users>, ArangoUserStore>();
 builder.Services.AddTransient<IRoleStore<Roles>, ArangoRoleStore>();
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+builder.Services.AddRazorPages();
+
 builder.Services.AddAuthentication()
     .AddDiscord(options =>
     {
@@ -84,7 +89,6 @@ builder.Services.AddAuthorization(options =>
         .Build();
 });
 
-builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
@@ -113,6 +117,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();

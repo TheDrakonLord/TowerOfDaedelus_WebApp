@@ -130,6 +130,28 @@ namespace TowerOfDaedalus_WebApp_Arango
                             }
                         }
 
+                        // Create Indices
+                        foreach (ArangoIndex item in ArangoSchema.indices)
+                        {
+                            var newIndexBody = new ArangoDBNetStandard.IndexApi.Models.PostPersistentIndexBody()
+                            {
+                                Sparse = true,
+                                Fields = item.Fields,
+                                InBackground = item.InBackground,
+                                Name = item.Name,
+                                Type = item.Type,
+                                Unique = true
+                            };
+
+                            var indexResponse = Task.Run(() => db.Index.PostPersistentIndexAsync(item.Query, newIndexBody)).Result;
+
+                            if (indexResponse.Code != System.Net.HttpStatusCode.OK && indexResponse.Code != System.Net.HttpStatusCode.Created)
+                            {
+                                _logger.LogError("Arango returned a non-ok status code");
+                                throw new HttpRequestException($"Could not add the {item.Name} index to ArangoDB");
+                            }
+                        }
+
                         // Create graph
                         _logger.LogInformation("creating graph and edge definitions");
                         foreach (Graph graph in ArangoSchema.Graphs)

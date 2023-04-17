@@ -18,7 +18,7 @@ services:
             condition: service_started
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_URLS=https://+:5100;http://+:5000
       - ASPNETCORE_Kestrel__Certificates__Default__Password=${CERT_PASSWORD}
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/root/.aspnet/https/TowerOfDaedelus_WebApp.pfx
       - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
@@ -31,8 +31,8 @@ services:
       - ARANGO_NEW_USERNAME=${ARANGO_NEW_USERNAME}
       - ARANGO_NEW_PASSWORD=${ARANGO_NEW_PASSWORD}
     ports:
-      - 5000:80
-      - 5100:443
+      - 5000:5000
+      - 5100:5100
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
@@ -53,7 +53,7 @@ services:
       dockerfile: TowerOfDaedalus_WebApp_Blazor/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_URLS=https://+:5101;http://+:5001
       - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
       - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
       - ARANGO_DB_NAME=${ARANGO_DB_NAME}
@@ -64,8 +64,8 @@ services:
       - ARANGO_NEW_USERNAME=${ARANGO_NEW_USERNAME}
       - ARANGO_NEW_PASSWORD=${ARANGO_NEW_PASSWORD}
     ports:
-      - 5001:80
-      - 5101:443
+      - 5001:5001
+      - 5101:5101
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
@@ -105,8 +105,6 @@ services:
       - ARANGO_URL=${ARANGO_URL}
       - ARANGO_NEW_USERNAME=${ARANGO_NEW_USERNAME}
       - ARANGO_NEW_PASSWORD=${ARANGO_NEW_PASSWORD}
-    ports:
-      - 5003:80
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ./Persistance/Logs:/var/opt/Logs
@@ -123,10 +121,10 @@ services:
     image: ${DOCKER_REGISTRY-}towerofdaedaluswebapprestapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_URLS=https://+:5102;http://+:5002
     ports:
-        - 5002:80
-        - 5102:443
+        - 5002:5002
+        - 5102:5102
     volumes:
         - ./Persistance/Logs:/var/opt/Logs
     build:

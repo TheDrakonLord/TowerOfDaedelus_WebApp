@@ -1283,6 +1283,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         {
             await CreateConnection();
 
+            // TODO obtain any Users that match the username of the provided user and update that record instead
+            // TODO no need for post method as record will already have been created
+
             if (user._key is null)
             {
                 PostDocumentResponse<Users> postResponse = await db.Document.PostDocumentAsync<Users>(ArangoSchema.collUsers, user, token: cancellationToken);
