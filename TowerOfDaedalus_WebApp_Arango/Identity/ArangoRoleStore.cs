@@ -57,7 +57,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<IdentityResult> CreateAsync(Roles role, CancellationToken cancellationToken)
         {
-            await CreateConnection();
+            
 
             PostDocumentResponse<Roles> roleResponse = await db.Document.PostDocumentAsync<Roles>(ArangoSchema.collRoles, role, token: cancellationToken);
 
@@ -73,7 +73,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<IdentityResult> DeleteAsync(Roles role, CancellationToken cancellationToken)
         {
-            await CreateConnection();
+            
 
             DeleteDocumentResponse<Roles> deleteResponse = await db.Document.DeleteDocumentAsync<Roles>(ArangoSchema.collRoles, role._key, token: cancellationToken);
 
@@ -118,7 +118,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<Roles?> FindByIdAsync(string roleId, CancellationToken cancellationToken)
         {
-            await CreateConnection();
+            
 
             ArangoQueryBuilder qb = new ArangoQueryBuilder(ArangoSchema.collRoles);
             qb.filter("Id", roleId);
@@ -146,7 +146,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<Roles?> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
         {
-            await CreateConnection();
+            
 
             ArangoQueryBuilder qb = new ArangoQueryBuilder(ArangoSchema.collRoles);
             qb.filter("NormalizedName", normalizedRoleName);
@@ -174,7 +174,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<string?> GetNormalizedRoleNameAsync(Roles role, CancellationToken cancellationToken)
         {
-            await CreateConnection();
+            
 
             Roles result = await db.Document.GetDocumentAsync<Roles>(ArangoSchema.collRoles, role.Id);
 
@@ -242,7 +242,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<IdentityResult> UpdateAsync(Roles role, CancellationToken cancellationToken)
         {
-            await CreateConnection();
+            
 
             if (role._key is null)
             {

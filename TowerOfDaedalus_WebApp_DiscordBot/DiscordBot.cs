@@ -102,7 +102,7 @@ namespace TowerOfDaedalus_WebApp_DiscordBot
             _client = new DiscordSocketClient();
             _cService = new CommandService();
             _cHandler = new commandHandler(_client, _cService, _logger);
-
+            statusMessage = Environment.GetEnvironmentVariable("DISCORD_BOT_STARTUP_STRING");
 
 
 

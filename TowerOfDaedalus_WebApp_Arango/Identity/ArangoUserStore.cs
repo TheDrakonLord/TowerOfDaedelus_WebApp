@@ -28,6 +28,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         IUserTwoFactorStore<Users>, IUserLockoutStore<Users>
     {
         private HttpApiTransport? transport;
+        private static ILogger<Utilities> _logger;
         private ArangoDBClient? db;
         private bool disposed_ = false;
         private bool created_ = false;
@@ -35,14 +36,58 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <summary>
         /// 
         /// </summary>
-        private async Task CreateConnection()
+        private void CreateConnection()
         {
+            _logger.LogTrace("Checking if connection to database exists already");
             if (!created_)
             {
+                _logger.LogDebug("Creating connection to database");
                 transport = HttpApiTransport.UsingBasicAuth(new Uri(ArangoDbContext.getUrl()), ArangoDbContext.getDbName(), ArangoDbContext.getNewUsername(), ArangoDbContext.getNewPass());
                 db = new ArangoDBClient(transport);
                 created_ = true;
             }
+        }
+
+        private async Task<Users?> getExistingUser(Users user, CancellationToken cancellationToken)
+        {
+            ArangoQueryBuilder existingQb = new ArangoQueryBuilder(ArangoSchema.collUsers);
+            existingQb.filter("UserName", user.UserName);
+            existingQb.limit(1);
+            string query = existingQb.ToString();
+            CursorResponse<Users> queryResponse = await db.Cursor.PostCursorAsync<Users>(query, token: cancellationToken);
+
+            if (queryResponse.Result.Any())
+            {
+                Users existingUser = queryResponse.Result.First();
+                return existingUser;
+            }
+            else
+            {
+                _logger.LogDebug($"Could not find a user with the name {user.UserName}");
+                return null;
+            }
+        }
+
+        private async Task<string> getExistingUserKey(Users user, CancellationToken cancellationToken)
+        {
+            Users? existingUser = await getExistingUser(user, cancellationToken);
+            if (existingUser == null)
+            {
+                _logger.LogError("could not find an existing user when we need one");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            return existingUser._key;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="logger"></param>
+        public ArangoUserStore(ILogger<Utilities> logger)
+        {
+            _logger = logger;
+            CreateConnection();
         }
 
         /// <summary>
@@ -63,13 +108,14 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task AddClaimsAsync(Users user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
         {
-            await CreateConnection();
-
-            if (user.Id is null)
+            if (user is null)
             {
-                //_logger.LogError("a user id must be supplied to add claims");
+                _logger.LogError("a user must be supplied to add claims");
                 return;
             }
+
+            user._key = await getExistingUserKey(user, cancellationToken);
+
             List<Edges> edges = new List<Edges>();
 
             foreach (Claim item in claims)
@@ -86,7 +132,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
 
                 if (edgeResponse.Error)
                 {
-                    //_logger.LogError("failed to post edge for user claim");
+                    _logger.LogError("failed to post edge for user claim");
                 }
             }
 
@@ -103,14 +149,15 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task AddLoginAsync(Users user, UserLoginInfo login, CancellationToken cancellationToken)
         {
-            await CreateConnection();
-
-            if (user.Id is null)
+            if (user is null)
             {
-                //_logger.LogError("a user id must be supplied to add claims");
+                _logger.LogError("a user must be supplied to add claims");
                 return;
             }
-            UserLogins newLogin = new UserLogins(login.LoginProvider, login.ProviderKey, login.ProviderDisplayName, user.Id);
+
+            user._key = await getExistingUserKey(user, cancellationToken);
+
+            UserLogins newLogin = new UserLogins(login.LoginProvider, login.ProviderKey, login.ProviderDisplayName, user._key);
             PostDocumentResponse<UserLogins> docResponse = await db.Document.PostDocumentAsync<UserLogins>(ArangoSchema.collUserLogins, newLogin, token: cancellationToken);
             Edges edge = new Edges($"{ArangoSchema.collUsers}/{user._key}",$"{ArangoSchema.collUserLogins}/{docResponse._key}");
             edge.Type = "Login";
@@ -119,7 +166,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
 
             if (edgeResponse.Error)
             {
-                //_logger.LogError("failed to post edge for user login");
+                _logger.LogError("failed to post edge for user login");
             }
 
             return;
@@ -135,7 +182,13 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task AddToRoleAsync(Users user, string roleName, CancellationToken cancellationToken)
         {
-            await CreateConnection();
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                return;
+            }
+
+            user._key = await getExistingUserKey(user, cancellationToken);
 
             PostCursorBody roleQuery = new PostCursorBody();
             roleQuery.BatchSize = 1;
@@ -149,11 +202,12 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
 
             if (queryResponse.Error)
             {
-                //_logger.LogError("Query to obtain role failed");
+                _logger.LogError("Query to obtain role failed");
             }
 
             if (queryResponse.Result == null)
             {
+                _logger.LogError("Could not find any roles");
                 throw new ArgumentNullException("queryResponse.Result");
             }
 
@@ -165,12 +219,12 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             PostEdgeResponse<Edges> edgeResponseA = await db.Graph.PostEdgeAsync<Edges>(ArangoSchema.graphPrimary, ArangoSchema.edgeUserRoles, edgeA, token: cancellationToken);
             if (edgeResponseA.Error)
             {
-                //_logger.LogError("failed to post edge for user role");
+                _logger.LogError("failed to post edge for user role");
             }
             PostEdgeResponse<Edges> edgeResponseB = await db.Graph.PostEdgeAsync<Edges>(ArangoSchema.graphPrimary, ArangoSchema.edgeRoleUsers, edgeB, token: cancellationToken);
             if (edgeResponseB.Error)
             {
-                //_logger.LogError("failed to post edge for role user");
+                _logger.LogError("failed to post edge for role user");
             }
 
             return;
@@ -185,9 +239,25 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<IdentityResult> CreateAsync(Users user, CancellationToken cancellationToken)
         {
-            await CreateConnection();
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                return IdentityResult.Failed();
+            }
 
-            PostDocumentResponse<Users> userResponse = await db.Document.PostDocumentAsync<Users>(ArangoSchema.collUsers, user, token: cancellationToken);
+            Users? existingUser = await getExistingUser(user, cancellationToken);
+
+            if (existingUser != null)
+            {
+                PatchDocumentQuery patchQuery = new PatchDocumentQuery();
+                patchQuery.KeepNull = true;
+
+                PatchDocumentResponse<object> patchResponse = await db.Document.PatchDocumentAsync<Users>($"{ArangoSchema.collUsers}/{existingUser._key}", user, patchQuery, cancellationToken);
+            }
+            else
+            {
+                PostDocumentResponse<Users> userResponse = await db.Document.PostDocumentAsync<Users>(ArangoSchema.collUsers, user, token: cancellationToken);
+            }
 
             return IdentityResult.Success;
         }
@@ -201,7 +271,13 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<IdentityResult> DeleteAsync(Users user, CancellationToken cancellationToken)
         {
-            await CreateConnection();
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                return IdentityResult.Failed();
+            }
+
+            user._key = await getExistingUserKey(user, cancellationToken);
 
             DeleteDocumentResponse<Users> deleteResponse = await db.Document.DeleteDocumentAsync<Users>(ArangoSchema.collUsers, user._key, token: cancellationToken);
 
@@ -246,8 +322,6 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<Users?> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
         {
-            await CreateConnection();
-
             ArangoQueryBuilder qb = new ArangoQueryBuilder(ArangoSchema.collUsers);
             qb.filter("NormalizedEmail", normalizedEmail);
             qb.limit(1);
@@ -261,6 +335,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             }
             else
             {
+                _logger.LogDebug($"could not find any users with the email {normalizedEmail}");
                 return null;
             }
         }
@@ -274,8 +349,6 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<Users?> FindByIdAsync(string userId, CancellationToken cancellationToken)
         {
-            await CreateConnection();
-
             ArangoQueryBuilder qb = new ArangoQueryBuilder(ArangoSchema.collUsers);
             qb.filter("Id", userId);
             qb.limit(1);
@@ -289,6 +362,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             }
             else
             {
+                _logger.LogDebug($"could not find any users with the id {userId}");
                 return null;
             }
         }
@@ -303,8 +377,6 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<Users?> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
-            await CreateConnection();
-
             ArangoQueryBuilder loginQb = new ArangoQueryBuilder(ArangoSchema.collUserLogins);
             loginQb.filter("LoginProvider", loginProvider);
             loginQb.filter("ProviderKey", providerKey);
@@ -330,11 +402,13 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
                 }
                 else
                 {
+                    _logger.LogDebug($"could not find any users with the login providere {loginProvider}");
                     return null;
                 }
             }
             else
             {
+                _logger.LogDebug($"could not find any logins with the provider {loginProvider}");
                 return null;
             }
         }
@@ -348,8 +422,6 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<Users?> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
-            await CreateConnection();
-
             ArangoQueryBuilder qb = new ArangoQueryBuilder(ArangoSchema.collUsers);
             qb.filter("NormalizedUserName", normalizedUserName);
             qb.limit(1);
@@ -363,6 +435,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             }
             else
             {
+                _logger.LogDebug($"could not find any users with the username {normalizedUserName}");
                 return null;
             }
         }
@@ -376,11 +449,23 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<int> GetAccessFailedCountAsync(Users user, CancellationToken cancellationToken)
         {
-            await CreateConnection();
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
 
-            Users result = await db.Document.GetDocumentAsync<Users>(ArangoSchema.collUsers, user.Id);
+            Users? existingUser = await getExistingUser(user, cancellationToken);
 
-            return result.AccessFailedCount;
+            if (existingUser != null)
+            {
+                return existingUser.AccessFailedCount;
+            }
+            else
+            {
+                _logger.LogError("An existing user was not found");
+                throw new ArgumentNullException(nameof(existingUser));
+            }
         }
 
         /// <summary>
@@ -392,7 +477,14 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<IList<Claim>> GetClaimsAsync(Users user, CancellationToken cancellationToken)
         {
-            await CreateConnection();
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            user._key = await getExistingUserKey(user, cancellationToken);
+
 
             List<Claim> result = new List<Claim>();
             ArangoQueryBuilder qb = new ArangoQueryBuilder(ArangoSchema.edgeUserClaims);
@@ -426,8 +518,10 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             }
             else
             {
-                throw new ArgumentNullException("queryResponse.Result");
+                _logger.LogError("An existing user claim was not found");
+                throw new ArgumentNullException(nameof(queryResponse.Result));
             }
+
         }
 
         /// <summary>
@@ -439,7 +533,23 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<string?> GetEmailAsync(Users user, CancellationToken cancellationToken)
         {
-            return user.Email;
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            Users? existingUser = await getExistingUser(user, cancellationToken);
+
+            if (existingUser != null)
+            {
+                return existingUser.Email;
+            }
+            else
+            {
+                _logger.LogError("An existing user was not found");
+                throw new ArgumentNullException(nameof(existingUser));
+            }
         }
 
         /// <summary>
@@ -452,7 +562,23 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<bool> GetEmailConfirmedAsync(Users user, CancellationToken cancellationToken)
         {
-            return user.EmailConfirmed;
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            Users? existingUser = await getExistingUser(user, cancellationToken);
+
+            if (existingUser != null)
+            {
+                return existingUser.EmailConfirmed;
+            }
+            else
+            {
+                _logger.LogError("An existing user was not found");
+                throw new ArgumentNullException(nameof(existingUser));
+            }
         }
 
         /// <summary>
@@ -464,7 +590,23 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<bool> GetLockoutEnabledAsync(Users user, CancellationToken cancellationToken)
         {
-            return user.LockoutEnabled;
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            Users? existingUser = await getExistingUser(user, cancellationToken);
+
+            if (existingUser != null)
+            {
+                return existingUser.LockoutEnabled;
+            }
+            else
+            {
+                _logger.LogError("An existing user was not found");
+                throw new ArgumentNullException(nameof(existingUser));
+            }
         }
 
         /// <summary>
@@ -477,7 +619,23 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<DateTimeOffset?> GetLockoutEndDateAsync(Users user, CancellationToken cancellationToken)
         {
-            return user.LockoutEnd;
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            Users? existingUser = await getExistingUser(user, cancellationToken);
+
+            if (existingUser != null)
+            {
+                return existingUser.LockoutEnd;
+            }
+            else
+            {
+                _logger.LogError("An existing user was not found");
+                throw new ArgumentNullException(nameof(existingUser));
+            }
         }
 
         /// <summary>
@@ -489,7 +647,13 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<IList<UserLoginInfo>> GetLoginsAsync(Users user, CancellationToken cancellationToken)
         {
-            await CreateConnection();
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            user._key = await getExistingUserKey(user, cancellationToken);
 
             List<UserLoginInfo> result = new List<UserLoginInfo>();
             ArangoQueryBuilder qb = new ArangoQueryBuilder(ArangoSchema.edgeUserLogins);
@@ -522,6 +686,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             }
             else
             {
+                _logger.LogError("An existing user login was not found");
                 throw new ArgumentNullException("queryResponse.Result");
             }
         }
@@ -535,7 +700,23 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<string?> GetNormalizedEmailAsync(Users user, CancellationToken cancellationToken)
         {
-            return user.NormalizedEmail;
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            Users? existingUser = await getExistingUser(user, cancellationToken);
+
+            if (existingUser != null)
+            {
+                return existingUser.NormalizedEmail;
+            }
+            else
+            {
+                _logger.LogError("An existing user was not found");
+                throw new ArgumentNullException(nameof(existingUser));
+            }
         }
 
         /// <summary>
@@ -547,7 +728,23 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<string?> GetNormalizedUserNameAsync(Users user, CancellationToken cancellationToken)
         {
-            return user.NormalizedUserName;
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            Users? existingUser = await getExistingUser(user, cancellationToken);
+
+            if (existingUser != null)
+            {
+                return existingUser.NormalizedUserName;
+            }
+            else
+            {
+                _logger.LogError("An existing user was not found");
+                throw new ArgumentNullException(nameof(existingUser));
+            }
         }
 
         /// <summary>
@@ -559,7 +756,23 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<string?> GetPasswordHashAsync(Users user, CancellationToken cancellationToken)
         {
-            return user.PasswordHash;
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            Users? existingUser = await getExistingUser(user, cancellationToken);
+
+            if (existingUser != null)
+            {
+                return existingUser.PasswordHash;
+            }
+            else
+            {
+                _logger.LogError("An existing user was not found");
+                throw new ArgumentNullException(nameof(existingUser));
+            }
         }
 
         /// <summary>
@@ -571,7 +784,23 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<string?> GetPhoneNumberAsync(Users user, CancellationToken cancellationToken)
         {
-            return user.PhoneNumber;
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            Users? existingUser = await getExistingUser(user, cancellationToken);
+
+            if (existingUser != null)
+            {
+                return existingUser.PhoneNumber;
+            }
+            else
+            {
+                _logger.LogError("An existing user was not found");
+                throw new ArgumentNullException(nameof(existingUser));
+            }
         }
 
         /// <summary>
@@ -583,7 +812,23 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<bool> GetPhoneNumberConfirmedAsync(Users user, CancellationToken cancellationToken)
         {
-            return user.PhoneNumberConfirmed;
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            Users? existingUser = await getExistingUser(user, cancellationToken);
+
+            if (existingUser != null)
+            {
+                return existingUser.PhoneNumberConfirmed;
+            }
+            else
+            {
+                _logger.LogError("An existing user was not found");
+                throw new ArgumentNullException(nameof(existingUser));
+            }
         }
 
         /// <summary>
@@ -595,7 +840,13 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<IList<string>> GetRolesAsync(Users user, CancellationToken cancellationToken)
         {
-            await CreateConnection();
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            user._key = await getExistingUserKey(user, cancellationToken);
 
             List<string> result = new List<string>();
             ArangoQueryBuilder qb = new ArangoQueryBuilder(ArangoSchema.edgeUserRoles);
@@ -628,6 +879,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             }
             else
             {
+                _logger.LogError("An existing user role was not found");
                 throw new ArgumentNullException("queryResponse.Result");
             }
         }
@@ -641,7 +893,23 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<string?> GetSecurityStampAsync(Users user, CancellationToken cancellationToken)
         {
-            return user.SecurityStamp;
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            Users? existingUser = await getExistingUser(user, cancellationToken);
+
+            if (existingUser != null)
+            {
+                return existingUser.SecurityStamp;
+            }
+            else
+            {
+                _logger.LogError("An existing user was not found");
+                throw new ArgumentNullException(nameof(existingUser));
+            }
         }
 
         /// <summary>
@@ -654,7 +922,23 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<bool> GetTwoFactorEnabledAsync(Users user, CancellationToken cancellationToken)
         {
-            return user.TwoFactorEnabled;
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            Users? existingUser = await getExistingUser(user, cancellationToken);
+
+            if (existingUser != null)
+            {
+                return existingUser.TwoFactorEnabled;
+            }
+            else
+            {
+                _logger.LogError("An existing user was not found");
+                throw new ArgumentNullException(nameof(existingUser));
+            }
         }
 
         /// <summary>
@@ -666,7 +950,23 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<string> GetUserIdAsync(Users user, CancellationToken cancellationToken)
         {
-            return user.Id;
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            Users? existingUser = await getExistingUser(user, cancellationToken);
+
+            if (existingUser != null)
+            {
+                return existingUser.Id;
+            }
+            else
+            {
+                _logger.LogError("An existing user was not found");
+                throw new ArgumentNullException(nameof(existingUser));
+            }
         }
 
         /// <summary>
@@ -678,7 +978,23 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<string?> GetUserNameAsync(Users user, CancellationToken cancellationToken)
         {
-            return user.UserName;
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            Users? existingUser = await getExistingUser(user, cancellationToken);
+
+            if (existingUser != null)
+            {
+                return existingUser.UserName;
+            }
+            else
+            {
+                _logger.LogError("An existing user was not found");
+                throw new ArgumentNullException(nameof(existingUser));
+            }
         }
 
         /// <summary>
@@ -690,8 +1006,6 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<IList<Users>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken)
         {
-            await CreateConnection();
-
             ArangoQueryBuilder claimQb = new ArangoQueryBuilder(ArangoSchema.collUserClaims);
             claimQb.filter("Value", claim.Value);
             claimQb.filter("Type", claim.Type);
@@ -732,6 +1046,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             }
             else
             {
+                _logger.LogError("An existing user claim was not found");
                 throw new ArgumentNullException("queryResponse.Result");
             }
         }
@@ -745,8 +1060,6 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<IList<Users>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
         {
-            await CreateConnection();
-
             ArangoQueryBuilder roleQb = new ArangoQueryBuilder(ArangoSchema.collRoles);
             roleQb.filter("Name", roleName);
             roleQb.limit(1);
@@ -785,6 +1098,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             }
             else
             {
+                _logger.LogError("An existing role user was not found");
                 throw new ArgumentNullException("queryResponse.Result");
             }
         }
@@ -798,13 +1112,29 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<bool> HasPasswordAsync(Users user, CancellationToken cancellationToken)
         {
-            if (user.PasswordHash is null)
+            if (user is null)
             {
-                return false;
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            Users? existingUser = await getExistingUser(user, cancellationToken);
+
+            if (existingUser != null)
+            {
+                if (existingUser.PasswordHash is null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
             }
             else
             {
-                return true;
+                _logger.LogError("An existing user was not found");
+                throw new ArgumentNullException(nameof(existingUser));
             }
         }
 
@@ -817,8 +1147,25 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<int> IncrementAccessFailedCountAsync(Users user, CancellationToken cancellationToken)
         {
-            user.AccessFailedCount++;
-            return user.AccessFailedCount;
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            Users? existingUser = await getExistingUser(user, cancellationToken);
+
+            if (existingUser != null)
+            {
+                existingUser.AccessFailedCount++;
+                return existingUser.AccessFailedCount;
+            }
+            else
+            {
+                _logger.LogError("An existing user was not found");
+                throw new ArgumentNullException(nameof(existingUser));
+            }
+
         }
 
         /// <summary>
@@ -831,7 +1178,13 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<bool> IsInRoleAsync(Users user, string roleName, CancellationToken cancellationToken)
         {
-            await CreateConnection();
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            user._key = await getExistingUserKey(user, cancellationToken);
 
             ArangoQueryBuilder roleQb = new ArangoQueryBuilder(ArangoSchema.collRoles);
             roleQb.filter("Name", roleName);
@@ -866,7 +1219,13 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task RemoveClaimsAsync(Users user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
         {
-            await CreateConnection();
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            user._key = await getExistingUserKey(user, cancellationToken);
 
             ArangoQueryBuilder edgeQb = new ArangoQueryBuilder(ArangoSchema.edgeUserClaims);
             edgeQb.filter("_from", $"{ArangoSchema.collUsers}/{user.Id}");
@@ -927,6 +1286,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             }
             else
             {
+                _logger.LogError("An existing user claim was not found");
                 throw new ArgumentNullException("queryResponse.Result");
             }
 
@@ -942,7 +1302,13 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task RemoveFromRoleAsync(Users user, string roleName, CancellationToken cancellationToken)
         {
-            await CreateConnection();
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            user._key = await getExistingUserKey(user, cancellationToken);
 
             ArangoQueryBuilder roleQb = new ArangoQueryBuilder(ArangoSchema.collRoles);
             roleQb.filter("Name", roleName);
@@ -979,6 +1345,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             }
             else
             {
+                _logger.LogError("An existing role user was not found");
                 throw new ArgumentNullException("queryResponse.Result");
             }
         }
@@ -994,7 +1361,13 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task RemoveLoginAsync(Users user, string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
-            await CreateConnection();
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            user._key = await getExistingUserKey(user, cancellationToken);
 
             ArangoQueryBuilder edgeQb = new ArangoQueryBuilder(ArangoSchema.collUserLogins);
             edgeQb.filter("_from", $"{ArangoSchema.collUsers}/{user._key}");
@@ -1050,6 +1423,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             }
             else
             {
+                _logger.LogError("An existing user login was not found");
                 throw new ArgumentNullException("queryResponse.Result");
             }
         }
@@ -1065,7 +1439,13 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task ReplaceClaimAsync(Users user, Claim claim, Claim newClaim, CancellationToken cancellationToken)
         {
-            await CreateConnection();
+            if (user is null)
+            {
+                _logger.LogError("a user must be supplied to add claims");
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            user._key = await getExistingUserKey(user, cancellationToken);
 
             ArangoQueryBuilder claimQb = new ArangoQueryBuilder(ArangoSchema.collUserClaims);
             claimQb.filter("Issuer", claim.Issuer);
@@ -1084,6 +1464,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             }
             else
             {
+                _logger.LogError("An existing user claim was not found");
                 throw new ArgumentNullException("claimResponse.Result");
             }
         }
@@ -1097,8 +1478,16 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task ResetAccessFailedCountAsync(Users user, CancellationToken cancellationToken)
         {
-            user.AccessFailedCount = 0;
-            await UpdateAsync(user, cancellationToken);
+            if (user != null)
+            {
+                user.AccessFailedCount = 0;
+                await UpdateAsync(user, cancellationToken);
+            }
+            else
+            {
+                _logger.LogError("The user parameter cannot be null");
+                throw new ArgumentNullException(nameof(user));
+            }
         }
 
         /// <summary>
@@ -1111,8 +1500,16 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task SetEmailAsync(Users user, string? email, CancellationToken cancellationToken)
         {
-            user.Email = email;
-            await UpdateAsync(user, cancellationToken);
+            if (user != null)
+            {
+                user.Email = email;
+                await UpdateAsync(user, cancellationToken);
+            }
+            else
+            {
+                _logger.LogError("The user parameter cannot be null");
+                throw new ArgumentNullException(nameof(user));
+            }
         }
 
         /// <summary>
@@ -1126,8 +1523,16 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task SetEmailConfirmedAsync(Users user, bool confirmed, CancellationToken cancellationToken)
         {
-            user.EmailConfirmed = confirmed;
-            await UpdateAsync(user, cancellationToken);
+            if (user != null)
+            {
+                user.EmailConfirmed = confirmed;
+                await UpdateAsync(user, cancellationToken);
+            }
+            else
+            {
+                _logger.LogError("The user parameter cannot be null");
+                throw new ArgumentNullException(nameof(user));
+            }
         }
 
         /// <summary>
@@ -1140,8 +1545,16 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task SetLockoutEnabledAsync(Users user, bool enabled, CancellationToken cancellationToken)
         {
-            user.LockoutEnabled = enabled;
-            await UpdateAsync(user, cancellationToken);
+            if (user != null)
+            {
+                user.LockoutEnabled = enabled;
+                await UpdateAsync(user, cancellationToken);
+            }
+            else
+            {
+                _logger.LogError("The user parameter cannot be null");
+                throw new ArgumentNullException(nameof(user));
+            }
         }
 
         /// <summary>
@@ -1155,8 +1568,16 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task SetLockoutEndDateAsync(Users user, DateTimeOffset? lockoutEnd, CancellationToken cancellationToken)
         {
-            user.LockoutEnd = lockoutEnd;
-            await UpdateAsync(user, cancellationToken);
+            if (user != null)
+            {
+                user.LockoutEnd = lockoutEnd;
+                await UpdateAsync(user, cancellationToken);
+            }
+            else
+            {
+                _logger.LogError("The user parameter cannot be null");
+                throw new ArgumentNullException(nameof(user));
+            }
         }
 
         /// <summary>
@@ -1169,8 +1590,16 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task SetNormalizedEmailAsync(Users user, string? normalizedEmail, CancellationToken cancellationToken)
         {
-            user.NormalizedEmail = normalizedEmail;
-            await UpdateAsync(user, cancellationToken);
+            if (user != null)
+            {
+                user.NormalizedEmail = normalizedEmail;
+                await UpdateAsync(user, cancellationToken);
+            }
+            else
+            {
+                _logger.LogError("The user parameter cannot be null");
+                throw new ArgumentNullException(nameof(user));
+            }
         }
 
         /// <summary>
@@ -1183,8 +1612,16 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task SetNormalizedUserNameAsync(Users user, string? normalizedName, CancellationToken cancellationToken)
         {
-            user.NormalizedUserName = normalizedName;
-            await UpdateAsync(user, cancellationToken);
+            if (user != null)
+            {
+                user.NormalizedUserName = normalizedName;
+                await UpdateAsync(user, cancellationToken);
+            }
+            else
+            {
+                _logger.LogError("The user parameter cannot be null");
+                throw new ArgumentNullException(nameof(user));
+            }
         }
 
         /// <summary>
@@ -1197,8 +1634,16 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task SetPasswordHashAsync(Users user, string? passwordHash, CancellationToken cancellationToken)
         {
-            user.PasswordHash = passwordHash;
-            await UpdateAsync(user, cancellationToken);
+            if (user != null)
+            {
+                user.PasswordHash = passwordHash;
+                await UpdateAsync(user, cancellationToken);
+            }
+            else
+            {
+                _logger.LogError("The user parameter cannot be null");
+                throw new ArgumentNullException(nameof(user));
+            }
         }
 
         /// <summary>
@@ -1211,8 +1656,16 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task SetPhoneNumberAsync(Users user, string? phoneNumber, CancellationToken cancellationToken)
         {
-            user.PhoneNumber = phoneNumber;
-            await UpdateAsync(user, cancellationToken);
+            if (user != null)
+            {
+                user.PhoneNumber = phoneNumber;
+                await UpdateAsync(user, cancellationToken);
+            }
+            else
+            {
+                _logger.LogError("The user parameter cannot be null");
+                throw new ArgumentNullException(nameof(user));
+            }
         }
 
         /// <summary>
@@ -1225,8 +1678,16 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task SetPhoneNumberConfirmedAsync(Users user, bool confirmed, CancellationToken cancellationToken)
         {
-            user.PhoneNumberConfirmed = confirmed;
-            await UpdateAsync(user, cancellationToken);
+            if (user != null)
+            {
+                user.PhoneNumberConfirmed = confirmed;
+                await UpdateAsync(user, cancellationToken);
+            }
+            else
+            {
+                _logger.LogError("The user parameter cannot be null");
+                throw new ArgumentNullException(nameof(user));
+            }
         }
 
         /// <summary>
@@ -1239,8 +1700,16 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task SetSecurityStampAsync(Users user, string stamp, CancellationToken cancellationToken)
         {
-            user.SecurityStamp = stamp;
-            await UpdateAsync(user, cancellationToken);
+            if (user != null)
+            {
+                user.SecurityStamp = stamp;
+                await UpdateAsync(user, cancellationToken);
+            }
+            else
+            {
+                _logger.LogError("The user parameter cannot be null");
+                throw new ArgumentNullException(nameof(user));
+            }
         }
 
         /// <summary>
@@ -1254,8 +1723,16 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task SetTwoFactorEnabledAsync(Users user, bool enabled, CancellationToken cancellationToken)
         {
-            user.TwoFactorEnabled = enabled;
-            await UpdateAsync(user, cancellationToken);
+            if (user != null)
+            {
+                user.TwoFactorEnabled = enabled;
+                await UpdateAsync(user, cancellationToken);
+            }
+            else
+            {
+                _logger.LogError("The user parameter cannot be null");
+                throw new ArgumentNullException(nameof(user));
+            }
         }
 
         /// <summary>
@@ -1268,8 +1745,16 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task SetUserNameAsync(Users user, string? userName, CancellationToken cancellationToken)
         {
-            user.UserName = userName;
-            await UpdateAsync(user, cancellationToken);
+            if (user != null)
+            {
+                user.UserName = userName;
+                await UpdateAsync(user, cancellationToken);
+            }
+            else
+            {
+                _logger.LogError("The user parameter cannot be null");
+                throw new ArgumentNullException(nameof(user));
+            }
         }
 
         /// <summary>
@@ -1281,21 +1766,18 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<IdentityResult> UpdateAsync(Users user, CancellationToken cancellationToken)
         {
-            await CreateConnection();
+            Users? existingUser = await getExistingUser(user, cancellationToken);
 
-            // TODO obtain any Users that match the username of the provided user and update that record instead
-            // TODO no need for post method as record will already have been created
-
-            if (user._key is null)
-            {
-                PostDocumentResponse<Users> postResponse = await db.Document.PostDocumentAsync<Users>(ArangoSchema.collUsers, user, token: cancellationToken);
-            }
-            else
+            if (existingUser != null)
             {
                 PatchDocumentQuery patchQuery = new PatchDocumentQuery();
                 patchQuery.KeepNull = true;
 
-                PatchDocumentResponse<object> patchResponse = await db.Document.PatchDocumentAsync<Users>($"{ArangoSchema.collUsers}/{user._key}", user, patchQuery, cancellationToken);
+                PatchDocumentResponse<object> patchResponse = await db.Document.PatchDocumentAsync<Users>($"{ArangoSchema.collUsers}/{existingUser._key}", user, patchQuery, cancellationToken);
+            }
+            else
+            {
+                PostDocumentResponse<Users> postResponse = await db.Document.PostDocumentAsync<Users>(ArangoSchema.collUsers, user, token: cancellationToken);
             }
             return IdentityResult.Success;
         }

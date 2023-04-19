@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Net.Http;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Identity;
@@ -17,6 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using static TowerOfDaedalus_WebApp_Arango.Schema.Documents;
 
 namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
@@ -83,7 +85,7 @@ namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
             [EmailAddress]
             public string Email { get; set; }
         }
-        
+
         public IActionResult OnGet() => RedirectToPage("./Login");
 
         public IActionResult OnPost(string provider, string returnUrl = null)
@@ -132,6 +134,62 @@ namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
                         Email = info.Principal.FindFirstValue(ClaimTypes.Email)
                     };
                 }
+                if (ModelState.IsValid)
+                {
+                    var user = CreateUser();
+
+                    HttpClient client = new HttpClient();
+
+                    var request = new HttpRequestMessage()
+                    {
+                        RequestUri = new Uri("https://discordapp.com/api/users/@me"),
+                        Method = HttpMethod.Get
+                    };
+
+                    request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", info.AuthenticationTokens.First().Value);
+
+                    var responseString = await client.SendAsync(request);
+                    HttpContent content = responseString.Content;
+
+                    client.Dispose();
+
+                    var json = content.ReadAsStringAsync().GetAwaiter().GetResult();
+                    var jo = JObject.Parse(json);
+                    string discUserId = jo.GetValue("id").Value<string>();
+                    string userName = jo.GetValue("username").Value<string>();
+
+                    user.DiscordUserName = userName;
+
+                    await _userStore.SetUserNameAsync(user, discUserId, CancellationToken.None);
+                    await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+                    await _emailStore.SetEmailConfirmedAsync(user, true, CancellationToken.None);
+
+                    var createResult = await _userManager.CreateAsync(user);
+                    if (createResult.Succeeded)
+                    {
+                        createResult = await _userManager.AddLoginAsync(user, info);
+                        if (createResult.Succeeded)
+                        {
+                            _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
+
+                            var userId = await _userManager.GetUserIdAsync(user);
+                            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                            var callbackUrl = Url.Page(
+                            "/Account/ConfirmEmail",
+                            pageHandler: null,
+                            values: new { area = "Identity", userId = userId, code = code },
+                            protocol: Request.Scheme);
+
+                            await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
+                            return LocalRedirect(returnUrl);
+                        }
+                    }
+                    foreach (var error in createResult.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                }
                 return Page();
             }
         }
@@ -151,8 +209,33 @@ namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
             {
                 var user = CreateUser();
 
-                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+                HttpClient client = new HttpClient();
+
+                var request = new HttpRequestMessage()
+                {
+                    RequestUri = new Uri("https://discordapp.com/api/users/@me"),
+                    Method = HttpMethod.Get
+                };
+
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", info.AuthenticationTokens.First().Value);
+
+                var responseString = await client.SendAsync(request);
+                HttpContent content = responseString.Content;
+
+                client.Dispose();
+
+                var json = content.ReadAsStringAsync().GetAwaiter().GetResult();
+                var jo = JObject.Parse(json);
+                string discUserId = jo.GetValue("id").Value<string>();
+                string userName = jo.GetValue("username").Value<string>();
+
+                user.DiscordUserName = userName;
+
+                await _userStore.SetUserNameAsync(user, discUserId, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+                await _emailStore.SetEmailConfirmedAsync(user, true, CancellationToken.None);
+                
+                _logger.LogInformation("updated values");
 
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
@@ -170,14 +253,6 @@ namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
                             pageHandler: null,
                             values: new { area = "Identity", userId = userId, code = code },
                             protocol: Request.Scheme);
-
-
-
-                        // If account confirmation is required, we need to show the link if we don't have a real email sender
-                        if (_userManager.Options.SignIn.RequireConfirmedAccount)
-                        {
-                            return RedirectToPage("./RegisterConfirmation", new { Email = Input.Email });
-                        }
 
                         await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
                         return LocalRedirect(returnUrl);

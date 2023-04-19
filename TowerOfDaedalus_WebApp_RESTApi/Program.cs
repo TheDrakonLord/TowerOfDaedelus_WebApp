@@ -4,6 +4,10 @@ using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//builder.Logging.ClearProviders();
+//log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.config"));
+//builder.Logging.AddLog4Net();
+
 // Add services to the container.
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));

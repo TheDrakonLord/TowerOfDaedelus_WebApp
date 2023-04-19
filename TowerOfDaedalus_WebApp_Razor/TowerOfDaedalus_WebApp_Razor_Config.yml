@@ -1,0 +1,45 @@
+﻿services:
+  towerofdaedalus_webapp_razor:
+    image: ${DOCKER_REGISTRY-}towerofdaedaluswebapprazor
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+        arangodb:
+            condition: service_started
+        zookeeper:
+            condition: service_started
+        kafka:
+            condition: service_started
+        towerofdaedalus_webapp_discordbot:
+            condition: service_started
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:5100;http://+:5000
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=${CERT_PASSWORD}
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/root/.aspnet/https/TowerOfDaedelus_WebApp.pfx
+      - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
+      - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
+      - ARANGO_DB_NAME=${ARANGO_DB_NAME}
+      - ARANGO_SYSTEM_DB_NAME=${ARANGO_SYSTEM_DB_NAME}
+      - ARANGO_SYSTEM_USER_NAME=${ARANGO_SYSTEM_USER_NAME}
+      - ARANGO_SYSTEM_PASSWORD=${ARANGO_SYSTEM_PASSWORD}
+      - ARANGO_URL=${ARANGO_URL}
+      - ARANGO_NEW_USERNAME=${ARANGO_NEW_USERNAME}
+      - ARANGO_NEW_PASSWORD=${ARANGO_NEW_PASSWORD}
+    ports:
+      - 5000:5000
+      - 5100:5100
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+      - ../Persistance/Logs:/var/opt/Logs
+    #healthcheck:
+    #  test: ["CMD", "wget", "--fail", "http://localhost:5000/healthz"]
+    #  interval: 1m30s
+    #  timeout: 10s
+    #  retries: 3
+    #  start_period: 40s
+    networks:
+        - daedalus-dev
+        - daedalus-data
