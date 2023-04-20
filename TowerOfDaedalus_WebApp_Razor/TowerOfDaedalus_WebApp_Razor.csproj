@@ -31,6 +31,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TowerOfDaedalus_WebApp_Arango\TowerOfDaedalus_WebApp_Arango.csproj" />
+    <ProjectReference Include="..\TowerOfDaedalus_WebApp_Kafka\TowerOfDaedalus_WebApp_Kafka.csproj" />
   </ItemGroup>
 
   <ItemGroup>

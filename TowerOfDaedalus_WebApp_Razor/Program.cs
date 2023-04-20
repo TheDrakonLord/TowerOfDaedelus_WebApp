@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using TowerOfDaedalus_WebApp_Razor.Properties;
+using Discord.Rest;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +32,8 @@ builder.Services.AddTransient<IRoleStore<Roles>, ArangoRoleStore>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+builder.Services.AddSingleton<DiscordRestClient>();
 
 builder.Services.AddRazorPages();
 
@@ -92,6 +96,7 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
+app.Logger.LogInformation("Creating database");
 using (var serviceScope = app.Services.CreateScope())
 {
     var services = serviceScope.ServiceProvider;
@@ -101,28 +106,37 @@ using (var serviceScope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline.
+app.Logger.LogInformation("configuring the HTTP request pipeline");
 if (app.Environment.IsDevelopment())
 {
+    app.Logger.LogInformation("Environment is development, using migrations endpoint");
     app.UseMigrationsEndPoint();
 }
 else
 {
+    app.Logger.LogInformation("Using exception handler and hsts");
     app.UseExceptionHandler("/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
+app.Logger.LogInformation("setting up https redirection");
 app.UseHttpsRedirection();
+app.Logger.LogInformation("Using static files");
 app.UseStaticFiles();
 
+app.Logger.LogInformation("using routing");
 app.UseRouting();
 
+app.Logger.LogInformation("Setting up authentication and authorization");
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.Logger.LogInformation("Adding routes");
 app.MapRazorPages();
 
 // Specify health check route for docker
 app.MapHealthChecks("/healthz");
 
+app.Logger.LogInformation("Starting the app");
 app.Run();

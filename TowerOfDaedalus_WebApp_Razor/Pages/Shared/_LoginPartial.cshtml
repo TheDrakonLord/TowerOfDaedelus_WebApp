@@ -4,6 +4,20 @@
 @inject SignInManager<Users> SignInManager
 @inject UserManager<Users> UserManager
 
+<style>
+    img.user-avatar-login {
+        margin-left: 25px;
+        margin-right: 5px;
+    }
+</style>
+@if (SignInManager.IsSignedIn(User))
+{
+    string avatar = UserManager.GetUserAsync(User).Result.DiscordAvatar;
+    if (avatar != null)
+    {
+        <img class="user-avatar-login" src=@avatar alt="avatar" width="50" />
+    }
+}
 <ul class="navbar-nav">
     @if (SignInManager.IsSignedIn(User))
     {

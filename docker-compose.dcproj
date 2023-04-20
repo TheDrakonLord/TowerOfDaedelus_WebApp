@@ -20,29 +20,6 @@
     <None Include="docker-compose.yml" />
     <None Include=".dockerignore" />
     <None Include="LICENSE" />
-    <None Include="Persistance\Arango\ENGINE" />
-    <None Include="Persistance\Arango\engine-rocksdb\000087.sst" />
-    <None Include="Persistance\Arango\engine-rocksdb\000090.sst" />
-    <None Include="Persistance\Arango\engine-rocksdb\000093.sst" />
-    <None Include="Persistance\Arango\engine-rocksdb\000112.sst" />
-    <None Include="Persistance\Arango\engine-rocksdb\000113.sst" />
-    <None Include="Persistance\Arango\engine-rocksdb\000114.sst" />
-    <None Include="Persistance\Arango\engine-rocksdb\000129.sst" />
-    <None Include="Persistance\Arango\engine-rocksdb\CURRENT" />
-    <None Include="Persistance\Arango\engine-rocksdb\IDENTITY" />
-    <None Include="Persistance\Arango\engine-rocksdb\journals\000004.log" />
-    <None Include="Persistance\Arango\engine-rocksdb\journals\000048.log" />
-    <None Include="Persistance\Arango\engine-rocksdb\journals\000082.log" />
-    <None Include="Persistance\Arango\engine-rocksdb\journals\000116.log" />
-    <None Include="Persistance\Arango\engine-rocksdb\LOCK" />
-    <None Include="Persistance\Arango\engine-rocksdb\MANIFEST-000117" />
-    <None Include="Persistance\Arango\engine-rocksdb\OPTIONS-000138" />
-    <None Include="Persistance\Arango\engine-rocksdb\OPTIONS-000140" />
-    <None Include="Persistance\Arango\LANGUAGE" />
-    <None Include="Persistance\Arango\LOCK" />
-    <None Include="Persistance\Arango\SERVER" />
-    <None Include="Persistance\Arango\VERSION-1" />
-    <None Include="Persistance\Arango\VERSION-163" />
     <None Include="Persistance\Kafka\data\.lock" />
     <None Include="Persistance\Kafka\data\cleaner-offset-checkpoint" />
     <None Include="Persistance\Kafka\data\log-start-offset-checkpoint" />
@@ -181,7 +158,7 @@
     <None Include="TowerOfDaedalus_WebApp_SW_Design_Doc.pdf" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Persistance\Arango\engine-rocksdb\journals\archive\" />
+    <Folder Include="Persistance\Arango\" />
     <Folder Include="Persistance\Kafka\config\" />
   </ItemGroup>
   <ItemGroup>

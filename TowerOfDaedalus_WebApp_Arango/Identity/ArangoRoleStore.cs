@@ -23,6 +23,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
     public class ArangoRoleStore : IRoleStore<Roles>
     {
         private HttpApiTransport? transport;
+        private static ILogger<ArangoRoleStore> _logger;
         private ArangoDBClient? db;
         private bool disposed_ = false;
         private bool created_ = false;
@@ -38,6 +39,16 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
                 db = new ArangoDBClient(transport);
                 created_ = true;
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="logger"></param>
+        public ArangoRoleStore(ILogger<ArangoRoleStore> logger)
+        {
+            _logger = logger;
+            CreateConnection();
         }
 
         /// <summary>

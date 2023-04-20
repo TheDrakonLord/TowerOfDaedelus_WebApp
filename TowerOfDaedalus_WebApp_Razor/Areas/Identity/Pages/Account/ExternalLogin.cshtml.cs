@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using static TowerOfDaedalus_WebApp_Arango.Schema.Documents;
+using Discord.Rest;
 
 namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
 {
@@ -31,18 +32,21 @@ namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
         private readonly IUserStore<Users> _userStore;
         private readonly IUserEmailStore<Users> _emailStore;
         private readonly ILogger<ExternalLoginModel> _logger;
+        private readonly DiscordRestClient _client;
 
         public ExternalLoginModel(
             SignInManager<Users> signInManager,
             UserManager<Users> userManager,
             IUserStore<Users> userStore,
-            ILogger<ExternalLoginModel> logger)
+            ILogger<ExternalLoginModel> logger,
+            DiscordRestClient client)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _userStore = userStore;
             _emailStore = (IUserEmailStore<Users>)GetEmailStore();
             _logger = logger;
+            _client = client;
         }
 
         /// <summary>
@@ -77,13 +81,6 @@ namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
         /// </summary>
         public class InputModel
         {
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
-            [EmailAddress]
-            public string Email { get; set; }
         }
 
         public IActionResult OnGet() => RedirectToPage("./Login");
@@ -98,6 +95,7 @@ namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnGetCallbackAsync(string returnUrl = null, string remoteError = null)
         {
+            _logger.LogDebug("OnGetCallbackAsync || onGetCallbackAync triggered");
             returnUrl = returnUrl ?? Url.Content("~/");
             if (remoteError != null)
             {
@@ -112,14 +110,16 @@ namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
             }
 
             // Sign in the user with this external login provider if the user already has a login.
+            _logger.LogDebug("OnGetCallbackAsync || checking if the user has an existing login");
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
             if (result.Succeeded)
             {
-                _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
+                _logger.LogInformation("OnGetCallbackAsync || {Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
                 return LocalRedirect(returnUrl);
             }
             if (result.IsLockedOut)
             {
+                _logger.LogDebug("OnGetCallbackAsync || user is locked out");
                 return RedirectToPage("./Lockout");
             }
             else
@@ -131,64 +131,7 @@ namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
                 {
                     Input = new InputModel
                     {
-                        Email = info.Principal.FindFirstValue(ClaimTypes.Email)
                     };
-                }
-                if (ModelState.IsValid)
-                {
-                    var user = CreateUser();
-
-                    HttpClient client = new HttpClient();
-
-                    var request = new HttpRequestMessage()
-                    {
-                        RequestUri = new Uri("https://discordapp.com/api/users/@me"),
-                        Method = HttpMethod.Get
-                    };
-
-                    request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", info.AuthenticationTokens.First().Value);
-
-                    var responseString = await client.SendAsync(request);
-                    HttpContent content = responseString.Content;
-
-                    client.Dispose();
-
-                    var json = content.ReadAsStringAsync().GetAwaiter().GetResult();
-                    var jo = JObject.Parse(json);
-                    string discUserId = jo.GetValue("id").Value<string>();
-                    string userName = jo.GetValue("username").Value<string>();
-
-                    user.DiscordUserName = userName;
-
-                    await _userStore.SetUserNameAsync(user, discUserId, CancellationToken.None);
-                    await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-                    await _emailStore.SetEmailConfirmedAsync(user, true, CancellationToken.None);
-
-                    var createResult = await _userManager.CreateAsync(user);
-                    if (createResult.Succeeded)
-                    {
-                        createResult = await _userManager.AddLoginAsync(user, info);
-                        if (createResult.Succeeded)
-                        {
-                            _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
-
-                            var userId = await _userManager.GetUserIdAsync(user);
-                            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                            var callbackUrl = Url.Page(
-                            "/Account/ConfirmEmail",
-                            pageHandler: null,
-                            values: new { area = "Identity", userId = userId, code = code },
-                            protocol: Request.Scheme);
-
-                            await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
-                            return LocalRedirect(returnUrl);
-                        }
-                    }
-                    foreach (var error in createResult.Errors)
-                    {
-                        ModelState.AddModelError(string.Empty, error.Description);
-                    }
                 }
                 return Page();
             }
@@ -207,59 +150,57 @@ namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
+                _logger.LogDebug("OnGetCallbackAsync || creating user");
                 var user = CreateUser();
 
-                HttpClient client = new HttpClient();
+                _logger.LogDebug("OnGetCallbackAsync || setting token to rest api call header");
+                await _client.LoginAsync(Discord.TokenType.Bearer, info.AuthenticationTokens.First().Value);
 
-                var request = new HttpRequestMessage()
-                {
-                    RequestUri = new Uri("https://discordapp.com/api/users/@me"),
-                    Method = HttpMethod.Get
-                };
+                _logger.LogDebug("OnGetCallbackAsync || getting user information from discord");
+                RestSelfUser discordUser = await _client.GetCurrentUserAsync();
 
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", info.AuthenticationTokens.First().Value);
+                _logger.LogDebug("OnGetCallbackAsync || setting information from discord to user account");
+                user.Id = discordUser.Id.ToString() + discordUser.Discriminator;
+                user.DiscordAvatar = discordUser.GetAvatarUrl(Discord.ImageFormat.WebP);
 
-                var responseString = await client.SendAsync(request);
-                HttpContent content = responseString.Content;
-
-                client.Dispose();
-
-                var json = content.ReadAsStringAsync().GetAwaiter().GetResult();
-                var jo = JObject.Parse(json);
-                string discUserId = jo.GetValue("id").Value<string>();
-                string userName = jo.GetValue("username").Value<string>();
-
-                user.DiscordUserName = userName;
-
-                await _userStore.SetUserNameAsync(user, discUserId, CancellationToken.None);
-                await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+                _logger.LogDebug("OnGetCallbackAsync || setting user name");
+                await _userStore.SetUserNameAsync(user, discordUser.Username, CancellationToken.None);
+                _logger.LogDebug("OnGetCallbackAsync || Setting email");
+                await _emailStore.SetEmailAsync(user, discordUser.Email, CancellationToken.None);
+                _logger.LogDebug("OnGetCallbackAsync || setting email confirmed");
                 await _emailStore.SetEmailConfirmedAsync(user, true, CancellationToken.None);
-                
-                _logger.LogInformation("updated values");
 
-                var result = await _userManager.CreateAsync(user);
-                if (result.Succeeded)
+                _logger.LogDebug("OnGetCallbackAsync || creating user");
+                var createResult = await _userManager.CreateAsync(user);
+                if (createResult.Succeeded)
                 {
-                    result = await _userManager.AddLoginAsync(user, info);
-                    if (result.Succeeded)
+                    _logger.LogDebug("OnGetCallbackAsync || User creation succeeded");
+                    createResult = await _userManager.AddLoginAsync(user, info);
+                    if (createResult.Succeeded)
                     {
-                        _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
+                        _logger.LogInformation("OnGetCallbackAsync || User created an account using {Name} provider.", info.LoginProvider);
 
+                        _logger.LogDebug("OnGetCallbackAsync || getting user id");
                         var userId = await _userManager.GetUserIdAsync(user);
+                        _logger.LogDebug("OnGetCallbackAsync || generating email confirmation token");
                         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                        _logger.LogDebug("OnGetCallbackAsync || setting callback url");
                         var callbackUrl = Url.Page(
                             "/Account/ConfirmEmail",
                             pageHandler: null,
                             values: new { area = "Identity", userId = userId, code = code },
                             protocol: Request.Scheme);
 
+                        _logger.LogDebug("OnGetCallbackAsync || signing in user");
                         await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
+                        _logger.LogDebug("OnGetCallbackAsync || redirecting to [{returnurl}]", returnUrl);
                         return LocalRedirect(returnUrl);
                     }
                 }
-                foreach (var error in result.Errors)
+                foreach (var error in createResult.Errors)
                 {
+                    _logger.LogDebug("OnGetCallbackAsync || Error encountered: {errorDescription}", error.Description);
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }

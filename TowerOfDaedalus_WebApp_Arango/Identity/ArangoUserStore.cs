@@ -28,7 +28,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         IUserTwoFactorStore<Users>, IUserLockoutStore<Users>
     {
         private HttpApiTransport? transport;
-        private static ILogger<Utilities> _logger;
+        private static ILogger<ArangoUserStore> _logger;
         private ArangoDBClient? db;
         private bool disposed_ = false;
         private bool created_ = false;
@@ -38,10 +38,10 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// </summary>
         private void CreateConnection()
         {
-            _logger.LogTrace("Checking if connection to database exists already");
+            _logger.LogDebug("CreateConnection || Checking if connection to database exists already");
             if (!created_)
             {
-                _logger.LogDebug("Creating connection to database");
+                _logger.LogDebug("CreateConnection || Creating connection to database");
                 transport = HttpApiTransport.UsingBasicAuth(new Uri(ArangoDbContext.getUrl()), ArangoDbContext.getDbName(), ArangoDbContext.getNewUsername(), ArangoDbContext.getNewPass());
                 db = new ArangoDBClient(transport);
                 created_ = true;
@@ -50,33 +50,37 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
 
         private async Task<Users?> getExistingUser(Users user, CancellationToken cancellationToken)
         {
+            _logger.LogDebug("getExistingUser || obtaining existing user");
             ArangoQueryBuilder existingQb = new ArangoQueryBuilder(ArangoSchema.collUsers);
             existingQb.filter("UserName", user.UserName);
             existingQb.limit(1);
             string query = existingQb.ToString();
+            _logger.LogDebug("getExistingUser || running query: {query}", query);
             CursorResponse<Users> queryResponse = await db.Cursor.PostCursorAsync<Users>(query, token: cancellationToken);
 
             if (queryResponse.Result.Any())
             {
+                _logger.LogDebug("getExistingUser || found the requested user");
                 Users existingUser = queryResponse.Result.First();
                 return existingUser;
             }
             else
             {
-                _logger.LogDebug($"Could not find a user with the name {user.UserName}");
+                _logger.LogDebug($"getExistingUser || Could not find a user with the name {user.UserName}");
                 return null;
             }
         }
 
         private async Task<string> getExistingUserKey(Users user, CancellationToken cancellationToken)
         {
+            _logger.LogDebug("getExistingUserKey || getting _key from existing user");
             Users? existingUser = await getExistingUser(user, cancellationToken);
             if (existingUser == null)
             {
                 _logger.LogError("could not find an existing user when we need one");
                 throw new ArgumentNullException(nameof(user));
             }
-
+            _logger.LogDebug("getExistingUserKey || returning key");
             return existingUser._key;
         }
 
@@ -84,7 +88,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// 
         /// </summary>
         /// <param name="logger"></param>
-        public ArangoUserStore(ILogger<Utilities> logger)
+        public ArangoUserStore(ILogger<ArangoUserStore> logger)
         {
             _logger = logger;
             CreateConnection();
@@ -108,9 +112,10 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task AddClaimsAsync(Users user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
         {
+            _logger.LogDebug("AddClaimsAsync || adding claims to user");
             if (user is null)
             {
-                _logger.LogError("a user must be supplied to add claims");
+                _logger.LogError("AddClaimsAsync || a user must be supplied to add claims");
                 return;
             }
 
@@ -120,7 +125,9 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
 
             foreach (Claim item in claims)
             {
+                _logger.LogDebug("AddClaimsAsync || posting claim: {claim}", item.Type);
                 PostDocumentResponse<ArangoClaims> docResponse = await db.Document.PostDocumentAsync<ArangoClaims>(ArangoSchema.collUserClaims, new ArangoClaims(item), token: cancellationToken);
+                _logger.LogDebug("AddClaimsAsync || claim posted with key: {key}", docResponse._key);
                 Edges edge = new Edges($"{ArangoSchema.collUsers}/{user._key}",$"{ArangoSchema.collUserClaims}/{docResponse._key}");
                 edge.Type = "Claim";
                 edges.Add(edge);
@@ -128,11 +135,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
 
             foreach (Edges item in edges)
             {
+                _logger.LogDebug("AddClaimsAsync || posting edge from [{from}] to [{to}}", item._from, item._to);
                 PostEdgeResponse<Edges> edgeResponse = await db.Graph.PostEdgeAsync<Edges>(ArangoSchema.graphPrimary, ArangoSchema.edgeUserClaims, item, token: cancellationToken);
-
-                if (edgeResponse.Error)
+                if ((int)edgeResponse.Code is < 200 or > 299)
                 {
-                    _logger.LogError("failed to post edge for user claim");
+                    _logger.LogError("AddClaimsAsync || could not post edge, an error occured: {error}", edgeResponse.Code.ToString());
                 }
             }
 
@@ -518,8 +525,8 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             }
             else
             {
-                _logger.LogError("An existing user claim was not found");
-                throw new ArgumentNullException(nameof(queryResponse.Result));
+                _logger.LogWarning("An existing user claim was not found");
+                return result;
             }
 
         }
@@ -879,8 +886,8 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             }
             else
             {
-                _logger.LogError("An existing user role was not found");
-                throw new ArgumentNullException("queryResponse.Result");
+                _logger.LogWarning("An existing user role was not found");
+                return result;
             }
         }
 

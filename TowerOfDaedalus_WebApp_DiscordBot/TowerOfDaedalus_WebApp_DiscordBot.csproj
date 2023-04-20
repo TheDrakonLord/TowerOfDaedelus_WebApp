@@ -27,11 +27,13 @@
     <PackageReference Include="Discord.Net.Webhook" Version="3.10.0" />
     <PackageReference Include="Discord.Net.WebSocket" Version="3.10.0" />
     <PackageReference Include="log4net" Version="2.0.15" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="6.1.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.18.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\TowerOfDaedalus_WebApp_Arango\TowerOfDaedalus_WebApp_Arango.csproj" />
+    <ProjectReference Include="..\TowerOfDaedalus_WebApp_Kafka\TowerOfDaedalus_WebApp_Kafka.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -806,7 +806,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Schema
             /// <summary>
             /// the user's discord user name
             /// </summary>
-            public string? DiscordUserName { get; set; }
+            public string? DiscordAvatar { get; set; }
 
         }
 

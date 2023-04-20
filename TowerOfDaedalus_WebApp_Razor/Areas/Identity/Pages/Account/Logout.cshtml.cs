@@ -13,6 +13,7 @@ using static TowerOfDaedalus_WebApp_Arango.Schema.Documents;
 
 namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
 {
+    [AllowAnonymous]
     public class LogoutModel : PageModel
     {
         private readonly SignInManager<Users> _signInManager;
