@@ -1,0 +1,39 @@
+﻿services:
+    towerofdaedalus_webapp_discordbot:
+        image: ${DOCKER_REGISTRY-}towerofdaedaluswebappdiscordbot
+        build:
+          context: .
+          dockerfile: Dockerfile
+        environment:
+          - DOTNET_ENVIRONMENT=Development
+          - ASPNETCORE_URLS=http://+:5003
+          - ASPNETCORE_Kestrel__Certificates__Default__Password=${CERT_PASSWORD}
+          - ASPNETCORE_Kestrel__Certificates__Default__Path=/root/.aspnet/https/TowerOfDaedelus_WebApp.pfx
+          - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+          - ARANGO_DB_NAME=${ARANGO_DB_NAME}
+          - ARANGO_SYSTEM_DB_NAME=${ARANGO_SYSTEM_DB_NAME}
+          - ARANGO_SYSTEM_USER_NAME=${ARANGO_SYSTEM_USER_NAME}
+          - ARANGO_SYSTEM_PASSWORD=${ARANGO_SYSTEM_PASSWORD}
+          - ARANGO_URL=${ARANGO_URL}
+          - ARANGO_NEW_USERNAME=${ARANGO_NEW_USERNAME}
+          - ARANGO_NEW_PASSWORD=${ARANGO_NEW_PASSWORD}
+          - DISCORD_BOT_STARTUP_STRING=${DISCORD_BOT_STARTUP_STRING}
+        volumes:
+          - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+          - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+          - ../Persistance/Logs:/var/opt/Logs
+        #healthcheck:
+            #  test: ["CMD", "wget", "--fail", "http://localhost:5003/healthz"]
+            #  interval: 1m30s
+            #  timeout: 10s
+            #  retries: 3
+            #  start_period: 40s
+        networks:
+            - daedalus-dev
+            - daedalus-data
+        deploy:
+            restart_policy:
+                condition: on-failure
+                delay: 5s
+                max_attempts: 3
+                window: 120s

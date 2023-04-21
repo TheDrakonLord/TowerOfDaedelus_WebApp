@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package TowerOfDaedalus_WebApp_Kafka.Protobuf;
+
+option csharp_namespace = "TowerOfDaedalus_WebApp_Kafka.Protobuf";
+
+message ServiceStatus
+{
+	string status = 1;
+
+	enum StatusType
+	{
+		SHUTDOWN = 0;
+		STARTING = 1;
+		HEALTHY = 2;
+		UNHEALTHY = 3;
+		STOPPING = 4;
+	}
+
+	StatusType type = 2;
+
+	int32 capacity = 3;
+}

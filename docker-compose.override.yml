@@ -1,0 +1,93 @@
+version: '3.4'
+name: towerofdaedalus
+
+services:
+    towerofdaedalus_webapp_razor:
+        extends:
+            file: TowerOfDaedalus_WebApp_Razor/TowerOfDaedalus_WebApp_Razor_Config.yml
+            service: towerofdaedalus_webapp_razor
+
+    towerofdaedalus_webapp_blazor:
+        extends:
+            file: TowerOfDaedalus_WebApp_Blazor/TowerOfDaedalus_WebApp_Blazor_Config.yml
+            service: towerofdaedalus_webapp_blazor
+
+    towerofdaedalus_webapp_discordbot:
+        extends:
+            file: TowerOfDaedalus_WebApp_DiscordBot/TowerOfDaedalus_WebApp_DiscordBot_Config.yml
+            service: towerofdaedalus_webapp_discordbot
+
+    towerofdaedalus_webapp_restapi:
+        extends:
+            file: TowerOfDaedalus_WebApp_RESTApi/TowerOfDaedalus_WebApp_RESTApi_Config.yml
+            service: towerofdaedalus_webapp_restapi
+
+    arangodb:
+        image: arangodb:latest
+        ports:
+            - 8529:8529
+        hostname: arangodb
+        environment:
+            - ARANGO_ROOT_PASSWORD=${ARANGO_SYSTEM_PASSWORD}
+        volumes:
+            - ./Persistance/Arango:/var/lib/arangodb3
+        networks:
+            - daedalus-data
+        deploy:
+            restart_policy:
+                condition: on-failure
+                delay: 5s
+                max_attempts: 3
+                window: 120s
+
+    zookeeper:
+        image: bitnami/zookeeper:latest
+        ports:
+            - 2181:2181
+        environment:
+            - ALLOW_ANONYMOUS_LOGIN=yes
+        volumes:
+            - ./Persistance/zookeeper:/bitnami/zookeeper
+        networks:
+            - daedalus-dev
+        deploy:
+            restart_policy:
+                condition: on-failure
+                delay: 5s
+                max_attempts: 3
+                window: 120s
+
+    kafka:
+        image: bitnami/kafka:latest
+        ports:
+            - 9092:9092
+        environment:
+            - KAFKA_BROKER_ID=1
+            - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+            - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://:9092
+            - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+            - ALLOW_PLAINTEXT_LISTENER=yes
+            - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=false
+        depends_on:
+            - zookeeper
+        volumes:
+            - ./Persistance/Kafka:/bitnami/kafka
+        networks:
+            - daedalus-dev
+        deploy:
+            restart_policy:
+                condition: on-failure
+                delay: 5s
+                max_attempts: 3
+                window: 120s
+        
+
+networks:
+    daedalus-dev:
+        driver: overlay
+        attachable: true
+    daedalus-data:
+        driver: overlay
+        attachable: true
+        internal: true
+

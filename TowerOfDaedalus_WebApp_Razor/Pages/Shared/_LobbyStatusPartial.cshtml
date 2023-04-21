@@ -1,0 +1,22 @@
+﻿@using TowerOfDaedalus_WebApp_Razor.Properties
+@{
+
+}
+<script type="text/javascript">
+    function GetDate(date) {
+        CurTime = new Date(date);
+        var offset = (new Date().getTimezoneOffset() / 60) * (-1);
+        var utc = CurTime.getTime() + (offset * 60000 * (-1));
+        var serverDate = new Date(utc + (3600000 * offset));
+        var serverHour = serverDate.getHours();
+        var serverMin = serverDate.getMinutes();
+        var serverDay = serverDate.getDay();
+
+</script>
+
+<ul class="navbar-nav">
+    <li>
+
+        <img src="@Resources.imgUriLobbyStatusClosed" alt="Lobby is closed" width="74" height="60" />
+    </li>
+</ul>

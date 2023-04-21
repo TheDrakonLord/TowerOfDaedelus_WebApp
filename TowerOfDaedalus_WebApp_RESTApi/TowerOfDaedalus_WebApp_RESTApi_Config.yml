@@ -1,0 +1,34 @@
+﻿services:
+    towerofdaedalus_webapp_restapi:
+        image: ${DOCKER_REGISTRY-}towerofdaedaluswebapprestapi
+        environment:
+          - ASPNETCORE_ENVIRONMENT=Development
+          - ASPNETCORE_URLS=https://+:5102;http://+:5002
+        ports:
+            - 5002:5002
+            - 5102:5102
+        volumes:
+            - ../Persistance/Logs:/var/opt/Logs
+            - ../Persistance/Containers/Razor/DataProtection-Keys:/root/.aspnet/DataProtection-Keys
+        build:
+          context: .
+          dockerfile: Dockerfile
+        depends_on:
+            - arangodb
+            - zookeeper
+            - kafka
+        #healthcheck:
+        #  test: ["CMD", "wget", "--fail", "http://localhost:5002/healthz"]
+        #  interval: 1m30s
+        #  timeout: 10s
+        #  retries: 3
+        #  start_period: 40s
+        networks:
+            - daedalus-dev
+            - daedalus-data
+        deploy:
+            restart_policy:
+                condition: on-failure
+                delay: 5s
+                max_attempts: 3
+                window: 120s

@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" Sdk="Microsoft.Docker.Sdk">
+  <PropertyGroup Label="Globals">
+    <ProjectVersion>2.1</ProjectVersion>
+    <DockerTargetOS>Linux</DockerTargetOS>
+    <ProjectGuid>ba20ed1d-db72-4b6c-b457-fdeb1d1bc1bc</ProjectGuid>
+    <DockerLaunchAction>None</DockerLaunchAction>
+    <DockerComposeProjectName>towerofdaedalus</DockerComposeProjectName>
+    <DockerServiceUrl>{Scheme}://localhost:{ServicePort}</DockerServiceUrl>
+    <DockerServiceName>towerofdaedelus_webapp</DockerServiceName>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include=".env" />
+    <None Include=".gitignore" />
+    <None Include="CODE_OF_CONDUCT.md" />
+    <None Include="Config\log4net.config" />
+    <None Include="CONTRIBUTING.md" />
+    <None Include="docker-compose.override.yml">
+      <DependentUpon>docker-compose.yml</DependentUpon>
+    </None>
+    <None Include="docker-compose.yml" />
+    <None Include=".dockerignore" />
+    <None Include="LICENSE" />
+    <None Include="Persistance\Kafka\data\.lock" />
+    <None Include="Persistance\Kafka\data\cleaner-offset-checkpoint" />
+    <None Include="Persistance\Kafka\data\log-start-offset-checkpoint" />
+    <None Include="Persistance\Kafka\data\meta.properties" />
+    <None Include="Persistance\Kafka\data\recovery-point-offset-checkpoint" />
+    <None Include="Persistance\Kafka\data\replication-offset-checkpoint" />
+    <None Include="Persistance\Logs\TowerOfDaedalus_Logs.log" />
+    <None Include="Persistance\Logs\TowerOfDaedalus_Logs.log.2023-04-09" />
+    <None Include="Persistance\Logs\TowerOfDaedalus_Logs.log.2023-04-10" />
+    <None Include="Persistance\Logs\TowerOfDaedalus_Logs.log.2023-04-11" />
+    <None Include="Persistance\Logs\TowerOfDaedalus_Logs.log.2023-04-12" />
+    <None Include="Persistance\Logs\TowerOfDaedalus_Logs.log.2023-04-13" />
+    <None Include="Persistance\Logs\TowerOfDaedalus_Logs.log.2023-04-14" />
+    <None Include="Persistance\Logs\TowerOfDaedalus_Logs.log.2023-04-15" />
+    <None Include="Persistance\Logs\TowerOfDaedalus_Logs.log.2023-04-16" />
+    <None Include="Persistance\Logs\TowerOfDaedalus_Logs.log.2023-04-17" />
+    <None Include="Persistance\zookeeper\data\myid" />
+    <None Include="Persistance\zookeeper\data\version-2\log.1" />
+    <None Include="Persistance\zookeeper\data\version-2\log.11c" />
+    <None Include="Persistance\zookeeper\data\version-2\log.140" />
+    <None Include="Persistance\zookeeper\data\version-2\log.164" />
+    <None Include="Persistance\zookeeper\data\version-2\log.177" />
+    <None Include="Persistance\zookeeper\data\version-2\log.19b" />
+    <None Include="Persistance\zookeeper\data\version-2\log.1bf" />
+    <None Include="Persistance\zookeeper\data\version-2\log.1e3" />
+    <None Include="Persistance\zookeeper\data\version-2\log.207" />
+    <None Include="Persistance\zookeeper\data\version-2\log.22b" />
+    <None Include="Persistance\zookeeper\data\version-2\log.23e" />
+    <None Include="Persistance\zookeeper\data\version-2\log.251" />
+    <None Include="Persistance\zookeeper\data\version-2\log.263" />
+    <None Include="Persistance\zookeeper\data\version-2\log.275" />
+    <None Include="Persistance\zookeeper\data\version-2\log.299" />
+    <None Include="Persistance\zookeeper\data\version-2\log.2ab" />
+    <None Include="Persistance\zookeeper\data\version-2\log.2bd" />
+    <None Include="Persistance\zookeeper\data\version-2\log.2e1" />
+    <None Include="Persistance\zookeeper\data\version-2\log.2f4" />
+    <None Include="Persistance\zookeeper\data\version-2\log.31" />
+    <None Include="Persistance\zookeeper\data\version-2\log.318" />
+    <None Include="Persistance\zookeeper\data\version-2\log.32b" />
+    <None Include="Persistance\zookeeper\data\version-2\log.34f" />
+    <None Include="Persistance\zookeeper\data\version-2\log.373" />
+    <None Include="Persistance\zookeeper\data\version-2\log.386" />
+    <None Include="Persistance\zookeeper\data\version-2\log.3aa" />
+    <None Include="Persistance\zookeeper\data\version-2\log.3d3" />
+    <None Include="Persistance\zookeeper\data\version-2\log.3e6" />
+    <None Include="Persistance\zookeeper\data\version-2\log.40a" />
+    <None Include="Persistance\zookeeper\data\version-2\log.41d" />
+    <None Include="Persistance\zookeeper\data\version-2\log.44" />
+    <None Include="Persistance\zookeeper\data\version-2\log.454" />
+    <None Include="Persistance\zookeeper\data\version-2\log.455" />
+    <None Include="Persistance\zookeeper\data\version-2\log.467" />
+    <None Include="Persistance\zookeeper\data\version-2\log.48b" />
+    <None Include="Persistance\zookeeper\data\version-2\log.49e" />
+    <None Include="Persistance\zookeeper\data\version-2\log.4b2" />
+    <None Include="Persistance\zookeeper\data\version-2\log.4c4" />
+    <None Include="Persistance\zookeeper\data\version-2\log.4e8" />
+    <None Include="Persistance\zookeeper\data\version-2\log.4e9" />
+    <None Include="Persistance\zookeeper\data\version-2\log.4fb" />
+    <None Include="Persistance\zookeeper\data\version-2\log.50d" />
+    <None Include="Persistance\zookeeper\data\version-2\log.51f" />
+    <None Include="Persistance\zookeeper\data\version-2\log.531" />
+    <None Include="Persistance\zookeeper\data\version-2\log.543" />
+    <None Include="Persistance\zookeeper\data\version-2\log.555" />
+    <None Include="Persistance\zookeeper\data\version-2\log.567" />
+    <None Include="Persistance\zookeeper\data\version-2\log.579" />
+    <None Include="Persistance\zookeeper\data\version-2\log.58b" />
+    <None Include="Persistance\zookeeper\data\version-2\log.5af" />
+    <None Include="Persistance\zookeeper\data\version-2\log.5d3" />
+    <None Include="Persistance\zookeeper\data\version-2\log.68" />
+    <None Include="Persistance\zookeeper\data\version-2\log.7a" />
+    <None Include="Persistance\zookeeper\data\version-2\log.8c" />
+    <None Include="Persistance\zookeeper\data\version-2\log.9e" />
+    <None Include="Persistance\zookeeper\data\version-2\log.b0" />
+    <None Include="Persistance\zookeeper\data\version-2\log.d4" />
+    <None Include="Persistance\zookeeper\data\version-2\log.f8" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.0" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.11b" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.13f" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.163" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.176" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.19a" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.1be" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.1e2" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.206" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.22a" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.23d" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.250" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.262" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.274" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.298" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.2aa" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.2bc" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.2e0" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.2f3" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.30" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.317" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.32a" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.34e" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.372" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.385" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.3a9" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.3d2" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.3e5" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.409" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.41c" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.43" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.453" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.454" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.466" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.48a" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.49d" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.4b1" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.4c3" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.4e7" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.4e8" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.4fa" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.50c" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.51e" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.530" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.542" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.554" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.566" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.578" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.58a" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.5ae" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.5d2" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.67" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.79" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.8b" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.9d" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.af" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.d3" />
+    <None Include="Persistance\zookeeper\data\version-2\snapshot.f7" />
+    <None Include="README.md" />
+    <None Include="TowerOfDaedalus_WebApp_SRS.pdf" />
+    <None Include="TowerOfDaedalus_WebApp_SW_Design_Doc.pdf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Persistance\Arango\" />
+    <Folder Include="Persistance\Containers\Blazor\DataProtection-Keys\" />
+    <Folder Include="Persistance\Containers\DiscordBot\" />
+    <Folder Include="Persistance\Containers\Razor\DataProtection-Keys\" />
+    <Folder Include="Persistance\Containers\RESTApi\DataProtection-Keys\" />
+    <Folder Include="Persistance\Kafka\config\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Config\**" />
+  </ItemGroup>
+</Project>

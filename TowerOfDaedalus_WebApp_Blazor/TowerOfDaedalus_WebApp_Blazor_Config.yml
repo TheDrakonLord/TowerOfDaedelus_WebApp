@@ -1,0 +1,52 @@
+﻿services:
+    towerofdaedalus_webapp_blazor:
+        image: ${DOCKER_REGISTRY-}towerofdaedaluswebappblazor
+        build:
+          context: .
+          dockerfile: Dockerfile
+        environment:
+          - ASPNETCORE_ENVIRONMENT=Development
+          - ASPNETCORE_URLS=https://+:5101;http://+:5001
+          - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
+          - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
+          - ARANGO_DB_NAME=${ARANGO_DB_NAME}
+          - ARANGO_SYSTEM_DB_NAME=${ARANGO_SYSTEM_DB_NAME}
+          - ARANGO_SYSTEM_USER_NAME=${ARANGO_SYSTEM_USER_NAME}
+          - ARANGO_SYSTEM_PASSWORD=${ARANGO_SYSTEM_PASSWORD}
+          - ARANGO_URL=${ARANGO_URL}
+          - ARANGO_NEW_USERNAME=${ARANGO_NEW_USERNAME}
+          - ARANGO_NEW_PASSWORD=${ARANGO_NEW_PASSWORD}
+        ports:
+          - 5001:5001
+          - 5101:5101
+        volumes:
+          - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+          - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+          - ../Persistance/Logs:/var/opt/Logs
+          - ../Persistance/Containers/Blazor/DataProtection-Keys:/root/.aspnet/DataProtection-Keys
+        depends_on:
+            arangodb:
+                condition: service_started
+            zookeeper:
+                condition: service_started
+            kafka:
+                condition: service_started
+            towerofdaedalus_webapp_discordbot:
+                condition: service_started
+            towerofdaedalus_webapp_razor:
+                condition: service_started
+        #healthcheck:
+        #  test: ["CMD", "wget", "--fail", "http://localhost:5001/healthz"]
+        #  interval: 1m30s
+        #  timeout: 10s
+        #  retries: 3
+        #  start_period: 40s
+        networks:
+            - daedalus-dev
+            - daedalus-data
+        deploy:
+           restart_policy:
+                condition: on-failure
+                delay: 5s
+                max_attempts: 3
+                window: 120s

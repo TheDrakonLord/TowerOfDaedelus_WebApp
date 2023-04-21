@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package TowerOfDaedalus_WebApp_Kafka.Protobuf;
+
+option csharp_namespace = "TowerOfDaedalus_WebApp_Kafka.Protobuf";
+
+message BotCommand
+{
+	string commandName = 1;
+
+	map<string, string> commandParameters = 2;
+}

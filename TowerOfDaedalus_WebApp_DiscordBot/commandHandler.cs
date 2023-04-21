@@ -11,18 +11,22 @@ using System;
 
 namespace TowerOfDaedalus_WebApp_DiscordBot
 {
+    /// <summary>
+    /// class that specified how commands should be recieved and handled by the bot
+    /// </summary>
     internal class commandHandler
     {
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
-        private readonly ILogger<DiscordBot_BackgroundWorker> _logger;
+        private readonly ILogger<DiscordBot> _logger;
 
         /// <summary>
         /// Retrieve client and CommandService instance via actor
         /// </summary>
         /// <param name="client">the discord client</param>
         /// <param name="commands">the command service</param>
-        public commandHandler(DiscordSocketClient client, CommandService commands, ILogger<DiscordBot_BackgroundWorker> logger)
+        /// <param name="logger">the logger to be used for logging messages</param>
+        public commandHandler(DiscordSocketClient client, CommandService commands, ILogger<DiscordBot> logger)
         {
             _commands = commands;
             _client = client;
