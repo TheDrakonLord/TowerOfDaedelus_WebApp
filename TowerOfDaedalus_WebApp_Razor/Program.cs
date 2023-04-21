@@ -8,6 +8,7 @@ using System.Security.Claims;
 using TowerOfDaedalus_WebApp_Razor.Properties;
 using Discord.Rest;
 using Microsoft.Extensions.DependencyInjection;
+using TowerOfDaedalus_WebApp_Kafka;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +17,20 @@ log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.config"))
 builder.Logging.AddLog4Net();
 
 // Add services to the container.
-builder.Services.AddScoped<IArangoUtils, Utilities>();
+builder.Services.AddScoped<IArangoUtils, TowerOfDaedalus_WebApp_Arango.Utilities>();
+builder.Services.AddScoped<IKafkaUtils, TowerOfDaedalus_WebApp_Kafka.Utilities>();
+builder.Services.AddScoped<IKafkaProducer, KafkaProducer>();
+
+builder.Services.Configure<KafkaOptions>(options =>
+{
+    options.BrokerHost = "kafka:9092";
+    options.Topics = new List<string>
+    {
+        KafkaSchema.topicBotCommands,
+        KafkaSchema.topicBotEvents,
+        KafkaSchema.topicServiceStatus
+    };
+});
 
 // Add health checks to report to docker
 builder.Services.AddHealthChecks();
@@ -103,6 +117,10 @@ using (var serviceScope = app.Services.CreateScope())
 
     var arangoUtils = services.GetRequiredService<IArangoUtils>();
     arangoUtils.CreateDB();
+
+    app.Logger.LogInformation("creating kafka topics");
+    var kafkaUtils = services.GetRequiredService<IKafkaUtils>();
+    kafkaUtils.CreateTopics();
 }
 
 // Configure the HTTP request pipeline.
