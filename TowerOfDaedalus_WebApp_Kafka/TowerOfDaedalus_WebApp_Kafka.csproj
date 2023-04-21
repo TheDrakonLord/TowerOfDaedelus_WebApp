@@ -8,9 +8,33 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="protoc-22.3-win64\**" />
+    <Content Remove="protoc-22.3-win64\**" />
+    <EmbeddedResource Remove="protoc-22.3-win64\**" />
+    <None Remove="protoc-22.3-win64\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Confluent.Kafka" Version="2.1.0" />
+    <PackageReference Include="Google.Protobuf" Version="3.22.3" />
     <PackageReference Include="log4net" Version="2.0.15" />
     <PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="6.1.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Protobuf\botCommand.proto">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="Protobuf\botEvent.proto">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="Protobuf\serviceStatus.proto">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command=" .\protoc-22.3-win64\bin\protoc.exe -I=Protobuf --csharp_out=Protobuf Protobuf\botCommand.proto&#xD;&#xA; .\protoc-22.3-win64\bin\protoc.exe -I=Protobuf --csharp_out=Protobuf Protobuf\botEvent.proto&#xD;&#xA; .\protoc-22.3-win64\bin\protoc.exe -I=Protobuf --csharp_out=Protobuf Protobuf\serviceStatus.proto" />
+  </Target>
 
 </Project>

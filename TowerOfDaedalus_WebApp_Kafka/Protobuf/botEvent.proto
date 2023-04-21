@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package TowerOfDaedalus_WebApp_Kafka.Protobuf;
+
+option csharp_namespace = "TowerOfDaedalus_WebApp_Kafka.Protobuf";
+
+message BotEvent
+{
+	string eventName = 1;
+
+	bool hasData = 2;
+
+	map<string, string> eventArgs = 3;
+}

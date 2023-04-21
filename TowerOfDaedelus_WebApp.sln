@@ -44,7 +44,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TowerOfDaedalus_WebApp_Razo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TowerOfDaedalus_WebApp_DiscordBot", "TowerOfDaedalus_WebApp_DiscordBot\TowerOfDaedalus_WebApp_DiscordBot.csproj", "{2161CE92-8408-4897-B0AA-91D0BC92FDBA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TowerOfDaedalus_WebApp_Kafka", "TowerOfDaedalus_WebApp_Kafka\TowerOfDaedalus_WebApp_Kafka.csproj", "{214427B9-8B0D-4CB7-BA79-14E084BC0B8F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TowerOfDaedalus_WebApp_Kafka", "TowerOfDaedalus_WebApp_Kafka\TowerOfDaedalus_WebApp_Kafka.csproj", "{214427B9-8B0D-4CB7-BA79-14E084BC0B8F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

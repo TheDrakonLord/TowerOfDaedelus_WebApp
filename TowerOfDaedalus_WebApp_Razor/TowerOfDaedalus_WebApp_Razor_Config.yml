@@ -34,6 +34,7 @@
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
       - ../Persistance/Logs:/var/opt/Logs
+      - ../Persistance/Containers/Razor/DataProtection-Keys:/root/.aspnet/DataProtection-Keys
     #healthcheck:
     #  test: ["CMD", "wget", "--fail", "http://localhost:5000/healthz"]
     #  interval: 1m30s

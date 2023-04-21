@@ -48,24 +48,31 @@ namespace TowerOfDaedalus_WebApp_Kafka
         {
             using (var adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = Options.BrokerHost }).Build())
             {
+                var metadata = adminClient.GetMetadata(TimeSpan.FromSeconds(10));
+                var topicsMetadata = metadata.Topics;
+                var topicNames = metadata.Topics.Select(a => a.Topic).ToList();
                 foreach (var topic in Options.Topics)
                 {
-                    _logger.LogInformation("CreateTopicAsync || creating topic [{topic}] on brokers [{broker}]", topic, Options.BrokerHost);
-                    try
+                    if (!topicNames.Contains(topic))
                     {
-                        Task.Run(() => adminClient.CreateTopicsAsync(new TopicSpecification[] {
-                        new TopicSpecification { Name = topic, ReplicationFactor = 1, NumPartitions = 1 } }));
+                        _logger.LogInformation("CreateTopicAsync || creating topic [{topic}] on brokers [{broker}]", topic, Options.BrokerHost);
+                        try
+                        {
+                            Task.Run(() => adminClient.CreateTopicsAsync(new TopicSpecification[] {
+                                new TopicSpecification { Name = topic, ReplicationFactor = 1, NumPartitions = 1 } }));
+                        }
+                        catch (CreateTopicsException e)
+                        {
+                            Console.WriteLine($"An error occured creating topic {e.Results[0].Topic}: {e.Results[0].Error.Reason}");
+                        }
                     }
-                    catch (CreateTopicsException e)
+                    else
                     {
-                        Console.WriteLine($"An error occured creating topic {e.Results[0].Topic}: {e.Results[0].Error.Reason}");
+                        _logger.LogInformation("CreateTopicAsync || creating topic [{topic}] already exists on broker [{broker}]", topic, Options.BrokerHost);
                     }
                 }
             }
         }
-
-
-
     }
 }
 

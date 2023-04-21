@@ -11,6 +11,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include=".env" />
+    <None Include=".gitignore" />
     <None Include="CODE_OF_CONDUCT.md" />
     <None Include="Config\log4net.config" />
     <None Include="CONTRIBUTING.md" />
@@ -159,6 +160,10 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Persistance\Arango\" />
+    <Folder Include="Persistance\Containers\Blazor\DataProtection-Keys\" />
+    <Folder Include="Persistance\Containers\DiscordBot\" />
+    <Folder Include="Persistance\Containers\Razor\DataProtection-Keys\" />
+    <Folder Include="Persistance\Containers\RESTApi\DataProtection-Keys\" />
     <Folder Include="Persistance\Kafka\config\" />
   </ItemGroup>
   <ItemGroup>

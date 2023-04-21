@@ -366,3 +366,6 @@ FodyWeavers.xsd
 launchSettings.json
 /Persistance
 /.env
+
+# protobuf compiler
+protoc-22.3-win64/

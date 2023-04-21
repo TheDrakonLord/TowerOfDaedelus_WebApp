@@ -9,6 +9,7 @@
             - 5102:5102
         volumes:
             - ../Persistance/Logs:/var/opt/Logs
+            - ../Persistance/Containers/Razor/DataProtection-Keys:/root/.aspnet/DataProtection-Keys
         build:
           context: .
           dockerfile: Dockerfile
