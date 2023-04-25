@@ -78,7 +78,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             if (existingUser == null)
             {
                 _logger.LogError("could not find an existing user when we need one");
-                throw new ArgumentNullException(nameof(user));
+                throw new ArgumentNullException(nameof(existingUser));
             }
             _logger.LogDebug("getExistingUserKey || returning key");
             return existingUser._key;
@@ -135,7 +135,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
 
             foreach (Edges item in edges)
             {
-                _logger.LogDebug("AddClaimsAsync || posting edge from [{from}] to [{to}}", item._from, item._to);
+                _logger.LogDebug($"AddClaimsAsync || posting edge from [{item._from}] to [{item._to}]");
                 PostEdgeResponse<Edges> edgeResponse = await db.Graph.PostEdgeAsync<Edges>(ArangoSchema.graphPrimary, ArangoSchema.edgeUserClaims, item, token: cancellationToken);
                 if ((int)edgeResponse.Code is < 200 or > 299)
                 {
@@ -205,18 +205,20 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             roleQuery.Query = qb.ToString();
 
             CursorResponse<Roles> queryResponse = await db.Cursor.PostCursorAsync<Roles>(roleQuery, token: cancellationToken);
-            Roles queryResult = queryResponse.Result.First();
+            
 
             if (queryResponse.Error)
             {
                 _logger.LogError("Query to obtain role failed");
             }
 
-            if (queryResponse.Result == null)
+            if (!queryResponse.Result.Any())
             {
-                _logger.LogError("Could not find any roles");
-                throw new ArgumentNullException("queryResponse.Result");
+                _logger.LogInformation("could not find any matching roles, creating role");
+
             }
+
+            Roles queryResult = queryResponse.Result.First();
 
             Edges edgeA = new Edges($"{ArangoSchema.collUsers}/{user._key}",$"{ArangoSchema.collRoles}/{queryResult._key}");
             edgeA.Type = "UserRole";
@@ -504,8 +506,8 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
                 foreach (Edges item in queryResponse.Result)
                 {
                     string[] edgeTo = item._to.Split('/');
-                    ArangoClaims itemClaim = await db.Document.GetDocumentAsync<ArangoClaims>(ArangoSchema.collUserClaims, edgeTo[1]);
-                    result.Add(itemClaim.getClaim());
+                    var itemClaim = await db.Document.GetDocumentAsync<ArangoClaims>(ArangoSchema.collUserClaims, edgeTo[1]);
+                    result.Add(itemClaim.convertToClaim());
                 }
                 bool hasMore = queryResponse.HasMore;
                 while (hasMore)
@@ -518,7 +520,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
 
                         string[] edgeTo = item._to.Split('/');
                         ArangoClaims itemClaim = await db.Document.GetDocumentAsync<ArangoClaims>(ArangoSchema.collUserClaims, edgeTo[1]);
-                        result.Add(itemClaim.getClaim());
+                        result.Add(itemClaim.convertToClaim());
                     }
                 }
                 return result;
@@ -1198,6 +1200,11 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             roleQb.limit(1);
             string roleQuery = roleQb.ToString();
             CursorResponse<ArangoClaims> roleResponse = await db.Cursor.PostCursorAsync<ArangoClaims>(roleQuery, token: cancellationToken);
+            if (!roleResponse.Result.Any())
+            { 
+                return false;
+            }
+
             string roleKey = roleResponse.Result.First()._key;
 
             ArangoQueryBuilder edgesQb = new ArangoQueryBuilder(ArangoSchema.edgeRoleUsers);
@@ -1271,10 +1278,10 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
                 {
                     foreach (ArangoClaims storedClaim in storedClaims)
                     {
-                        if (claim.Issuer == storedClaim.Issuer &&
-                            claim.Type == storedClaim.Type &&
-                            claim.ValueType == storedClaim.ValueType &&
-                            claim.Value == storedClaim.Value)
+                        if (claim.Issuer == storedClaim.issuer &&
+                            claim.Type == storedClaim.type &&
+                            claim.ValueType == storedClaim.valueType &&
+                            claim.Value == storedClaim.value)
                         {
                             claimsToDelete.Add(storedClaim._key);
                             foreach (Edges item in edgeList)

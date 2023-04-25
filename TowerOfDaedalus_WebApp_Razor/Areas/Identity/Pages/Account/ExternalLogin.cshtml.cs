@@ -21,6 +21,10 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using static TowerOfDaedalus_WebApp_Arango.Schema.Documents;
 using Discord.Rest;
+using System.Linq;
+using Discord;
+using Microsoft.Build.Construction;
+using TowerOfDaedalus_WebApp_Razor.Properties;
 
 namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
 {
@@ -30,6 +34,8 @@ namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
         private readonly SignInManager<Users> _signInManager;
         private readonly UserManager<Users> _userManager;
         private readonly IUserStore<Users> _userStore;
+        private readonly RoleManager<Roles> _roleManager;
+        private readonly IRoleStore<Roles> _roleStore;
         private readonly IUserEmailStore<Users> _emailStore;
         private readonly ILogger<ExternalLoginModel> _logger;
         private readonly DiscordRestClient _client;
@@ -38,12 +44,16 @@ namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
             SignInManager<Users> signInManager,
             UserManager<Users> userManager,
             IUserStore<Users> userStore,
+            RoleManager<Roles> roleManager,
+            IRoleStore<Roles> roleStore,
             ILogger<ExternalLoginModel> logger,
             DiscordRestClient client)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _userStore = userStore;
+            _roleManager = roleManager;
+            _roleStore = roleStore;
             _emailStore = (IUserEmailStore<Users>)GetEmailStore();
             _logger = logger;
             _client = client;
@@ -115,6 +125,58 @@ namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
             if (result.Succeeded)
             {
                 _logger.LogInformation("OnGetCallbackAsync || {Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
+                if (ulong.TryParse(Properties.Resources.targetGuildID, out ulong guildId))
+                {
+                    await _client.LoginAsync(Discord.TokenType.Bearer, info.AuthenticationTokens.First().Value);
+                    RestGuildUser guildUser = await _client.GetCurrentUserGuildMemberAsync(guildId);
+                    if (guildUser != null)
+                    {
+                        Users user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+                        if (user != null)
+                        {
+
+                            var userClaims = await _userManager.GetClaimsAsync(user);
+                            if (userClaims != null)
+                            {
+                                List<string> discordRoles = new List<string>();
+                                foreach (ulong role in guildUser.RoleIds)
+                                {
+                                    discordRoles.Add(role.ToString());
+                                }
+                                foreach (var claim in userClaims)
+                                {
+                                    if (discordRoles.Contains(claim.Value))
+                                    {
+                                        discordRoles.Remove(claim.Value);
+                                    }
+                                    else
+                                    {
+                                        var removeResult = await _userManager.RemoveClaimAsync(user, claim);
+                                        if (removeResult.Succeeded)
+                                        {
+                                            _logger.LogInformation("OnGetCallbackAsync || removed a role from the user");
+                                        }
+                                    }
+                                }
+
+                                if (discordRoles.Any())
+                                {
+                                    foreach (string role in discordRoles)
+                                    {
+                                        if (!userClaims.Where(i => i.Value == role).Any())
+                                        {
+                                            Claim newClaim = new Claim(Resources.customClaim, role);
+                                            await _userManager.AddClaimAsync(user, newClaim);
+                                        }
+                                    }
+
+                                }
+                            }
+
+                        }
+                    }
+                }
+
                 return LocalRedirect(returnUrl);
             }
             if (result.IsLockedOut)
@@ -164,7 +226,7 @@ namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
                 user.DiscordAvatar = discordUser.GetAvatarUrl(Discord.ImageFormat.WebP);
 
                 _logger.LogDebug("OnGetCallbackAsync || setting user name");
-                await _userStore.SetUserNameAsync(user, discordUser.Username, CancellationToken.None);
+                await _userStore.SetUserNameAsync(user, discordUser.Username + discordUser.Discriminator, CancellationToken.None);
                 _logger.LogDebug("OnGetCallbackAsync || Setting email");
                 await _emailStore.SetEmailAsync(user, discordUser.Email, CancellationToken.None);
                 _logger.LogDebug("OnGetCallbackAsync || setting email confirmed");
@@ -185,6 +247,33 @@ namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
                         _logger.LogDebug("OnGetCallbackAsync || generating email confirmation token");
                         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+                        if (ulong.TryParse(Properties.Resources.targetGuildID, out ulong guildId))
+                        {
+                            RestGuildUser guildUser = await _client.GetCurrentUserGuildMemberAsync(guildId);
+                            if (guildUser != null)
+                            {
+
+                                List<string> roles = new List<string>();
+                                foreach (ulong item in guildUser.RoleIds)
+                                {
+                                    roles.Add(item.ToString());
+                                }
+
+                                var userClaims = await _userManager.GetClaimsAsync(user);
+                                foreach (string role in roles)
+                                {
+                                    
+                                    if (!userClaims.Where(i => i.Value == role).Any())
+                                    {
+                                        Claim newClaim = new Claim(Resources.customClaim, role);
+                                        await _userManager.AddClaimAsync(user, newClaim);
+                                    }
+                                }
+
+                            }
+                        }
+
                         _logger.LogDebug("OnGetCallbackAsync || setting callback url");
                         var callbackUrl = Url.Page(
                             "/Account/ConfirmEmail",

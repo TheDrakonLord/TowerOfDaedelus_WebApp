@@ -212,6 +212,15 @@ namespace TowerOfDaedalus_WebApp_DiscordBot
                     _logger.LogInformation($"Ready Join error. Already connected to {x.Name} ({x.Id})");
                 }
             }
+
+            if(ulong.TryParse(Options.targetServer, out ulong targetGuildId))
+            {
+                var guild = _client.GetGuild(targetGuildId);
+
+                CommandModule.CreateCommands(guild, _logger);
+
+                _client.SlashCommandExecuted += CommandModule.SlashCommandHandler;
+            }
         }
 
     }
