@@ -25,6 +25,7 @@ using System.Linq;
 using Discord;
 using Microsoft.Build.Construction;
 using TowerOfDaedalus_WebApp_Razor.Properties;
+using Discord.Net;
 
 namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
 {
@@ -128,8 +129,20 @@ namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
                 if (ulong.TryParse(Properties.Resources.targetGuildID, out ulong guildId))
                 {
                     await _client.LoginAsync(Discord.TokenType.Bearer, info.AuthenticationTokens.First().Value);
-                    RestGuildUser guildUser = await _client.GetCurrentUserGuildMemberAsync(guildId);
-                    if (guildUser != null)
+
+                    RestGuildUser guildUser = null;
+                    bool guildAccessSucceeded = false;
+                    try
+                    {
+                        guildUser = await _client.GetCurrentUserGuildMemberAsync(guildId);
+                        guildAccessSucceeded = true;
+                    }
+                    catch (HttpException ex)
+                    {
+                        _logger.LogWarning(ex, "A user tried to log in but was not a member of the guild");
+                    }
+
+                    if (guildAccessSucceeded && guildUser != null)
                     {
                         Users user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
                         if (user != null)
@@ -250,8 +263,19 @@ namespace TowerOfDaedalus_WebApp_Razor.Areas.Identity.Pages.Account
 
                         if (ulong.TryParse(Properties.Resources.targetGuildID, out ulong guildId))
                         {
-                            RestGuildUser guildUser = await _client.GetCurrentUserGuildMemberAsync(guildId);
-                            if (guildUser != null)
+                            RestGuildUser guildUser = null;
+                            bool guildAccessSucceeded = false;
+                            try
+                            {
+                                guildUser = await _client.GetCurrentUserGuildMemberAsync(guildId);
+                                guildAccessSucceeded = true;
+                            }
+                            catch (HttpException ex)
+                            {
+                                _logger.LogWarning(ex, "A user tried to register but was not a member of the guild");
+                            }
+                            
+                            if (guildAccessSucceeded && guildUser != null)
                             {
 
                                 List<string> roles = new List<string>();
