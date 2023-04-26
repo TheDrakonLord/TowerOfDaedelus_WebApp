@@ -41,6 +41,42 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             }
         }
 
+        private async Task<Roles?> getExistingRole(Roles role, CancellationToken cancellationToken)
+        {
+            _logger.LogDebug("getExistingRole || obtaining existing role");
+            ArangoQueryBuilder existingQB = new ArangoQueryBuilder(ArangoSchema.collRoles);
+            existingQB.filter("Name", role.Name);
+            existingQB.limit(1);
+            string query = existingQB.ToString();
+            _logger.LogDebug("getExistingRole || running query: {query}", query);
+            CursorResponse<Roles> queryResponse = await db.Cursor.PostCursorAsync<Roles>(query, token: cancellationToken);
+
+            if (queryResponse.Result.Any())
+            {
+                _logger.LogDebug("getExistingRole || found the requested role");
+                Roles existingRole = queryResponse.Result.First();
+                return existingRole;
+            }
+            else
+            {
+                _logger.LogDebug("getExistingUser || Could not find a role with the naem {name}", role.Name);
+                return null;
+            }
+        }
+
+        private async Task<string> getExistingRoleKey(Roles role, CancellationToken cancellationToken)
+        {
+            _logger.LogDebug("getExistingUserKey || getting _key from existing role");
+            Roles? existingRole = await getExistingRole(role, cancellationToken);
+            if (existingRole == null)
+            {
+                _logger.LogError("could not find an existing role when we need one");
+                throw new ArgumentNullException(nameof(existingRole));
+            }
+            _logger.LogDebug("getExistingRoleKey || returning key");
+            return existingRole._key;
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -68,9 +104,25 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<IdentityResult> CreateAsync(Roles role, CancellationToken cancellationToken)
         {
-            
+            if (role == null)
+            {
+                _logger.LogError("A role must be supplied to create");
+                return IdentityResult.Failed();
+            }
 
-            PostDocumentResponse<Roles> roleResponse = await db.Document.PostDocumentAsync<Roles>(ArangoSchema.collRoles, role, token: cancellationToken);
+            Roles? existingRole = await getExistingRole(role, cancellationToken);
+
+            if (existingRole != null)
+            {
+                PatchDocumentQuery patchQuery = new PatchDocumentQuery();
+                patchQuery.KeepNull = true;
+
+                PatchDocumentResponse<object> patchRespone = await db.Document.PatchDocumentAsync<Roles>($"{ArangoSchema.collRoles}/{existingRole._key}", role, patchQuery, cancellationToken);
+            }
+            else
+            {
+                PostDocumentResponse<Roles> roleResponse = await db.Document.PostDocumentAsync<Roles>(ArangoSchema.collRoles, role, token:  cancellationToken);
+            }
 
             return IdentityResult.Success;
         }
@@ -84,7 +136,13 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<IdentityResult> DeleteAsync(Roles role, CancellationToken cancellationToken)
         {
-            
+            if (role is null)
+            {
+                _logger.LogError("a role must be supplied to delete");
+                return IdentityResult.Failed();
+            }
+
+            role._key = await getExistingRoleKey(role, cancellationToken);
 
             DeleteDocumentResponse<Roles> deleteResponse = await db.Document.DeleteDocumentAsync<Roles>(ArangoSchema.collRoles, role._key, token: cancellationToken);
 
@@ -129,8 +187,6 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<Roles?> FindByIdAsync(string roleId, CancellationToken cancellationToken)
         {
-            
-
             ArangoQueryBuilder qb = new ArangoQueryBuilder(ArangoSchema.collRoles);
             qb.filter("Id", roleId);
             qb.limit(1);
@@ -144,6 +200,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             }
             else
             {
+                _logger.LogDebug($"could not find any roles with the id {roleId}");
                 return null;
             }
         }
@@ -157,8 +214,6 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<Roles?> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
         {
-            
-
             ArangoQueryBuilder qb = new ArangoQueryBuilder(ArangoSchema.collRoles);
             qb.filter("NormalizedName", normalizedRoleName);
             qb.limit(1);
@@ -172,6 +227,7 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
             }
             else
             {
+                _logger.LogDebug($"could not find any roles with the rolename {normalizedRoleName}");
                 return null;
             }
         }
@@ -185,11 +241,23 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<string?> GetNormalizedRoleNameAsync(Roles role, CancellationToken cancellationToken)
         {
-            
+            if (role is null)
+            {
+                _logger.LogError("a role must be supplied to retrieve");
+                throw new ArgumentNullException(nameof(role));
+            }
 
-            Roles result = await db.Document.GetDocumentAsync<Roles>(ArangoSchema.collRoles, role.Id);
+            Roles? existingRole = await getExistingRole(role, cancellationToken);
 
-            return result.NormalizedName;
+            if (existingRole != null)
+            {
+                return existingRole.NormalizedName;
+            }
+            else
+            {
+                _logger.LogError("An existing role was not found");
+                return null;
+            }    
         }
 
         /// <summary>
@@ -201,7 +269,27 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<string> GetRoleIdAsync(Roles role, CancellationToken cancellationToken)
         {
-            return role.Id;
+            if (role is null)
+            {
+                _logger.LogError("a role must be supplied to retrieve id");
+                throw new ArgumentNullException(nameof(role));
+            }
+
+            Roles? existingRole = await getExistingRole(role, cancellationToken);
+
+            if (existingRole != null)
+            {
+                return existingRole.Id;
+            }
+            else if (role.Id != null)
+            {
+                return role.Id;
+            }
+            else
+            {
+                _logger.LogError("An existing role was not found");
+                throw new ArgumentNullException(nameof(existingRole));
+            }
         }
 
         /// <summary>
@@ -213,7 +301,23 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<string?> GetRoleNameAsync(Roles role, CancellationToken cancellationToken)
         {
-            return role.Name;
+            if (role is null)
+            {
+                _logger.LogError("a role must be supplied to retrieve name");
+                throw new ArgumentNullException(nameof(role));
+            }
+
+            Roles? existingRole = await getExistingRole(role, cancellationToken);
+
+            if (existingRole != null)
+            {
+                return existingRole.Name;
+            }
+            else
+            {
+                _logger.LogError("An existing role was not found");
+                return null;
+            }
         }
 
         /// <summary>
@@ -226,8 +330,16 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task SetNormalizedRoleNameAsync(Roles role, string? normalizedName, CancellationToken cancellationToken)
         {
-            role.NormalizedName = normalizedName;
-            await UpdateAsync(role, cancellationToken);
+            if (role != null)
+            {
+                role.NormalizedName = normalizedName;
+                await UpdateAsync(role, cancellationToken);
+            }
+            else
+            {
+                _logger.LogError("The role parameter cannot be null");
+                throw new ArgumentNullException(nameof(role));
+            }
         }
 
         /// <summary>
@@ -240,8 +352,16 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task SetRoleNameAsync(Roles role, string? roleName, CancellationToken cancellationToken)
         {
-            role.Name = roleName;
-            await UpdateAsync(role, cancellationToken);
+            if (role != null)
+            {
+                role.Name = roleName;
+                await UpdateAsync(role, cancellationToken);
+            }
+            else
+            {
+                _logger.LogError("The role parameter cannot be null");
+                throw new ArgumentNullException(nameof(role));
+            }
         }
 
         /// <summary>
@@ -253,18 +373,18 @@ namespace TowerOfDaedalus_WebApp_Arango.Identity
         /// <exception cref="NotImplementedException"></exception>
         public async Task<IdentityResult> UpdateAsync(Roles role, CancellationToken cancellationToken)
         {
-            
+            Roles? existingRole = await getExistingRole(role, cancellationToken);
 
-            if (role._key is null)
-            {
-                PostDocumentResponse<Roles> postResponse = await db.Document.PostDocumentAsync<Roles>(ArangoSchema.collRoles, role, token: cancellationToken);
-            }
-            else
+            if (existingRole != null)
             {
                 PatchDocumentQuery patchQuery = new PatchDocumentQuery();
                 patchQuery.KeepNull = true;
 
-                PatchDocumentResponse<object> patchResponse = await db.Document.PatchDocumentAsync<Roles>($"{ArangoSchema.collRoles}/{role._key}", role, patchQuery, cancellationToken);
+                PatchDocumentResponse<object> patchResponse = await db.Document.PatchDocumentAsync<Roles>($"{ArangoSchema.collRoles}/{existingRole._key}", role, patchQuery, cancellationToken);
+            }
+            else
+            {
+                PostDocumentResponse<Roles> postResponse = await db.Document.PostDocumentAsync<Roles>(ArangoSchema.collRoles, role, token: cancellationToken);
             }
             return IdentityResult.Success;
         }

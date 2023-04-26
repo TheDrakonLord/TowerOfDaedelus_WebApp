@@ -1,31 +1,47 @@
-﻿using System;
-using System.Threading.Tasks;
-using Discord.Commands;
-using Discord;
-using System.Xml.Linq;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using log4net;
+﻿using Discord;
+using Discord.Net;
+using Discord.WebSocket;
+using Newtonsoft.Json;
+using System.Security.Cryptography.X509Certificates;
 
-namespace HavocBot
+namespace TowerOfDaedalus_WebApp_DiscordBot
 {
-    /// <summary>
-    /// module class that stores all commands and phrases the bot should respond to
-    /// </summary>
-    public class CommandModule : ModuleBase<SocketCommandContext>
+    public static class CommandModule
     {
-        /// <summary>
-        /// dummy command used only for testing
-        /// TODO: remove prior to a release build
-        /// </summary>
-        /// <returns></returns>
-        [Command("cookie")]
-        [Summary("the bot eats a cookie")]
-        public async Task cancelEventAsync()
+        public static async void CreateCommands(SocketGuild guild, ILogger<DiscordBot> logger) 
         {
-            await Context.Channel.SendMessageAsync("the bot eats a cookie");
+            var cookieCommand = new SlashCommandBuilder();
+            cookieCommand.WithName("cookie");
+            cookieCommand.WithDescription("Test command");
+
+
+            try
+            {
+                await guild.CreateApplicationCommandAsync(cookieCommand.Build());
+            }
+            catch (ApplicationCommandException exception)
+            {
+                var json = JsonConvert.SerializeObject(exception.Errors, Formatting.Indented);
+                logger.LogCritical(exception, json);
+            }
+
+        }
+
+        public static async Task SlashCommandHandler(SocketSlashCommand command)
+        {
+            switch (command.CommandName)
+            {
+                case "cookie":
+                    await cookieCommand(command);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public static async Task cookieCommand(SocketSlashCommand command)
+        {
+            await command.RespondAsync("The bot eats a cookie");
         }
     }
-
 }

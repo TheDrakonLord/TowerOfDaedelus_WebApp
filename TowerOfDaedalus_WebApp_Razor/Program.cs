@@ -69,6 +69,7 @@ builder.Services.AddAuthentication()
         options.Scope.Add("guilds.members.read");
         options.Scope.Add("identify");
         options.Scope.Add("email");
+        options.Scope.Add("guilds");
 
         options.ClaimActions.MapJsonKey(ClaimTypes.Email, "email", "string");
         options.ClaimActions.MapJsonKey(ClaimTypes.Name, "username", "string");
@@ -85,16 +86,16 @@ builder.Services.AddAuthorization(options =>
     policy.RequireClaim(Resources.ResourceManager.GetString("customClaim"), Resources.ResourceManager.GetString("RoleIdAssistantGameMaster"), Resources.ResourceManager.GetString("RoleIdGameMaster"), Resources.ResourceManager.GetString("RoleIdAdmin")));
 
     options.AddPolicy("allCharacters", policy =>
-    policy.RequireClaim(Resources.ResourceManager.GetString("customClaim"), Resources.ResourceManager.GetString("RoleIdScholar"), Resources.ResourceManager.GetString("RoleIdScribe"), Resources.ResourceManager.GetString("RoleIdAdvisor"), Resources.ResourceManager.GetString("RoleIdVisitor"), Resources.ResourceManager.GetString("RoleIdClockworkSoldier"), Resources.ResourceManager.GetString("RoleIdAssistantGameMaster"), Resources.ResourceManager.GetString("RoleIdGameMaster"), Resources.ResourceManager.GetString("RoleIdAdmin")));
+    policy.RequireClaim(Resources.ResourceManager.GetString("customClaim"), Resources.ResourceManager.GetString("RoleIdVisitor"), Resources.ResourceManager.GetString("RoleIdClockworkSoldier"), Resources.ResourceManager.GetString("RoleIdAssistantGameMaster"), Resources.ResourceManager.GetString("RoleIdGameMaster"), Resources.ResourceManager.GetString("RoleIdAdmin")));
 
     options.AddPolicy("allPlayers", policy =>
-    policy.RequireClaim(Resources.ResourceManager.GetString("customClaim"), Resources.ResourceManager.GetString("RoleIdScholar"), Resources.ResourceManager.GetString("RoleIdScribe"), Resources.ResourceManager.GetString("RoleIdAdvisor"), Resources.ResourceManager.GetString("RoleIdVisitor"), Resources.ResourceManager.GetString("RoleIdAssistantGameMaster"), Resources.ResourceManager.GetString("RoleIdGameMaster"), Resources.ResourceManager.GetString("RoleIdAdmin")));
+    policy.RequireClaim(Resources.ResourceManager.GetString("customClaim"), Resources.ResourceManager.GetString("RoleIdVisitor"), Resources.ResourceManager.GetString("RoleIdAssistantGameMaster"), Resources.ResourceManager.GetString("RoleIdGameMaster"), Resources.ResourceManager.GetString("RoleIdAdmin")));
 
     options.AddPolicy("permanentPlayers", policy =>
-    policy.RequireClaim(Resources.ResourceManager.GetString("customClaim"), Resources.ResourceManager.GetString("RoleIdScholar"), Resources.ResourceManager.GetString("RoleIdScribe"), Resources.ResourceManager.GetString("RoleIdAssistantGameMaster"), Resources.ResourceManager.GetString("RoleIdGameMaster"), Resources.ResourceManager.GetString("RoleIdAdmin")));
+    policy.RequireClaim(Resources.ResourceManager.GetString("customClaim"), Resources.ResourceManager.GetString("RoleIdAssistantGameMaster"), Resources.ResourceManager.GetString("RoleIdGameMaster"), Resources.ResourceManager.GetString("RoleIdAdmin")));
 
     options.AddPolicy("visitingPlayers", policy =>
-    policy.RequireClaim(Resources.ResourceManager.GetString("customClaim"), Resources.ResourceManager.GetString("RoleIdAdvisor"), Resources.ResourceManager.GetString("RoleIdVisitor"), Resources.ResourceManager.GetString("RoleIdAssistantGameMaster"), Resources.ResourceManager.GetString("RoleIdGameMaster"), Resources.ResourceManager.GetString("RoleIdAdmin")));
+    policy.RequireClaim(Resources.ResourceManager.GetString("customClaim"), Resources.ResourceManager.GetString("RoleIdVisitor"), Resources.ResourceManager.GetString("RoleIdAssistantGameMaster"), Resources.ResourceManager.GetString("RoleIdGameMaster"), Resources.ResourceManager.GetString("RoleIdAdmin")));
 
     options.AddPolicy("nonPlayerCharacters", policy =>
     policy.RequireClaim(Resources.ResourceManager.GetString("customClaim"), Resources.ResourceManager.GetString("RoleIdClockworkSoldier"), Resources.ResourceManager.GetString("RoleIdAssistantGameMaster"), Resources.ResourceManager.GetString("RoleIdGameMaster"), Resources.ResourceManager.GetString("RoleIdAdmin")));
